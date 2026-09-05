@@ -97,38 +97,49 @@ def _depth_world(
     return pos + cam @ rot.T
 
 
-def _add_spheres(
+def _write_points(
     scn: mujoco.MjvScene,
+    start: int,
     points: NDArray[np.float64],
     *,
     radius: float,
     rgba: NDArray[np.float32],
+    inited: list[int],
     max_n: int,
 ) -> int:
-    if points.size == 0 or scn.ngeom >= scn.maxgeom:
+    """Init BOX geoms once (discoverse-style); afterwards only write pos.
+
+    Boxes are much cheaper than spheres: 12 triangles vs a tessellated sphere.
+    MuJoCo has no point-sprite primitive (github.com/google-deepmind/mujoco/issues/3270).
+    """
+    if points.size == 0 or start >= scn.maxgeom:
         return 0
-    n = min(len(points), max_n, scn.maxgeom - scn.ngeom)
+    n = min(len(points), max_n, scn.maxgeom - start)
     if n <= 0:
         return 0
     if len(points) > n:
         idx = np.linspace(0, len(points) - 1, n, dtype=int)
         points = points[idx]
-    size = np.array([radius, 0.0, 0.0], dtype=np.float64)
-    added = 0
-    for p in points:
-        if scn.ngeom >= scn.maxgeom:
-            break
+    size = np.array([radius, radius, radius], dtype=np.float64)
+    geoms = scn.geoms
+    need = start + n
+    while inited[0] < need:
+        i = inited[0]
         mujoco.mjv_initGeom(
-            scn.geoms[scn.ngeom],
-            mujoco.mjtGeom.mjGEOM_SPHERE,
+            geoms[i],
+            mujoco.mjtGeom.mjGEOM_BOX,
             size,
-            p,
+            np.zeros(3),
             _IDENTITY_MAT,
             rgba,
         )
-        scn.ngeom += 1
-        added += 1
-    return added
+        inited[0] += 1
+    for i, p in enumerate(points):
+        g = geoms[start + i]
+        g.pos[:] = p
+        g.size[:] = size
+        g.rgba[:] = rgba
+    return n
 
 
 def _paint_gantry(
@@ -160,31 +171,40 @@ def _paint(
     gantry: ElasticBand | None,
     pelvis_id: int,
     overlay: ViewerOverlayConfig,
-) -> tuple[int, int]:
+    *,
+    refresh_clouds: bool,
+    inited: list[int],
+    drawn: list[int],
+) -> None:
     scn = viewer.user_scn
-    scn.ngeom = 0
-    lidar_drawn = 0
-    depth_drawn = 0
-    lidar_cap = overlay.lidar_dots if overlay.lidar_dots > 0 else scn.maxgeom
-    if cloud is not None:
-        lidar_drawn = _add_spheres(
-            scn,
-            _lidar_world(model, data, cloud),
-            radius=overlay.lidar_radius,
-            rgba=_LIDAR_RGBA,
-            max_n=lidar_cap,
-        )
-    if depth is not None:
-        depth_drawn = _add_spheres(
-            scn,
-            _depth_world(model, data, depth, stride=overlay.depth_stride),
-            radius=overlay.depth_radius,
-            rgba=_DEPTH_RGBA,
-            max_n=scn.maxgeom - scn.ngeom,
-        )
+    if refresh_clouds:
+        lidar_cap = overlay.lidar_dots if overlay.lidar_dots > 0 else scn.maxgeom
+        n_l = 0
+        n_d = 0
+        if cloud is not None:
+            n_l = _write_points(
+                scn,
+                0,
+                _lidar_world(model, data, cloud),
+                radius=overlay.lidar_radius,
+                rgba=_LIDAR_RGBA,
+                inited=inited,
+                max_n=lidar_cap,
+            )
+        if depth is not None:
+            n_d = _write_points(
+                scn,
+                n_l,
+                _depth_world(model, data, depth, stride=overlay.depth_stride),
+                radius=overlay.depth_radius,
+                rgba=_DEPTH_RGBA,
+                inited=inited,
+                max_n=scn.maxgeom - n_l,
+            )
+        drawn[0], drawn[1] = n_l, n_d
+    scn.ngeom = drawn[0] + drawn[1]
     if gantry is not None and gantry.enable:
         _paint_gantry(scn, data.xpos[pelvis_id], gantry.target)
-    return lidar_drawn, depth_drawn
 
 
 def _configure_viewer(viewer: mujoco.viewer.Handle) -> None:
@@ -197,6 +217,13 @@ def _configure_viewer(viewer: mujoco.viewer.Handle) -> None:
     cam_flag = getattr(mujoco.mjtVisFlag, "mjVIS_CAMERA", None)
     if cam_flag is not None:
         viewer.opt.flags[cam_flag] = True
+    # User overlay is thousands of tiny boxes; shadows/reflections dominate GPU time.
+    shadow = getattr(mujoco.mjtRndFlag, "mjRND_SHADOW", None)
+    refl = getattr(mujoco.mjtRndFlag, "mjRND_REFLECTION", None)
+    if shadow is not None:
+        viewer.user_scn.flags[shadow] = 0
+    if refl is not None:
+        viewer.user_scn.flags[refl] = 0
 
 
 def _hud(
@@ -299,6 +326,9 @@ def _run_viewer(
         _configure_viewer(viewer)
         step_i = 0
         last_print = 0.0
+        inited = [0]
+        drawn = [0, 0]
+        clouds_dirty = True
         while viewer.is_running():
             if gantry is not None:
                 gantry.apply(sim.model, sim.data, pelvis_id)
@@ -306,12 +336,14 @@ def _run_viewer(
             if obs.sensors.lidar is not None:
                 last_cloud = obs.sensors.lidar
                 last_lidar_n = last_cloud.num_points
+                clouds_dirty = True
             if obs.sensors.depth is not None:
                 last_depth = obs.sensors.depth
                 last_depth_valid = int(np.count_nonzero(last_depth.depth > 0))
+                clouds_dirty = True
             step_i += 1
             if step_i % sync_every == 0:
-                lidar_drawn, depth_drawn = _paint(
+                _paint(
                     viewer,
                     sim.model,
                     sim.data,
@@ -320,7 +352,11 @@ def _run_viewer(
                     gantry,
                     pelvis_id,
                     overlay,
+                    refresh_clouds=clouds_dirty,
+                    inited=inited,
+                    drawn=drawn,
                 )
+                clouds_dirty = False
                 viewer.sync()
                 now = time.perf_counter()
                 if now - last_print >= 0.5:
@@ -329,8 +365,8 @@ def _run_viewer(
                             obs,
                             lidar_n=last_lidar_n,
                             depth_valid=last_depth_valid,
-                            lidar_drawn=lidar_drawn,
-                            depth_drawn=depth_drawn,
+                            lidar_drawn=drawn[0],
+                            depth_drawn=drawn[1],
                         ),
                         flush=True,
                     )
@@ -396,13 +432,13 @@ def main() -> None:
         "--lidar-radius",
         type=float,
         default=None,
-        help="green lidar sphere radius in metres",
+        help="green lidar overlay box half-size in metres",
     )
     parser.add_argument(
         "--depth-radius",
         type=float,
         default=None,
-        help="cyan depth sphere radius in metres",
+        help="cyan depth overlay box half-size in metres",
     )
     args = parser.parse_args()
 
