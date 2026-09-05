@@ -1,0 +1,47 @@
+name: g1-simulacrum
+
+services:
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: g1-simulacrum:local
+    container_name: g1-simulacrum
+    working_dir: /workspace
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    restart: "no"
+    stop_grace_period: 30s
+    stop_signal: SIGTERM
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    shm_size: 8gb
+    stdin_open: true
+    tty: true
+    init: true
+    group_add:
+      - "${VIDEO_GID:-44}"
+      - "${RENDER_GID:-110}"
+    devices:
+      - /dev/dri
+    volumes:
+      - ..:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      HOST_UID: ${HOST_UID:-1000}
+      HOST_GID: ${HOST_GID:-1000}
+      HOME: /workspace/docker/home
+      VIRTUAL_ENV: /opt/venv
+      PATH: /opt/venv/bin:/usr/local/bin:/usr/bin:/bin
+      PYTHONPATH: /workspace:/opt
+      MUJOCO_GL: egl
+      PYOPENGL_PLATFORM: egl
+      DISPLAY: ${DISPLAY:-:0}
+      TERM: xterm-256color
+    command: ["sleep", "infinity"]

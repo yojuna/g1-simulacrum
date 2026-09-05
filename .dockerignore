@@ -1,0 +1,14 @@
+# Build context is the git root (`compose.yaml` build.context: ..).
+# Keep the context small; source is bind-mounted at runtime.
+.git
+.cursor
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+docker/home
+g1_simulacrum
+configs
+examples
+tests
+docs
+ARCHITECTURE.md
