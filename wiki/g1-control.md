@@ -56,11 +56,10 @@ SDK `mode_pr`: `0` = series pitch/roll, `1` = parallel A/B. Same two motors,
 different command meaning. This package’s PD loop commands **named joints**
 in Menagerie (pitch/roll). An AB-mode adapter is not core.
 
-## Example PD tables (SDK sample, not our tuned gains)
+## Example PD tables (SDK sample; in `gains.py`)
 
-From the same example (`Kp` / `Kd` arrays). Copy into `gains.py` only if we
-deliberately adopt them; they are a **cited starting point**, not measured
-on a specific robot.
+From the same example (`Kp` / `Kd` arrays). These **are** the body gains in
+`gains.py`. Cited starting point, not measured on a specific robot.
 
 Legs: Kp `60, 60, 60, 100, 40, 40` (each side); Kd `1, 1, 1, 2, 1, 1`.
 Waist: Kp `60, 40, 40`; Kd `1, 1, 1`.

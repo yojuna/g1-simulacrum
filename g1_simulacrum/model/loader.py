@@ -1,6 +1,7 @@
 """Compile pinned MJCF with ``MjModel.from_xml_path`` only.
 
-No ElementTree, no temp XML, no Menagerie hunt at runtime.
+Runtime: no ElementTree, no temp XML, no Menagerie hunt.
+Authoring of the pin is ``scripts/pin_mjcf.py``.
 """
 
 from __future__ import annotations

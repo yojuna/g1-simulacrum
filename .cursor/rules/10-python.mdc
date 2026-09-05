@@ -31,7 +31,7 @@ sim = G1Simulacrum.from_config("configs/default.yaml")
 
 ## Tests and runtime
 
-Run Python only via `docker/run.sh` once it exists (`40-docker-tooling.mdc`).
+Run Python only via `docker/run.sh` from `docker/` (`40-docker-tooling.mdc`).
 Never host/system Python or a repo `.venv`. Add a focused test for nontrivial
 numerics (noise models, metric depth, joint indexing) rather than
 trusting by inspection.

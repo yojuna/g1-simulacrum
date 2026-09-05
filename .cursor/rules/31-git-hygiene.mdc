@@ -30,10 +30,10 @@ wip
 rename and fix sensors
 
 # ✅ GOOD
-Add Mid-360 mount on torso_link with IMU site.
+Pin Mid-360 mount from the URDF into mjcf/mounts/mid360.xml.
 
-Menagerie G1 has no lidar body. Mount XML is composed before compile so
-sensor sites exist when ImuSensor resolves names.
+Runtime loads from_xml_path only. Authoring (pin_mjcf.py) copies the URDF
+origin onto torso_link; do not hunt Menagerie at runtime.
 ```
 
 ## Branching

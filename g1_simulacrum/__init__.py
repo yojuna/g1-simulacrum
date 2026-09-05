@@ -1,4 +1,4 @@
-"""g1-simulacrum: Modular MuJoCo simulation for Unitree G1 with full sensor suite."""
+"""g1-simulacrum: pinned Unitree G1 in MuJoCo (29-DoF body, Dex3, Mid-360, D435i)."""
 
 from .config import G1SimulacrumConfig
 from .simulacrum import G1Simulacrum

@@ -8,7 +8,7 @@ gap instead of hiding it.
 
 | Aspect | How |
 |--------|-----|
-| 29-DoF names, limits, inertias | Pinned `g1_29dof_rev_1_0` MJCF |
+| 29-DoF names, limits, inertias | Pinned Unitree body in `mjcf/` (from `g1_29dof_rev_1_0`) |
 | Pelvis / torso IMU locations | Unitree sites; same numbers as URDF |
 | Lidar and camera **mounts** | URDF `mid360_joint` / `d435_joint` at pin `7c40519` (not discoverse’s G1 site) |
 | Dex3 kinematics | Unitree with-hand MJCF; flange `0.0415 ±0.003` m |

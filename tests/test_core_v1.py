@@ -1,6 +1,8 @@
 """Compile pinned MJCF and check name maps / sites / rates.
 
-Run: ``docker/run.sh pytest tests``
+From ``docker/``::
+
+    ./run.sh python -m pytest tests -q
 """
 
 from __future__ import annotations

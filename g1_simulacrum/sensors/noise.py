@@ -24,13 +24,13 @@ def apply_lidar_noise(
     near_field_max: float = 0.3,
     rng: np.random.Generator | None = None,
 ) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
-    """Apply realistic noise to a raw LiDAR point cloud.
+    """Apply datasheet-1σ range noise plus labeled dropout/clutter placeholders.
 
-    Noise model components:
-    1. Range noise — Gaussian noise on radial distance.
-    2. Random dropout — remove a fraction of points (simulates missed returns).
-    3. Near-field clutter — assign a fraction of points small random distances
-       (simulates internal reflections / multi-path).
+    Not calibrated from robot logs (wiki/sim-fidelity.md).
+
+    1. Range noise — Gaussian on radial distance (Livox ≤2 cm @ 10 m start).
+    2. Near-field clutter — placeholder internal-reflection stand-in.
+    3. Random dropout — placeholder missed returns.
 
     Returns:
         points: (M, 3) noised point cloud (M <= N after dropout).
@@ -88,14 +88,16 @@ def apply_depth_noise(
     edge_erosion: bool = True,
     sigma: float = 0.005,
     hole_rate: float = 0.01,
-    min_range: float = 0.105,
-    max_range: float = 10.0,
+    min_range: float = 0.3,
+    max_range: float = 3.0,
     rng: np.random.Generator | None = None,
 ) -> NDArray[np.float32]:
-    """Apply D435i-style depth noise.
+    """Apply a pinhole stereo stand-in (wiki). Not a RealSense.
 
-    Noise model components:
-    1. Range clipping — values outside [min_range, max_range] set to 0 (invalid).
+    Callers should pass config ranges (default YAML: 0.3–3 m). Do not treat
+    0.105–10 m as equal quality.
+
+    1. Range clipping — outside [min_range, max_range] set to 0 (invalid).
     2. Edge erosion — depth discontinuities get eroded (stereo-matching artifact).
     3. Distance-dependent Gaussian noise — precision degrades with range.
     4. Random holes — fraction of pixels set to 0 (failed stereo match).

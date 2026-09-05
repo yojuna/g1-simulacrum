@@ -31,11 +31,12 @@ Runtime: `40-docker-tooling.mdc` — no host `.venv`.
 |------|------|
 | `g1_simulacrum/` | Import package |
 | `configs/` | YAML, validated by Pydantic |
-| `docs/` | Implementation specs (normative when present) |
+| `docs/` | Docker usage + inspect screenshot |
 | `ARCHITECTURE.md` | Architecture — **normative decisions** |
 | `wiki/` | Compiled G1 hardware facts + citations (not decisions) |
 | `docker/` | GPU container (`run.sh`) |
-| `examples/` | Runnable demos |
+| `examples/` | GLFW inspect viewer (`01_empty_arena.py`) |
+| `scripts/` | `pin_mjcf.py` authoring only |
 | `tests/` | Tests, run in the image |
 
 This tree is the core v1 package (pinned MJCF, facade, inspect viewer).

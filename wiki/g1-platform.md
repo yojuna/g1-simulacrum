@@ -68,6 +68,10 @@ sim; this table is the public spec, not a substitute for XML.
 
 1. Unitree publishes `g1_29dof_rev_1_0.xml` + `.urdf` in `unitree_ros`.
 2. [Menagerie `unitree_g1`](https://github.com/google-deepmind/mujoco_menagerie/tree/main/unitree_g1)
-   copies the MJCF, adds defaults/keyframes/actuators.
-3. This repo will **snapshot** that body and **add** lidar/camera/IMU extra
-   sites from the URDF. We do not fetch unpinned Menagerie at runtime.
+   copies the MJCF and adds defaults/keyframes/actuators.
+3. This package **pins** Unitree at `unitree_ros@7c40519e02d7` into
+   `g1_simulacrum/model/mjcf/upstream/` + `assets/`, then **adds** lidar,
+   camera, and device-IMU sites from the URDF (`scripts/pin_mjcf.py`,
+   record in [`PIN.md`](../g1_simulacrum/model/mjcf/PIN.md)). Runtime
+   loads that pin (`from_xml_path`). It does not fetch unpinned Menagerie
+   for the robot.
