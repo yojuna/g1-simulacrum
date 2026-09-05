@@ -36,3 +36,12 @@ must follow until we bump them on purpose.
 2. Add a dated “revision” row (old → new, SHA, one-line why).
 3. Change Architecture **and** the pinned MJCF in the same change set.
 4. Do not silently “fix” a pose in Python.
+
+## This package snapshot
+
+Pinned 2026-09-05 via `docker/run.sh python scripts/pin_mjcf.py`. Pristine Unitree files are vendored under `g1_simulacrum/model/mjcf/upstream/` and `assets/`. Bump with `--fetch` (named GitHub raw files only). See `g1_simulacrum/model/mjcf/PIN.md`.
+
+| What | Pin |
+|------|-----|
+| Body MJCF, Dex3 MJCF, URDF, STLs | `unitree_ros@7c40519e02d7` |
+| Mid-360 IMU site in lidar frame | wiki Livox offset `0.011 0.02329 -0.04412` |

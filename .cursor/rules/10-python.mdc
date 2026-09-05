@@ -33,5 +33,5 @@ sim = G1Simulacrum.from_config("configs/default.yaml")
 
 Run Python only via `docker/run.sh` once it exists (`40-docker-tooling.mdc`).
 Never host/system Python or a repo `.venv`. Add a focused test for nontrivial
-numerics (noise models, z-buffer conversion, joint indexing) rather than
+numerics (noise models, metric depth, joint indexing) rather than
 trusting by inspection.

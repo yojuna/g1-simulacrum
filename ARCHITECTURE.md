@@ -118,8 +118,8 @@ URDF snapshots (pre-fix Mid-360 had z=`0.41618`, rpy=`0, 0.04014, 0`).
 | `pelvis` | Base / freejoint; **primary robot IMU** (`LowState`) |
 | `torso_link` | **Secondary robot IMU** (`rt/secondary_imu`) |
 | `mid360_link` | LiDAR optical; point clouds in this frame |
-| `d435i_link` | Camera body (depth + RGB cameras on this body) |
-| `d435i_color_optical_frame` | RGB optical (OpenCV: +Z forward, +X right, +Y down) |
+| `d435i_link` | Camera body (depth + RGB cameras on this body; look along **+X**) |
+| `d435i_color_optical_frame` | RGB observation `frame_id` (OpenCV: +Z forward, +X right, +Y down) |
 
 LiDAR rays originate at a **site on `mid360_link`**, never at the torso origin.
 Mounts change only by editing XML (and the wiki if Unitree revises the URDF).
@@ -131,7 +131,8 @@ we name. Discoverse’s G1 demo uses a **simplified** site on `torso_link`
 (optical +Z down so the +52° lobe covers the floor) but **not** the Unitree
 URDF (roll π, 2.93° pitch, z=0.428434, +X still forward). We pin Unitree.
 No API conflict: `MjLidarWrapper(model, site_name="mid360", …)` plus
-`bodyexclude=torso_link` so rays skip the head mesh. Do not copy
+`bodyexclude=torso_link` so rays skip the head mesh, and `geomgroup[4]=0`
+so the cosmetic Mid-360 cylinder (geom group 4) is not a hit. Do not copy
 discoverse’s site pose into our XML. Details: [`wiki/g1-sensors.md`](wiki/g1-sensors.md).
 
 ### Rates
@@ -170,21 +171,31 @@ The compiler is the composer. No `ElementTree` mutation, no
 
 ### Files
 
+Pin record: [`g1_simulacrum/model/mjcf/PIN.md`](g1_simulacrum/model/mjcf/PIN.md).
+Pristine Unitree XML/URDF live under `mjcf/upstream/`; STLs under `mjcf/assets/`.
+Authoring: `docker/run.sh python scripts/pin_mjcf.py` (optional `--fetch`).
+
 | File | Role |
 |------|------|
-| `g1_simulacrum/model/mjcf/g1_29dof.xml` | Pinned snapshot of Unitree/Menagerie `g1_29dof_rev_1_0` (body SHA + URDF mount SHA in wiki) |
-| `g1_simulacrum/model/mjcf/mounts/mid360.xml` | Lidar body at URDF pose, site, visual geom, device IMU site |
-| `g1_simulacrum/model/mjcf/mounts/d435i.xml` | Camera body at URDF pose; **two** cameras (depth fovy 58°, RGB fovy 42°) |
+| `g1_simulacrum/model/mjcf/g1_29dof.xml` | Composed Dex3 robot (body + mounts + hands). Copy, not a nested include of a full `<mujoco>` document |
+| `g1_simulacrum/model/mjcf/g1_29dof_none.xml` | Same body+sensors, rubber hands |
+| `g1_simulacrum/model/mjcf/mounts/mid360.xml` | Lidar body at URDF pose, site `mid360`, group-4 visual cylinder, device IMU site |
+| `g1_simulacrum/model/mjcf/mounts/d435i.xml` | Camera body at URDF pose; **two** cameras looking along camera-link **+X** (depth fovy 58°, RGB fovy 42°) |
 | `g1_simulacrum/model/mjcf/mounts/imus.xml` | Accel/gyro for pelvis, torso, Mid-360, D435i sites |
 | `g1_simulacrum/model/mjcf/end_effectors/dex3/{left,right}.xml` | Dex3-1 subtree + actuators, snapshot from Unitree `g1_29dof_with_hand_rev_1_0` |
 | `g1_simulacrum/model/mjcf/end_effectors/none/{left,right}.xml` | Rubber-hand visual only (from `g1_29dof_rev_1_0`) |
-| `g1_simulacrum/model/mjcf/g1_robot.xml` | Default robot: G1 tree with includes on `torso_link` (sensors) and both `*_wrist_yaw_link` (**dex3**) |
-| `g1_simulacrum/model/mjcf/g1_robot_none.xml` | Same body+sensors, rubber hands (`end_effectors/none`) |
-| `g1_simulacrum/model/mjcf/g1_sensorized.xml` | Default complete model: `g1_robot.xml` + empty arena |
-| `g1_simulacrum/model/mjcf/scenes/` | Optional scenes that `<include>` `g1_robot.xml` |
+| `g1_simulacrum/model/mjcf/g1_robot.xml` | Default robot file the scenes include (`g1_29dof.xml` contents) |
+| `g1_simulacrum/model/mjcf/g1_robot_none.xml` | Rubber-hand robot file |
+| `g1_simulacrum/model/mjcf/g1_sensorized.xml` | Default complete model: `g1_robot.xml` + floor |
+| `g1_simulacrum/model/mjcf/g1_inspect.xml` | Same include + coloured boxes (inspect viewer). Same directory so `meshdir=assets` resolves |
 
-`g1_29dof.xml` is a snapshot we own. Keep pelvis/torso IMU sites from Unitree;
-do not delete them when adding lidar/camera.
+Keep pelvis/torso IMU sites from Unitree; do not delete them when adding
+lidar/camera.
+
+Fragments (`mounts/`, `end_effectors/`) **must** be rooted at
+`<mujocoinclude>`. Nested includes of a full `<mujoco>` document duplicate
+the tree. `g1_robot.xml` is therefore a copy of the composed body, not
+`<include file="g1_29dof.xml"/>` of another complete model.
 
 Sensor includes go on `torso_link`:
 
@@ -205,10 +216,14 @@ includes a different kit — not rewriting the tree in Python.
 A later Inspire / Dex5 / gripper kit is another folder under
 `end_effectors/` plus a `g1_robot_<kit>.xml` entry. Same flange pose.
 
-`compiler meshdir` (and texture paths) are set so meshes resolve relative to
-these MJCF files, whether loaded from the package or from `/opt/mujoco_menagerie`
-copies we pin. Python only calls `mujoco.MjModel.from_xml_path` on
-`g1_sensorized.xml` or on a scene that includes `g1_robot.xml`.
+D435i: Unitree `d435_link` is a ROS camera_link (**+X** forward, +Z up).
+MuJoCo cameras default to looking along **+Z**. Both cameras use
+`xyaxes="0 -1 0 0 0 1"` so they look along body +X (the 47.6° URDF pitch
+then aims at the floor, not the sky).
+
+`compiler meshdir=assets` is relative to these MJCF files. Python only
+calls `mujoco.MjModel.from_xml_path` on `g1_sensorized.xml`,
+`g1_inspect.xml`, or a scene that includes `g1_robot.xml`.
 
 ### Dropping the robot into a user scene
 
@@ -239,11 +254,15 @@ joint name map (29), and the hand joint name map (14 for Dex3, empty for
 
 - `Mid360Lidar` — `mujoco-lidar.MjLidarWrapper` on site **`mid360`** (on
   `mid360_link`). Pattern: `LivoxGenerator("mid360")`. Pass
-  `bodyexclude=torso_link` (and keep the lidar visual on a geom group the
-  wrapper can ignore) so the head mesh is not a hit. CPU first.
+  `bodyexclude=torso_link` and skip geom **group 4** (cosmetic lidar/camera
+  housings) so rays hit the floor and scene, not a 3 cm shell. Default
+  backend is **CPU**.
 - `D435iCamera` — MuJoCo renderer: depth camera **fovy 58°** (87° H at 4:3
-  is the RealSense depth FOV), RGB camera **fovy 42°**. Do not render both
-  from one camera. This is a pinhole stand-in for stereo (see wiki).
+  is the RealSense depth FOV), RGB camera **fovy 42°**. Cameras look along
+  `d435i_link` **+X**. Do not render both from one camera. This is a pinhole
+  stand-in for stereo (see wiki). On **MuJoCo 3.12**,
+  `Renderer.enable_depth_rendering()` already returns **metric metres**;
+  do not apply the older OpenGL z-buffer formula a second time.
 - `ImuSensor` — **four** named pairs: `imu_in_pelvis`, `imu_in_torso`,
   Mid-360, D435i. Core `SensorBundle` exposes pelvis (primary) and torso
   (secondary). Device IMUs are optional fields.
@@ -311,6 +330,34 @@ obs = sim.step(q_target)             # (29,) or None to hold last PD target
 `build(scene_xml=...)` is only valid if `scene_xml` is an MJCF file that
 includes `g1_robot.xml` (or `g1_robot_none.xml`). No ad-hoc merge.
 
+### 6. Inspect viewer (example, not the core API)
+
+`examples/01_empty_arena.py` is the live GLFW check. It is not a second
+facade. From `docker/`:
+
+```bash
+./run.sh python examples/01_empty_arena.py
+```
+
+Default scene is `g1_inspect.xml` (floor + boxes). `--empty` compiles
+`g1_sensorized.xml` instead.
+
+**Gantry** (`g1_simulacrum/gantry.py`, `ElasticBand`): spring-damper wrench
+on `pelvis` via `data.xfrc_applied`. Same idea as Unitree MuJoCo /
+GEAR-SONIC. The freejoint stays free — this is not a weld and not a
+balance policy. Keys **7 / 8** change length, **9** toggles. `--no-gantry`
+/ `--free-base` lets the robot fall (PD is joints only).
+
+**Cameras:** click the 3D view, **C** cycles free → `d435i_rgb` →
+`d435i_depth` (or Rendering → Camera in the right panel). No PiP window.
+
+**Overlays:** green Mid-360, cyan D435i depth. YAML `viewer:` sets density;
+CLI `--overlay sparse|dense|full` and `--lidar-dots` / `--depth-stride`
+override. Dense default is all ~24k lidar returns and every 4th depth
+pixel. User geoms are **boxes** inited once, then only `pos` is written,
+and clouds refresh at sensor rate (not every display frame). MuJoCo has
+no point-sprite primitive. Overlay shadows/reflections are off.
+
 ---
 
 ## Configuration
@@ -336,12 +383,19 @@ controller:
   physics_hz: 1000
   control_hz: 500               # SDK2 G1 low-level; not 200
 
+viewer:                         # inspect overlay only; not sensor rates
+  lidar_dots: 0                 # 0 = all Mid-360 returns (~24k)
+  depth_stride: 4
+  lidar_radius: 0.006
+  depth_radius: 0.008
+
 render: true
 seed: 42
 ```
 
-`robot.hands` selects which **pinned robot XML** to compile (`g1_robot.xml`
-for Dex3, `g1_robot_none.xml` for rubber). It is not a pose patch.
+`robot.hands` selects which **pinned scene XML** to compile
+(`g1_sensorized.xml` for Dex3, `g1_sensorized_none.xml` for rubber). Those
+scenes include `g1_robot.xml` / `g1_robot_none.xml`. It is not a pose patch.
 
 Drop `controller.type: sonic`, `environment.type: robocasa`, and `interface.ros2`
 from the core schema. Gym can remain a later optional extra, not a required
@@ -363,17 +417,18 @@ g1_simulacrum/                    git root
 ├── configs/default.yaml
 ├── docs/docker_usage.md
 ├── docker/                       run.sh image
-├── examples/                     small demos of the facade (no SONIC)
+├── scripts/pin_mjcf.py           authoring only; runtime does not run this
+├── examples/01_empty_arena.py    GLFW inspect viewer
 ├── tests/
 └── g1_simulacrum/
     ├── __init__.py               G1Simulacrum, G1SimulacrumConfig
     ├── simulacrum.py
     ├── config.py
+    ├── gantry.py                 inspect ElasticBand; not the facade
     ├── model/
     │   ├── loader.py
-    │   └── mjcf/                 pinned XML (body, mounts, end_effectors/)
-    ├── sensors/                  as today: base, mid360, d435i, imu,
-    │                             manager, noise, data_types
+    │   └── mjcf/                 pinned XML + PIN.md + upstream/ + assets/
+    ├── sensors/                  base, mid360, d435i, imu, manager, noise, data_types
     ├── controllers/
     │   ├── base.py
     │   ├── pd.py
@@ -400,7 +455,9 @@ Revisit only when we open that work:
   lidar `Box`, no baked “don’t fall” reward as the package default.
 - **ROS2 extra** — topics from `Observation`, not a second robot.
 - **RoboCasa** — a scene that includes `g1_robot.xml`, or a separate project.
-- **GPU lidar backends** — config flag after CPU is correct.
+- **GPU lidar backends** — Warp (and others) as a **config flag** after CPU
+  is the measured default. The image may install `mujoco-lidar[warp]`;
+  `sensors.mid360.backend` stays `cpu` until we switch on purpose.
 - **Calibrated noise from robot logs** — datasheet 1σ is the start, not the end.
 - **23 DoF locked-waist XML** — same package, different MJCF entry.
 - **Mid-360s** — G1 units after April 2026 may ship Livox Mid-360s. Stay on
@@ -413,7 +470,7 @@ Revisit only when we open that work:
 | Dependency | Role |
 |------------|------|
 | `mujoco` | Physics, renderer |
-| `mujoco-lidar` | Mid-360 rays (CPU) |
+| `mujoco-lidar` | Mid-360 rays (CPU default; Warp extra in the image, not the YAML default) |
 | `numpy`, `scipy` | Arrays, noise helpers |
 | `pydantic`, `pyyaml` | Config |
 | Menagerie G1 | **Pinned snapshot** in `mjcf/`, not an unpinned pip import |

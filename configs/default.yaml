@@ -1,67 +1,55 @@
-# g1-simulacrum default configuration
-# All sensor and controller parameters match the real G1 hardware stack.
+# g1-simulacrum default configuration (ARCHITECTURE.md).
+# Mount poses live in pinned MJCF, not here.
 
 robot:
-  model: g1_29dof
-  initial_height: 0.82
+  model: g1_sensorized
+  hands: dex3                   # dex3 | none
+  spawn_pos: [0.0, 0.0, 0.82]
+  spawn_quat: [1.0, 0.0, 0.0, 0.0]
 
 sensors:
   mid360:
     enabled: true
     backend: cpu
     rate_hz: 10.0
+    # Livox datasheet 1σ start (≤2 cm @ 10 m). Dropout/clutter are placeholders.
     noise:
       range_sigma: 0.02
       dropout_rate: 0.02
       near_field_clutter_rate: 0.01
       near_field_max_range: 0.3
-    mount_body: torso_link
-    mount_pos: [0.0, 0.0, 0.05]
-    mount_quat: [1.0, 0.0, 0.0, 0.0]
+    site_name: mid360
+    bodyexclude: torso_link
 
   d435i:
     enabled: true
     rate_hz: 30.0
     resolution: [640, 480]
+    # Useful stereo range ~0.3–3 m (wiki). Not a flat 0.105–10 m quality band.
     noise:
       edge_erosion: true
       depth_noise_sigma: 0.005
       hole_rate: 0.01
-      max_range: 10.0
-      min_range: 0.105
-    mount_body: head_link
-    mount_pos: [0.05, 0.0, 0.0]
-    mount_quat: [1.0, 0.0, 0.0, 0.0]
+      min_range: 0.3
+      max_range: 3.0
 
   imu:
-    enabled: true
-    rate_hz: 200.0
-    noise:
-      accel_sigma: 0.01
-      gyro_sigma: 0.005
-      accel_bias_drift: 0.0001
-      gyro_bias_drift: 0.00005
+    pelvis: { enabled: true, rate_hz: 500 }   # LowState
+    torso:  { enabled: true, rate_hz: 500 }   # rt/secondary_imu
+    mid360: { enabled: true, rate_hz: 200 }   # device IMU
+    d435i:  { enabled: true, rate_hz: 200 }   # gyro; accel may be slower
 
 controller:
-  type: pd
-  physics_hz: 1000.0
-  control_hz: 200.0
+  type: pd                      # pd | passthrough
+  physics_hz: 1000
+  control_hz: 500               # SDK2 G1 low-level (2 ms)
 
-environment:
-  type: empty_arena
-  ground_friction: [1.0, 0.005, 0.0001]
-  spawn_pos: [0.0, 0.0, 0.82]
-  spawn_quat: [1.0, 0.0, 0.0, 0.0]
-
-interface:
-  gym:
-    enabled: true
-    obs_keys: [proprioception, lidar, depth, imu]
-    reward_type: sparse
-    max_episode_steps: 1000
-  ros2:
-    enabled: false
-    namespace: /g1
+# Inspect-viewer overlays only. Sensor rates/resolution stay under sensors:.
+viewer:
+  lidar_dots: 0                 # 0 = all Mid-360 returns (~24k)
+  depth_stride: 4               # every Nth D435i pixel (4 → ~160×120)
+  lidar_radius: 0.006
+  depth_radius: 0.008
 
 render: true
 seed: 42

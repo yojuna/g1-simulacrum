@@ -1,0 +1,12 @@
+<mujoco model="g1_sensorized_none">
+  <include file="g1_robot_none.xml"/>
+  <option timestep="0.001" gravity="0 0 -9.81"/>
+  <statistic center="0 0 0.8" extent="1.2"/>
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3"/>
+  </visual>
+  <worldbody>
+    <light name="top_light" pos="0 0 3.5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.8 0.8 0.8 1"/>
+  </worldbody>
+</mujoco>

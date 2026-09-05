@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujocoinclude>
+  <!-- Dex3 actuators from g1_29dof_with_hand_rev_1_0 -->
+  <motor name="left_hand_thumb_0_joint" joint="left_hand_thumb_0_joint" />
+  <motor name="left_hand_thumb_1_joint" joint="left_hand_thumb_1_joint" />
+  <motor name="left_hand_thumb_2_joint" joint="left_hand_thumb_2_joint" />
+  <motor name="left_hand_middle_0_joint" joint="left_hand_middle_0_joint" />
+  <motor name="left_hand_middle_1_joint" joint="left_hand_middle_1_joint" />
+  <motor name="left_hand_index_0_joint" joint="left_hand_index_0_joint" />
+  <motor name="left_hand_index_1_joint" joint="left_hand_index_1_joint" />
+  <motor name="right_hand_thumb_0_joint" joint="right_hand_thumb_0_joint" />
+  <motor name="right_hand_thumb_1_joint" joint="right_hand_thumb_1_joint" />
+  <motor name="right_hand_thumb_2_joint" joint="right_hand_thumb_2_joint" />
+  <motor name="right_hand_index_0_joint" joint="right_hand_index_0_joint" />
+  <motor name="right_hand_index_1_joint" joint="right_hand_index_1_joint" />
+  <motor name="right_hand_middle_0_joint" joint="right_hand_middle_0_joint" />
+  <motor name="right_hand_middle_1_joint" joint="right_hand_middle_1_joint" />
+</mujocoinclude>

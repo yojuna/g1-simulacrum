@@ -1,0 +1,7 @@
+<!-- Device IMUs only. Pelvis/torso gyro+accel stay in the body snapshot. -->
+<mujocoinclude>
+  <accelerometer name="mid360_accel" site="mid360_imu_site"/>
+  <gyro name="mid360_gyro" site="mid360_imu_site"/>
+  <accelerometer name="d435i_accel" site="d435i_imu_site"/>
+  <gyro name="d435i_gyro" site="d435i_imu_site"/>
+</mujocoinclude>

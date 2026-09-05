@@ -14,12 +14,12 @@ file; compose SONIC later from `GR00T-WholeBodyControl`.
 
 ```bash
 # ❌ BAD
-python examples/01_walk_around.py
+python examples/01_empty_arena.py
 python3 -c "import g1_simulacrum"
 
 # ✅ GOOD  (from docker/)
 ./run.sh python -c "import g1_simulacrum; print(g1_simulacrum.__version__)"
-./run.sh python examples/01_walk_around.py
+./run.sh python examples/01_empty_arena.py
 ```
 
 ## Contract (implement and keep)
