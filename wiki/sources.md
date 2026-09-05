@@ -1,7 +1,8 @@
 # Sources
 
-Checked 2026-09-05. Pins below are what Architecture and future MJCF snapshots
-must follow until we bump them on purpose.
+Checked 2026-09-05. Pins below are what Architecture and the in-tree MJCF
+must follow until we bump them on purpose. Current pin:
+`unitree_ros@7c40519e02d7` — see [This package snapshot](#this-package-snapshot).
 
 ## Canonical (use these first)
 

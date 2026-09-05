@@ -12,8 +12,8 @@ MuJoCo: pinned body from Unitree/`g1_29dof_rev_1_0`, Livox Mid-360 and
 RealSense D435i on `torso_link`, pelvis + torso IMUs, Dex3 on the wrist-yaw
 flange, and a **500 Hz** PD (or torque) loop matching SDK2 low-level.
 Hands are a **swap-in MJCF kit**, not a second robot. The Dex3 *controller*
-is deferred until the body+sensors core is tested. Downstream stacks compose
-with this object.
+(`HandController`) is still deferred. Body+sensors core is in; downstream
+stacks compose with this object.
 
 Runtime is `docker/run.sh`. See [`docs/docker_usage.md`](docs/docker_usage.md).
 
@@ -166,8 +166,9 @@ Four IMU models: pelvis, torso, Mid-360, D435i. Do not share one noise block.
 
 ## MJCF (pinned includes)
 
-The compiler is the composer. No `ElementTree` mutation, no
-`NamedTemporaryFile` XML.
+The compiler is the composer. The **runtime** loader does not mutate XML
+(`from_xml_path` only). Authoring (`scripts/pin_mjcf.py`) uses named
+ElementTree edits; that script is not on the step path.
 
 ### Files
 
@@ -187,6 +188,7 @@ Authoring: `docker/run.sh python scripts/pin_mjcf.py` (optional `--fetch`).
 | `g1_simulacrum/model/mjcf/g1_robot.xml` | Default robot file the scenes include (`g1_29dof.xml` contents) |
 | `g1_simulacrum/model/mjcf/g1_robot_none.xml` | Rubber-hand robot file |
 | `g1_simulacrum/model/mjcf/g1_sensorized.xml` | Default complete model: `g1_robot.xml` + floor |
+| `g1_simulacrum/model/mjcf/g1_sensorized_none.xml` | Floor scene with rubber hands |
 | `g1_simulacrum/model/mjcf/g1_inspect.xml` | Same include + coloured boxes (inspect viewer). Same directory so `meshdir=assets` resolves |
 
 Keep pelvis/torso IMU sites from Unitree; do not delete them when adding
@@ -305,9 +307,10 @@ from Unitree `g1_29dof_with_hand_rev_1_0` into `end_effectors/dex3/`. Do not
 keep rubber-hand geoms on the same wrist.
 
 Until `HandController` exists: compile Dex3 kinematics, hold finger joints
-at the keyframe (named actuators stay at default `ctrl`). They must not
-flop. `Observation` may include `q_hands` for inspection; `step()` still
-takes body `(29,)` only.
+at reset qpos with a light named-actuator PD (`FINGER_HOLD_KP` /
+`FINGER_HOLD_KD` in `gains.py`). They must not flop. `Observation.q_hands`
+is the 14 finger qpos (or `None` for `hands: none`); `step()` still takes
+body `(29,)` only.
 
 Swap kit = different `g1_robot_*.xml` include, same flange. Inspire, Dex5,
 and a parallel gripper are later folders, not Python attachment hacks.
@@ -397,16 +400,16 @@ seed: 42
 (`g1_sensorized.xml` for Dex3, `g1_sensorized_none.xml` for rubber). Those
 scenes include `g1_robot.xml` / `g1_robot_none.xml`. It is not a pose patch.
 
-Drop `controller.type: sonic`, `environment.type: robocasa`, and `interface.ros2`
-from the core schema. Gym can remain a later optional extra, not a required
-config block.
+The core schema has no `sonic` controller, no `robocasa` environment, and
+no `ros2` interface block. `interface/gym_env.py` is an optional extra,
+not a required config key.
 
 ---
 
 ## Directory (v1)
 
-What we intend to keep. Absence of a listed file means implementation is
-incomplete, not that a fifth layer is “coming.”
+What is in the tree today. Deferred work is listed under Later, not as
+missing files here.
 
 ```
 g1_simulacrum/                    git root
@@ -416,25 +419,27 @@ g1_simulacrum/                    git root
 ├── wiki/                         compiled G1 hardware facts + sources
 ├── configs/default.yaml
 ├── docs/docker_usage.md
+├── docs/inspect_viewer.png       README screenshot
 ├── docker/                       run.sh image
 ├── scripts/pin_mjcf.py           authoring only; runtime does not run this
 ├── examples/01_empty_arena.py    GLFW inspect viewer
-├── tests/
+├── tests/test_core_v1.py
 └── g1_simulacrum/
     ├── __init__.py               G1Simulacrum, G1SimulacrumConfig
+    ├── cli.py                    compile + print maps
     ├── simulacrum.py
     ├── config.py
     ├── gantry.py                 inspect ElasticBand; not the facade
     ├── model/
+    │   ├── joints.py             BODY_JOINT_NAMES / HAND_JOINT_NAMES
     │   ├── loader.py
     │   └── mjcf/                 pinned XML + PIN.md + upstream/ + assets/
     ├── sensors/                  base, mid360, d435i, imu, manager, noise, data_types
     ├── controllers/
-    │   ├── base.py
+    │   ├── base.py               body API + Dex3 hold_hands
     │   ├── pd.py
     │   ├── passthrough.py
-    │   ├── gains.py
-    │   └── hands.py              later: HandController; not core v1
+    │   └── gains.py              SDK2-cited body PD; FINGER_HOLD_*
     └── interface/
         └── gym_env.py            optional extra only; not the core API
 ```
@@ -451,8 +456,8 @@ Revisit only when we open that work:
   after body+sensors core is tested. No DDS in core.
 - **Other hand kits** — Inspire, Dex5, parallel gripper: new
   `end_effectors/<kit>/` + `g1_robot_<kit>.xml`. Same flange.
-- **Gym extra** — thin wrapper over `G1Simulacrum` if RL needs it. No padded
-  lidar `Box`, no baked “don’t fall” reward as the package default.
+- **Gym extra** — `interface/gym_env.py` exists as a thin optional wrapper.
+  Do not make it the core API. No padded lidar `Box` as the package default.
 - **ROS2 extra** — topics from `Observation`, not a second robot.
 - **RoboCasa** — a scene that includes `g1_robot.xml`, or a separate project.
 - **GPU lidar backends** — Warp (and others) as a **config flag** after CPU
@@ -473,7 +478,8 @@ Revisit only when we open that work:
 | `mujoco-lidar` | Mid-360 rays (CPU default; Warp extra in the image, not the YAML default) |
 | `numpy`, `scipy` | Arrays, noise helpers |
 | `pydantic`, `pyyaml` | Config |
-| Menagerie G1 | **Pinned snapshot** in `mjcf/`, not an unpinned pip import |
+| `unitree_ros` G1 | **Pinned** in `mjcf/upstream/` + `assets/` (`PIN.md`). Not an unpinned pip import |
+| Menagerie G1 | Docker clones it to `/opt/mujoco_menagerie` (`PYTHONPATH=/opt`). Runtime robot XML is the package pin, not this clone |
 
 Optional extras (`gymnasium`, GPU lidar, etc.) stay extras. `unitree_sdk2py`
 is not a core dependency.

@@ -32,9 +32,10 @@ xyz metres, rpy radians (URDF XYZ fixed-axis: roll, pitch, yaw).
 | `imu_in_torso_joint` | `-0.03959 -0.00224 0.14792` | `0 0 0` | — |
 | `imu_in_pelvis_joint` | `0.04525 0 -0.08339` | `0 0 0` | — |
 
-MJCF `g1_29dof_rev_1_0.xml` already has sites `imu_in_pelvis` and
-`imu_in_torso` at those positions. It does **not** include `mid360_link` or
-`d435_link`. Those come from our mount includes.
+Unitree's vendored `upstream/g1_29dof_rev_1_0.xml` already has sites
+`imu_in_pelvis` and `imu_in_torso` at those positions. It does **not**
+include `mid360_link` or `d435_link`. Those come from our mount includes
+and are compiled into `g1_29dof.xml` / `g1_robot.xml`.
 
 ### Mid-360 pose revision (do not mix)
 

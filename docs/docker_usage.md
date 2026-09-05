@@ -25,7 +25,7 @@ there are no Docker volumes. Host files survive stop and reboot.
 | `docker/` | `/workspace/docker` | Dockerfile, `run.sh`, compose |
 | `docker/home/` | `/workspace/docker/home` | `$HOME` |
 | (not a host path) | `/opt/venv` | image Python |
-| (not a host path) | `/opt/mujoco_menagerie` | Menagerie MJCF (`PYTHONPATH=/opt`) |
+| (not a host path) | `/opt/mujoco_menagerie` | Menagerie clone (`PYTHONPATH=/opt`). Robot MJCF is the package pin, not this tree |
 | `/tmp/.X11-unix` | `/tmp/.X11-unix` | host X for GLFW |
 
 Needs NVIDIA driver + nvidia-container-toolkit. Do not create a host `.venv`.
