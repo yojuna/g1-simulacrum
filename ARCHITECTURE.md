@@ -1,510 +1,422 @@
 # g1-simulacrum — Architecture
 
-**A modular MuJoCo simulation package for the Unitree G1 humanoid with a full sensor suite.**
+Normative for this repo. Code follows this file. If they disagree, this file
+wins and the code is wrong.
 
-This document is the original prototype design and is **ahead of the code**. A rewrite is planned (including keeping GEAR-SONIC out of this package). Until then, treat the layers below as intent, not a file inventory.
+Hardware facts (DoF, mounts, rates, datasheets) live in [`wiki/`](wiki/README.md).
+This file records **design decisions**. Numbers here must match the wiki and
+cite it. Do not invent poses or rates in code.
 
-Runtime is the GPU container in `docker/` — always `docker/run.sh`, never a host venv. See [`docs/docker_usage.md`](docs/docker_usage.md). Compose has **no** SONIC sidecar; that stack lives in `GR00T-WholeBodyControl`.
+A **sensorized Unitree G1 EDU (29-DoF body + Dex3-1 hands by default)** in
+MuJoCo: pinned body from Unitree/`g1_29dof_rev_1_0`, Livox Mid-360 and
+RealSense D435i on `torso_link`, pelvis + torso IMUs, Dex3 on the wrist-yaw
+flange, and a **500 Hz** PD (or torque) loop matching SDK2 low-level.
+Hands are a **swap-in MJCF kit**, not a second robot. The Dex3 *controller*
+is deferred until the body+sensors core is tested. Downstream stacks compose
+with this object.
 
-## Problem
+Runtime is `docker/run.sh`. See [`docs/docker_usage.md`](docs/docker_usage.md).
 
-Developing autonomous behaviors for a Unitree G1 equipped with a Livox Mid-360 LiDAR and RealSense D435i requires iterating in simulation with high fidelity before deploying on hardware. Today, the pieces exist (MuJoCo Menagerie G1 model, MuJoCo-LiDAR, GEAR-SONIC WBC) but are separate projects with incompatible interfaces. Wiring them together is a multi-week integration task that every team repeats.
+---
 
-## Solution
+## Scope
 
-`g1-simulacrum` is a drop-in Python package that composes these components into a single coherent system. A downstream user writes:
+**This package is**
+
+- A pinned, sensorized G1 MJCF model the MuJoCo compiler can load.
+- Modular end-effectors (Dex3 default) as wrist-yaw includes.
+- Sensors that emit typed readings at hardware-like rates.
+- Actuation: joint-position PD and torque passthrough **for the 29 body
+  joints**. Hand PD is a later controller, not core v1.
+- A Python facade (`G1Simulacrum`) that compiles, steps, resets, and returns
+  an `Observation`.
+
+**This package is not**
+
+- GEAR-SONIC, DDS, or a 95-D policy observation. Whole-body control lives in
+  `GR00T-WholeBodyControl`. How to compose the two is **out of scope** until
+  we revisit it against that repo.
+- A RoboCasa / RoboSuite task suite.
+- A ROS2 robot driver.
+- A Gym locomotion environment as the primary API.
+
+Gym, ROS2, RoboCasa, and a SONIC adapter may return later as optional extras.
+They do not shape the core.
+
+---
+
+## Principles
+
+1. **Pinned MJCF includes** — mounts, sites, cameras, and sensors live in XML
+   the compiler includes. Python does not rewrite trees, write temp XML, or
+   inject bodies at runtime.
+2. **Named joints, not slices** — 29 DoF follow Unitree `G1JointIndex` /
+   Menagerie names. Never `qpos[7:36]` as the contract.
+3. **Typed contracts** — `PointCloud`, `DepthFrame`, `ImuReading`,
+   `JointState`, `BaseState`, `Observation` are the API. Downstream code
+   depends on these, not on Gym spaces or ROS messages.
+4. **Config-driven sensors** — rates, mounts (as XML, not live pose hacks),
+   and noise come from YAML / Pydantic. No new magic numbers in sensor code.
+5. **Lean core** — one way to compile, step, and read sensors. Adapters wait.
+
+---
+
+## Invariants
+
+Facts and URLs: [`wiki/g1-platform.md`](wiki/g1-platform.md),
+[`wiki/g1-sensors.md`](wiki/g1-sensors.md),
+[`wiki/g1-control.md`](wiki/g1-control.md),
+[`wiki/g1-hands.md`](wiki/g1-hands.md).
+
+### Degrees of freedom
+
+Default model is **G1 EDU 29 body DoF + Dex3-1 (7+7 finger DoF)**.
+The 29 body joints match Unitree `G1JointIndex` 0–28 and
+`g1_29dof_rev_1_0`. Fingers are a **separate named group**, never padded
+into the 29. The base retail G1 is 23 DoF (waist roll/pitch and wrist
+pitch/yaw locked). We do not treat 23 as a second product; a locked-joint
+XML can come later. `hands: none` restores rubber-hand visuals only.
+
+Canonical name order (same as SDK2 indices 0–28):
+
+```
+left_hip_pitch, left_hip_roll, left_hip_yaw, left_knee,
+left_ankle_pitch, left_ankle_roll,
+right_hip_pitch, right_hip_roll, right_hip_yaw, right_knee,
+right_ankle_pitch, right_ankle_roll,
+waist_yaw, waist_roll, waist_pitch,
+left_shoulder_pitch, left_shoulder_roll, left_shoulder_yaw, left_elbow,
+left_wrist_roll, left_wrist_pitch, left_wrist_yaw,
+right_shoulder_pitch, right_shoulder_roll, right_shoulder_yaw, right_elbow,
+right_wrist_roll, right_wrist_pitch, right_wrist_yaw
+```
+
+The loader builds a **name → MuJoCo id** map at compile time. Freejoint
+base (`qpos[0:7]`, `qvel[0:6]`) stays separate from the 29.
+
+### Frames and mounts
+
+G1 has **no actuated head**. Unitree’s docs say lidar and camera sit in the
+head assembly; the URDF parent for both is **`torso_link`**. Do not invent
+`head_link` as a camera parent.
+
+Poses from Unitree `g1_29dof_rev_1_0.urdf` at
+`unitree_ros@7c40519e02d7` (2026-06-16, “fix g1 mid360_joint transform”).
+xyz in metres, rpy in radians. Copy into pinned MJCF — do not mix with older
+URDF snapshots (pre-fix Mid-360 had z=`0.41618`, rpy=`0, 0.04014, 0`).
+
+| Body / site | Parent | xyz | rpy |
+|-------------|--------|-----|-----|
+| `mid360_link` | `torso_link` | `0.0002835, 0.00003, 0.428434` | `π, 0.051121, 0` (~180° roll, 2.93° pitch) |
+| `d435i_link` (URDF `d435_link`) | `torso_link` | `0.0576235, 0.01753, 0.42987` | `0, 0.830777, 0` (~47.60° pitch) |
+| `imu_in_torso` | `torso_link` | `-0.03959, -0.00224, 0.14792` | `0, 0, 0` |
+| `imu_in_pelvis` | `pelvis` | `0.04525, 0, -0.08339` | `0, 0, 0` |
+
+| Frame | Meaning |
+|-------|---------|
+| `world` | MuJoCo inertial |
+| `pelvis` | Base / freejoint; **primary robot IMU** (`LowState`) |
+| `torso_link` | **Secondary robot IMU** (`rt/secondary_imu`) |
+| `mid360_link` | LiDAR optical; point clouds in this frame |
+| `d435i_link` | Camera body (depth + RGB cameras on this body) |
+| `d435i_color_optical_frame` | RGB optical (OpenCV: +Z forward, +X right, +Y down) |
+
+LiDAR rays originate at a **site on `mid360_link`**, never at the torso origin.
+Mounts change only by editing XML (and the wiki if Unitree revises the URDF).
+
+[`mujoco-lidar`](https://github.com/discoverse-dev/MuJoCo-LiDAR) does not
+own the mount. It traces `LivoxGenerator("mid360")` rays in whatever site
+we name. Discoverse’s G1 demo uses a **simplified** site on `torso_link`
+(`pos="0 0 0.405" quat="0 0 1 0"` = 180° about Y). That is the same *idea*
+(optical +Z down so the +52° lobe covers the floor) but **not** the Unitree
+URDF (roll π, 2.93° pitch, z=0.428434, +X still forward). We pin Unitree.
+No API conflict: `MjLidarWrapper(model, site_name="mid360", …)` plus
+`bodyexclude=torso_link` so rays skip the head mesh. Do not copy
+discoverse’s site pose into our XML. Details: [`wiki/g1-sensors.md`](wiki/g1-sensors.md).
+
+### Rates
+
+| Loop | Rate | Source |
+|------|------|--------|
+| MuJoCo physics | 1000 Hz | Sim choice (`timestep="0.001"`) |
+| PD / torque apply | **500 Hz** | SDK2 G1 low-level (2 ms). Two physics substeps per control step |
+| Pelvis / torso IMU | 500 Hz | Same as low-state (read every control step) |
+| Mid-360 IMU (ICM-40609) | 200 Hz | Livox datasheet |
+| D435i IMU (BMI055) | gyro ~200 Hz, accel ~63–250 Hz | Intel; we may sample gyro at 200 Hz |
+| D435i RGB | 30 Hz | Intel default stream |
+| D435i depth | 30 Hz in this package (hardware up to 90 Hz) | Sim cost; wiki notes 90 Hz cap |
+| Mid-360 scan | 10 Hz | Livox typical frame rate |
+
+A sensor that is not due this control step returns `None` in `SensorBundle`.
+Callers must not treat missing readings as zeros.
+
+### Noise
+
+Start from **datasheet 1σ**, labeled as such, not as “calibrated on our G1”:
+
+- Mid-360 range: ≤ 2 cm @ 10 m, ≤ 3 cm @ 0.2 m (Livox). Dropout/clutter remain
+  placeholders until we have robot logs.
+- D435i: stereo approximation only (edge holes, range-dependent σ). MuJoCo is
+  not a RealSense. Ideal depth range 0.3–3 m, not a flat 0.105–10 m quality.
+
+Four IMU models: pelvis, torso, Mid-360, D435i. Do not share one noise block.
+
+---
+
+## MJCF (pinned includes)
+
+The compiler is the composer. No `ElementTree` mutation, no
+`NamedTemporaryFile` XML.
+
+### Files
+
+| File | Role |
+|------|------|
+| `g1_simulacrum/model/mjcf/g1_29dof.xml` | Pinned snapshot of Unitree/Menagerie `g1_29dof_rev_1_0` (body SHA + URDF mount SHA in wiki) |
+| `g1_simulacrum/model/mjcf/mounts/mid360.xml` | Lidar body at URDF pose, site, visual geom, device IMU site |
+| `g1_simulacrum/model/mjcf/mounts/d435i.xml` | Camera body at URDF pose; **two** cameras (depth fovy 58°, RGB fovy 42°) |
+| `g1_simulacrum/model/mjcf/mounts/imus.xml` | Accel/gyro for pelvis, torso, Mid-360, D435i sites |
+| `g1_simulacrum/model/mjcf/end_effectors/dex3/{left,right}.xml` | Dex3-1 subtree + actuators, snapshot from Unitree `g1_29dof_with_hand_rev_1_0` |
+| `g1_simulacrum/model/mjcf/end_effectors/none/{left,right}.xml` | Rubber-hand visual only (from `g1_29dof_rev_1_0`) |
+| `g1_simulacrum/model/mjcf/g1_robot.xml` | Default robot: G1 tree with includes on `torso_link` (sensors) and both `*_wrist_yaw_link` (**dex3**) |
+| `g1_simulacrum/model/mjcf/g1_robot_none.xml` | Same body+sensors, rubber hands (`end_effectors/none`) |
+| `g1_simulacrum/model/mjcf/g1_sensorized.xml` | Default complete model: `g1_robot.xml` + empty arena |
+| `g1_simulacrum/model/mjcf/scenes/` | Optional scenes that `<include>` `g1_robot.xml` |
+
+`g1_29dof.xml` is a snapshot we own. Keep pelvis/torso IMU sites from Unitree;
+do not delete them when adding lidar/camera.
+
+Sensor includes go on `torso_link`:
+
+```xml
+<include file="mounts/mid360.xml"/>
+<include file="mounts/d435i.xml"/>
+```
+
+Hand includes go on the wrist-yaw links (Unitree flange). Default files
+are Dex3. Swapping hands means compiling a different robot XML that
+includes a different kit — not rewriting the tree in Python.
+
+```xml
+<!-- inside left_wrist_yaw_link -->
+<include file="end_effectors/dex3/left.xml"/>
+```
+
+A later Inspire / Dex5 / gripper kit is another folder under
+`end_effectors/` plus a `g1_robot_<kit>.xml` entry. Same flange pose.
+
+`compiler meshdir` (and texture paths) are set so meshes resolve relative to
+these MJCF files, whether loaded from the package or from `/opt/mujoco_menagerie`
+copies we pin. Python only calls `mujoco.MjModel.from_xml_path` on
+`g1_sensorized.xml` or on a scene that includes `g1_robot.xml`.
+
+### Dropping the robot into a user scene
+
+The user scene is MJCF that includes `g1_robot.xml` (or copies that include
+line). Python does not merge worldbodies in memory. If a scene cannot use
+`<include>`, that is a scene-authoring problem, not a reason to resurrect
+runtime injection.
+
+---
+
+## Core modules
+
+```
+G1Simulacrum          facade: build / reset / step → Observation
+  ModelLoader         from_xml_path only; body + hand name maps
+  SensorManager       Mid-360, D435i, IMUs at their rates
+  Controller          body PD or torque passthrough → named body actuators
+  HandController      deferred; fingers held at keyframe in core v1
+```
+
+### 1. Model (`g1_simulacrum.model`)
+
+`ModelLoader.build()` compiles pinned XML. It returns `MjModel`, the body
+joint name map (29), and the hand joint name map (14 for Dex3, empty for
+`none`). It does not accept a “patch this tree” API.
+
+### 2. Sensors (`g1_simulacrum.sensors`)
+
+- `Mid360Lidar` — `mujoco-lidar.MjLidarWrapper` on site **`mid360`** (on
+  `mid360_link`). Pattern: `LivoxGenerator("mid360")`. Pass
+  `bodyexclude=torso_link` (and keep the lidar visual on a geom group the
+  wrapper can ignore) so the head mesh is not a hit. CPU first.
+- `D435iCamera` — MuJoCo renderer: depth camera **fovy 58°** (87° H at 4:3
+  is the RealSense depth FOV), RGB camera **fovy 42°**. Do not render both
+  from one camera. This is a pinhole stand-in for stereo (see wiki).
+- `ImuSensor` — **four** named pairs: `imu_in_pelvis`, `imu_in_torso`,
+  Mid-360, D435i. Core `SensorBundle` exposes pelvis (primary) and torso
+  (secondary). Device IMUs are optional fields.
+- `SensorManager` — `step(sim_time) → SensorBundle`.
+- `noise.py` — datasheet 1σ where cited; otherwise labeled placeholder.
+
+`SensorBundle` fields are `None` when disabled or not due.
+
+### 3. Actuation (`g1_simulacrum.controllers`)
+
+Two implementations of `Controller`:
+
+| Type | Input | Output |
+|------|--------|--------|
+| `pd` | `(29,)` position targets, canonical order | PD torques, gains from `gains.py` / config |
+| `passthrough` | `(29,)` torques | written to `data.ctrl` |
+
+Default is `pd`. There is no `sonic` controller type.
+
+Gains stay in `gains.py` as a named table. Config may scale named joints,
+not integer indices in comments that drift.
+
+The body controller writes **named body actuators only**. It must not index
+`data.ctrl[:29]` if hand actuators exist.
+
+### 4. Hands (model now, controller later)
+
+See [`wiki/g1-hands.md`](wiki/g1-hands.md).
+
+The wrist-yaw links are a **flange**. Unitree uses the same fixed joint for
+rubber hands and Dex3:
+
+| Joint | Parent | xyz (m) | rpy |
+|-------|--------|---------|-----|
+| `left_hand_palm_joint` | `left_wrist_yaw_link` | `0.0415, 0.003, 0` | `0, 0, 0` |
+| `right_hand_palm_joint` | `right_wrist_yaw_link` | `0.0415, -0.003, 0` | `0, 0, 0` |
+
+Default kit is Dex3-1: extract the finger tree + palm geoms + 14 actuators
+from Unitree `g1_29dof_with_hand_rev_1_0` into `end_effectors/dex3/`. Do not
+keep rubber-hand geoms on the same wrist.
+
+Until `HandController` exists: compile Dex3 kinematics, hold finger joints
+at the keyframe (named actuators stay at default `ctrl`). They must not
+flop. `Observation` may include `q_hands` for inspection; `step()` still
+takes body `(29,)` only.
+
+Swap kit = different `g1_robot_*.xml` include, same flange. Inspire, Dex5,
+and a parallel gripper are later folders, not Python attachment hacks.
+
+### 5. Facade (`G1Simulacrum`)
 
 ```python
-from g1_simulacrum import G1Simulacrum, environments
+from g1_simulacrum import G1Simulacrum, G1SimulacrumConfig
 
-sim = G1Simulacrum(
-    controller="sonic-v1.1",
-    sensors=["mid360", "d435i"],
-)
-env = environments.load("robocasa:kitchen-001")
-env.attach(sim)
-obs = env.reset()
-
-while True:
-    action = my_policy(obs)
-    obs, reward, done, info = env.step(action)
+sim = G1Simulacrum.from_config("configs/default.yaml")
+sim.build()                          # compile pinned MJCF
+obs = sim.reset()
+obs = sim.step(q_target)             # (29,) or None to hold last PD target
 ```
 
-## Design Principles
-
-1. **Composition over inheritance** — each layer is a standalone component that can be used independently or composed.
-2. **MJCF-native** — sensor mounts, collision geoms, and actuators are defined in XML includes, not monkey-patched at runtime.
-3. **Interface contracts** — every component exposes typed dataclasses for its inputs/outputs so downstream systems can rely on stable shapes.
-4. **Backend-agnostic sensors** — the LiDAR abstraction works with CPU, Taichi, JAX, or Warp backends; switching is a config flag.
-5. **Sim-to-real parity** — sensor noise models, control frequencies, and observation vectors match the real G1 hardware stack.
-
----
-
-## Layer Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Downstream Consumers                   │
-│         (nav stack, MoveIt, RL training, VLA)            │
-├──────────────┬──────────────────────┬────────────────────┤
-│  ROS2 Bridge │    Gym-style API     │   Raw Python API   │
-├──────────────┴──────────────────────┴────────────────────┤
-│                                                          │
-│                  5. Interface Layer                       │
-│          g1_simulacrum.interface                           │
-│   ┌────────────┐ ┌────────────┐ ┌──────────────┐        │
-│   │ ROS2Bridge │ │  GymEnv    │ │ ObsManager   │        │
-│   └────────────┘ └────────────┘ └──────────────┘        │
-│                                                          │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│                  4. Environment Layer                    │
-│          g1_simulacrum.environments                       │
-│   ┌────────────┐ ┌────────────┐ ┌──────────────┐        │
-│   │ RoboCasa   │ │ Empty      │ │ Custom MJCF  │        │
-│   │ Adapter    │ │ Arena      │ │ Loader       │        │
-│   └────────────┘ └────────────┘ └──────────────┘        │
-│                                                          │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│                  3. Controller Layer                      │
-│          g1_simulacrum.controllers                         │
-│   ┌────────────┐ ┌────────────┐ ┌──────────────┐        │
-│   │ SONIC      │ │ PD Ctrl    │ │ Passthrough   │        │
-│   │ Bridge     │ │ (native)   │ │ (torque)      │        │
-│   └────────────┘ └────────────┘ └──────────────┘        │
-│                                                          │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│                  2. Sensor Layer                          │
-│          g1_simulacrum.sensors                             │
-│   ┌────────────┐ ┌────────────┐ ┌──────────────┐        │
-│   │ Mid360     │ │ D435i      │ │ IMU          │        │
-│   │ LiDAR      │ │ DepthCam   │ │ (accel+gyro) │        │
-│   └────────────┘ └────────────┘ └──────────────┘        │
-│                                                          │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│                  1. Model Layer                           │
-│          g1_simulacrum.model                               │
-│   ┌────────────┐ ┌────────────┐ ┌──────────────┐        │
-│   │ G1 MJCF    │ │ Sensor     │ │ Composed     │        │
-│   │ (29 DOF)   │ │ Mounts XML │ │ Assembly     │        │
-│   └────────────┘ └────────────┘ └──────────────┘        │
-│                                                          │
-├──────────────────────────────────────────────────────────┤
-│                   External Dependencies                  │
-│  mujoco  ·  mujoco-lidar  ·  mujoco_menagerie           │
-│  unitree_sdk2  ·  gear-sonic  ·  robosuite/robocasa      │
-└──────────────────────────────────────────────────────────┘
-```
-
----
-
-## Layer Details
-
-### 1. Model Layer (`g1_simulacrum.model`)
-
-**Purpose:** Assemble the G1 MJCF with sensor mount points, producing a single composite model that can be dropped into any MuJoCo scene.
-
-**Key files:**
-- `mjcf/g1_29dof.xml` — base G1 model (sourced from Menagerie, pinned version)
-- `mjcf/sensor_mounts.xml` — MJCF `<include>` that adds sensor bodies, sites, cameras
-- `mjcf/g1_sensorized.xml` — top-level composed model
-- `model.py` — Python API to load, configure, and attach the model
-
-**Sensor mount points on real G1:**
-- **Mid-360 LiDAR**: head/torso top, pos `[0, 0, 0.05]` relative to `torso_link`
-- **D435i cameras**: head link, facing forward (can be configured for wrist mount too)
-- **IMU (Mid-360 built-in)**: co-located with LiDAR mount site
-- **IMU (D435i built-in)**: co-located with camera body
-
-**G1 joint configuration (29 DOF, matching GEAR-SONIC):**
-```
-Legs (12):   left/right × [hip_pitch, hip_roll, hip_yaw, knee, ankle_pitch, ankle_roll]
-Waist (3):   waist_yaw, waist_roll, waist_pitch (→ torso_link anchor)
-Arms (14):   left/right × [shoulder_pitch, shoulder_roll, shoulder_yaw, elbow,
-              wrist_roll, wrist_pitch, wrist_yaw]
-```
-
-### 2. Sensor Layer (`g1_simulacrum.sensors`)
-
-**Purpose:** Unified sensor interfaces that produce data matching real hardware output formats.
-
-#### Mid-360 LiDAR (`sensors/mid360.py`)
-
-Wraps `mujoco_lidar.LidarSensor` with the `mid360` preset. Outputs:
-- `PointCloud` dataclass: `points: ndarray (N,3)`, `intensities: ndarray (N,)`, `timestamp: float`
-- Configurable: backend (`cpu`/`taichi`/`jax`/`warp`), noise model, scan rate
-
-Noise model parameters (matching real sensor):
-- Range noise: Gaussian σ=0.02m
-- Random point dropout: 2% of points
-- Near-field clutter: 1% of points assigned random [0, 0.3] range
-
-#### D435i Depth Camera (`sensors/d435i.py`)
-
-Uses MuJoCo native `Renderer` for RGB + depth. Outputs:
-- `DepthFrame` dataclass: `rgb: ndarray (H,W,3)`, `depth: ndarray (H,W)`, `timestamp: float`
-- Intrinsics matching real D435i: 640×480 @ 30fps, 87° H-FOV (58° V-FOV)
-- Depth noise model: edge erosion, distance-dependent precision degradation, hole injection on flat/reflective surfaces
-
-#### IMU (`sensors/imu.py`)
-
-Reads MuJoCo `accelerometer` and `gyro` sensors. Outputs:
-- `ImuReading` dataclass: `accel: ndarray (3,)`, `gyro: ndarray (3,)`, `timestamp: float`
-- Noise model: bias drift, white noise (matching ICM-40609-D specs for Mid-360, BMI055 for D435i)
-
-#### Sensor Manager (`sensors/manager.py`)
-
-Orchestrates all sensors with configurable rates:
-```python
-manager = SensorManager(model, data, config={
-    "mid360": {"rate_hz": 10, "backend": "warp"},
-    "d435i":  {"rate_hz": 30, "resolution": [640, 480]},
-    "imu":    {"rate_hz": 200},
-})
-readings = manager.step(sim_time)
-# → SensorBundle(lidar=PointCloud, depth=DepthFrame, imu=ImuReading)
-```
-
-### 3. Controller Layer (`g1_simulacrum.controllers`)
-
-**Purpose:** Bridge between high-level action commands and MuJoCo actuator torques.
-
-#### SONIC Bridge (`controllers/sonic_bridge.py`)
-
-Interfaces with GEAR-SONIC deployment stack via DDS (Unitree SDK2):
-
-```
-┌──────────────────┐     DDS loopback      ┌───────────────────┐
-│  g1-simulacrum    │ ◄──── rt/lowcmd ────── │  gear_sonic_deploy │
-│  (MuJoCo 200Hz)  │ ────► rt/lowstate ───► │  (ONNX 50Hz)      │
-│                  │ ────► rt/odostate ───► │                   │
-│                  │ ────► rt/secondary_imu─►│                   │
-└──────────────────┘                        └───────────────────┘
-```
-
-- Publishes: `rt/lowstate` (joint pos/vel/torque), `rt/odostate` (base pose/vel), `rt/secondary_imu`
-- Subscribes: `rt/lowcmd` (target joint positions from policy)
-- Applies PD control: `τ = Kp(q_target - q) + Kd(0 - q̇)` at 200Hz
-- Per-joint PD gains from SONIC config (Kp: 4–400, Kd: 0.1–5.0)
-
-#### PD Controller (`controllers/pd_controller.py`)
-
-Standalone PD position controller (no SONIC dependency). Accepts raw joint position targets.
-
-#### Passthrough Controller (`controllers/passthrough.py`)
-
-Direct torque control for custom RL policies that output torques.
-
-### 4. Environment Layer (`g1_simulacrum.environments`)
-
-**Purpose:** Adapt various MuJoCo scene sources into a uniform environment API.
-
-#### Base Environment (`environments/base.py`)
-
-```python
-class G1Environment:
-    def attach(self, robot: G1Simulacrum) -> None: ...
-    def reset(self) -> Observation: ...
-    def step(self, action: Action) -> tuple[Observation, float, bool, dict]: ...
-    def render(self) -> ndarray | None: ...
-```
-
-#### RoboCasa Adapter (`environments/robocasa_adapter.py`)
-
-- Loads RoboCasa kitchen scenes (120 scenes, 2500+ objects)
-- Replaces the default robot model with sensorized G1
-- Preserves RoboCasa's task definitions and reward functions
-- Handles MJCF merging: G1 model → RoboCasa Arena → composed scene
-
-#### Empty Arena (`environments/empty_arena.py`)
-
-Flat ground plane with configurable obstacles. For locomotion testing.
-
-#### Custom MJCF Loader (`environments/custom_loader.py`)
-
-Loads any user-provided MJCF/XML scene and attaches the G1.
-
-### 5. Interface Layer (`g1_simulacrum.interface`)
-
-**Purpose:** Connect the simulation to downstream systems.
-
-#### Gym API (`interface/gym_env.py`)
-
-Wraps everything into a `gymnasium.Env`:
-
-```python
-observation_space = Dict({
-    "proprioception": Box(shape=(29*2 + 6,)),  # joint pos/vel + base vel
-    "lidar": Box(shape=(N, 3)),                 # point cloud
-    "depth": Box(shape=(480, 640)),              # depth image
-    "rgb": Box(shape=(480, 640, 3)),             # RGB image
-    "imu": Box(shape=(6,)),                      # accel + gyro
-})
-action_space = Box(shape=(29,))  # joint position targets
-```
-
-#### ROS2 Bridge (`interface/ros2_bridge.py`)
-
-Publishes standard ROS2 topics:
-
-| Topic                      | Message Type              | Rate  |
-|----------------------------|---------------------------|-------|
-| `/g1/lidar/points`        | `sensor_msgs/PointCloud2` | 10 Hz |
-| `/g1/camera/color/image`  | `sensor_msgs/Image`       | 30 Hz |
-| `/g1/camera/depth/image`  | `sensor_msgs/Image`       | 30 Hz |
-| `/g1/camera/camera_info`  | `sensor_msgs/CameraInfo`  | 30 Hz |
-| `/g1/imu/data`            | `sensor_msgs/Imu`         | 200Hz |
-| `/g1/joint_states`        | `sensor_msgs/JointState`  | 200Hz |
-| `/g1/odom`                | `nav_msgs/Odometry`       | 50 Hz |
-| `/tf`                     | `tf2_msgs/TFMessage`      | 50 Hz |
-
-Subscribes:
-
-| Topic                      | Message Type                  | Use           |
-|----------------------------|-------------------------------|---------------|
-| `/g1/cmd_vel`             | `geometry_msgs/Twist`         | Velocity cmd  |
-| `/g1/joint_cmd`           | `trajectory_msgs/JointTrajectory` | Joint targets |
-
-#### Observation Manager (`interface/obs_manager.py`)
-
-Assembles the SONIC-compatible observation vector:
-- Base linear velocity (3)
-- IMU gravity projection (3)
-- Joint positions (29)
-- Joint velocities (29)
-- Previous actions (29)
-- Phase signals (2)
-
-Total: 95-dimensional proprioceptive observation (matches SONIC training).
-
----
-
-## Directory Structure
-
-```
-g1_simulacrum/
-├── pyproject.toml
-├── README.md
-├── ARCHITECTURE.md
-│
-├── g1_simulacrum/
-│   ├── __init__.py
-│   ├── simulacrum.py                    # G1Simulacrum top-level facade
-│   ├── config.py                   # Pydantic config models
-│   │
-│   ├── model/
-│   │   ├── __init__.py
-│   │   ├── loader.py               # MJCF loading and composition
-│   │   ├── mjcf/
-│   │   │   ├── g1_29dof.xml        # Base G1 (from Menagerie, pinned)
-│   │   │   ├── sensor_mounts.xml   # Sensor bodies, sites, cameras
-│   │   │   └── g1_sensorized.xml   # Composed top-level model
-│   │   └── assets/                 # Meshes (G1, D435i)
-│   │
-│   ├── sensors/
-│   │   ├── __init__.py
-│   │   ├── base.py                 # Abstract sensor interface
-│   │   ├── mid360.py               # Livox Mid-360 LiDAR wrapper
-│   │   ├── d435i.py                # RealSense D435i depth + RGB
-│   │   ├── imu.py                  # IMU sensor wrapper
-│   │   ├── noise.py                # Sensor noise models
-│   │   ├── manager.py              # Multi-sensor orchestrator
-│   │   └── data_types.py           # PointCloud, DepthFrame, ImuReading
-│   │
-│   ├── controllers/
-│   │   ├── __init__.py
-│   │   ├── base.py                 # Abstract controller interface
-│   │   ├── sonic_bridge.py         # GEAR-SONIC DDS bridge
-│   │   ├── pd_controller.py        # Standalone PD controller
-│   │   ├── passthrough.py          # Direct torque passthrough
-│   │   └── gains.py                # Per-joint PD gain configs
-│   │
-│   ├── environments/
-│   │   ├── __init__.py
-│   │   ├── base.py                 # Base environment ABC
-│   │   ├── robocasa_adapter.py     # RoboCasa scene adapter
-│   │   ├── empty_arena.py          # Flat ground + obstacles
-│   │   └── custom_loader.py        # User MJCF scene loader
-│   │
-│   └── interface/
-│       ├── __init__.py
-│       ├── gym_env.py              # gymnasium.Env wrapper
-│       ├── ros2_bridge.py          # ROS2 topic publisher/subscriber
-│       └── obs_manager.py          # SONIC-format observation builder
-│
-├── configs/
-│   ├── default.yaml                # Default full-stack config
-│   ├── sonic_v1_1.yaml             # SONIC v1.1 matched config
-│   ├── lidar_only.yaml             # LiDAR-only (no camera) config
-│   └── headless.yaml               # Headless training config
-│
-├── examples/
-│   ├── 01_walk_around.py           # SONIC keyboard-driven walking
-│   ├── 02_robocasa_kitchen.py      # G1 in RoboCasa kitchen scene
-│   ├── 03_nav_stack.py             # ROS2 Nav2 integration
-│   ├── 04_custom_scene.py          # Custom MJCF environment
-│   ├── 05_rl_training.py           # RL policy training with Gym API
-│   └── 06_sensor_visualization.py  # Visualize all sensor outputs
-│
-├── tests/                          # (placeholder; run via docker/run.sh)
-│
-├── docs/
-│   └── docker_usage.md             # How to run the GPU container
-│
-├── .cursor/rules/                  # Project Cursor rules
-│
-└── docker/
-    ├── Dockerfile                  # CUDA 12.6 + Python 3.10 + MuJoCo
-    ├── compose.yaml                # named container g1-simulacrum
-    ├── run.sh                      # only supported entry: compose exec
-    ├── entrypoint.sh
-    └── README.md
-```
-
----
-
-## Timing and Control Frequencies
-
-All frequencies match the real G1 hardware stack and SONIC training:
-
-| Component              | Rate     | Notes                                    |
-|------------------------|----------|------------------------------------------|
-| MuJoCo physics         | 1000 Hz  | `model.opt.timestep = 0.001`            |
-| PD control loop        | 200 Hz   | Matches Unitree SDK2 low-level rate      |
-| SONIC policy inference  | 50 Hz    | Encoder + decoder cycle                  |
-| SONIC planner           | 10 Hz    | Kinematic trajectory generation          |
-| IMU sensor              | 200 Hz   | Matches PD control rate                  |
-| D435i camera            | 30 Hz    | Matches real D435i default               |
-| Mid-360 LiDAR           | 10 Hz    | 200k points/sec, ~20k points/scan        |
-| ROS2 TF broadcast       | 50 Hz    | State estimation rate                    |
-
----
-
-## Integration Points
-
-### With GEAR-SONIC (`NVlabs/GR00T-WholeBodyControl`)
-
-The SONIC bridge runs as a separate process. The sim publishes robot state over DDS and receives joint commands back. This matches the real deployment architecture exactly — SONIC doesn't know if it's talking to MuJoCo or real hardware.
-
-```bash
-# Terminal 1: Simulation
-python -m g1_simulacrum.run --config configs/sonic_v1_1.yaml
-
-# Terminal 2: SONIC policy
-cd GR00T-WholeBodyControl/gear_sonic_deploy
-./deploy.sh --cp policy/sonic_v1_1/model \
-             --obs-config policy/sonic_v1_1/observation_config.yaml \
-             sim
-```
-
-### With RoboCasa
-
-RoboCasa uses RoboSuite's Arena/Robot/Task composition. The adapter:
-1. Loads the RoboCasa scene XML (arena + objects + fixtures)
-2. Removes the default robot model
-3. Injects the sensorized G1 model at the spawn point
-4. Wires the G1's actuators into RoboSuite's controller interface
-5. Preserves task rewards and success criteria
-
-### With GR00T N1.7 VLA
-
-The full perception → action pipeline:
-```
-Mid-360 + D435i → ROS2 topics → GR00T N1.7 VLA → action targets
-                                                     ↓
-SONIC decoder → joint positions → PD controller → MuJoCo torques
-```
-
-### With Nav2 / Navigation Stacks
-
-The ROS2 bridge publishes standard `PointCloud2`, `Image`, `Imu`, `Odometry`, and `TF` — any ROS2 navigation stack (Nav2, RTAB-Map, cartographer) can consume these directly without custom adapters.
+`Observation` is body joint state (29), optional `q_hands`, base state,
+`SensorBundle`, timestamp, and the **previous** control-step **body** action
+(not the action just applied).
+
+`build(scene_xml=...)` is only valid if `scene_xml` is an MJCF file that
+includes `g1_robot.xml` (or `g1_robot_none.xml`). No ad-hoc merge.
 
 ---
 
 ## Configuration
 
-All configuration is via YAML with Pydantic validation:
+YAML + Pydantic (`G1SimulacrumConfig`). Core keys:
 
 ```yaml
-# configs/default.yaml
 robot:
-  model: "g1_29dof"
-  initial_height: 0.82     # standing height (m)
+  model: g1_sensorized          # pinned MJCF entry (not a Menagerie hunt)
+  hands: dex3                   # dex3 | none; later: inspire, gripper, dex5
 
 sensors:
-  mid360:
-    enabled: true
-    backend: "cpu"          # cpu | taichi | jax | warp
-    rate_hz: 10
-    noise:
-      range_sigma: 0.02
-      dropout_rate: 0.02
-    mount_body: "torso_link"
-    mount_pos: [0.0, 0.0, 0.05]
-
-  d435i:
-    enabled: true
-    rate_hz: 30
-    resolution: [640, 480]
-    noise:
-      edge_erosion: true
-      depth_noise_sigma: 0.005
-    mount_body: "head_link"
-    mount_pos: [0.05, 0.0, 0.0]
-    mount_quat: [1, 0, 0, 0]   # forward-facing
-
+  mid360: { enabled: true, backend: cpu, rate_hz: 10 }
+  d435i:  { enabled: true, rate_hz: 30, resolution: [640, 480] }
   imu:
-    enabled: true
-    rate_hz: 200
-    noise:
-      accel_sigma: 0.01
-      gyro_sigma: 0.005
-      bias_drift: 0.0001
+    pelvis: { enabled: true, rate_hz: 500 }   # LowState
+    torso:  { enabled: true, rate_hz: 500 }   # rt/secondary_imu
+    mid360: { enabled: true, rate_hz: 200 }   # device IMU
+    d435i:  { enabled: true, rate_hz: 200 }   # gyro; accel may be slower
 
 controller:
-  type: "sonic"               # sonic | pd | passthrough
+  type: pd                      # pd | passthrough
   physics_hz: 1000
-  control_hz: 200
-  sonic:
-    dds_domain: 0
-    checkpoint: "sonic_v1_1"
+  control_hz: 500               # SDK2 G1 low-level; not 200
 
-environment:
-  type: "empty_arena"         # empty_arena | robocasa | custom
-  ground_friction: [1.0, 0.005, 0.0001]
+render: true
+seed: 42
+```
 
-interface:
-  gym:
-    enabled: true
-    obs_keys: ["proprioception", "lidar", "depth"]
-  ros2:
-    enabled: false
-    namespace: "/g1"
+`robot.hands` selects which **pinned robot XML** to compile (`g1_robot.xml`
+for Dex3, `g1_robot_none.xml` for rubber). It is not a pose patch.
+
+Drop `controller.type: sonic`, `environment.type: robocasa`, and `interface.ros2`
+from the core schema. Gym can remain a later optional extra, not a required
+config block.
+
+---
+
+## Directory (v1)
+
+What we intend to keep. Absence of a listed file means implementation is
+incomplete, not that a fifth layer is “coming.”
+
+```
+g1_simulacrum/                    git root
+├── pyproject.toml
+├── README.md
+├── ARCHITECTURE.md               this file (normative decisions)
+├── wiki/                         compiled G1 hardware facts + sources
+├── configs/default.yaml
+├── docs/docker_usage.md
+├── docker/                       run.sh image
+├── examples/                     small demos of the facade (no SONIC)
+├── tests/
+└── g1_simulacrum/
+    ├── __init__.py               G1Simulacrum, G1SimulacrumConfig
+    ├── simulacrum.py
+    ├── config.py
+    ├── model/
+    │   ├── loader.py
+    │   └── mjcf/                 pinned XML (body, mounts, end_effectors/)
+    ├── sensors/                  as today: base, mid360, d435i, imu,
+    │                             manager, noise, data_types
+    ├── controllers/
+    │   ├── base.py
+    │   ├── pd.py
+    │   ├── passthrough.py
+    │   ├── gains.py
+    │   └── hands.py              later: HandController; not core v1
+    └── interface/
+        └── gym_env.py            optional extra only; not the core API
 ```
 
 ---
 
-## Dependency Matrix
+## Later (explicitly deferred)
 
-Install extras via `pyproject.toml`. Runtime Python lives in the image
-(`/opt/venv`); Menagerie is cloned to `/opt/mujoco_menagerie`, not pip.
+Revisit only when we open that work:
 
-| Dependency          | Version     | Required | Purpose                   |
-|---------------------|-------------|----------|---------------------------|
-| `mujoco`           | ≥3.2        | Yes      | Physics engine             |
-| `mujoco-lidar`     | ≥0.3        | Yes      | Mid-360 LiDAR simulation   |
-| `scipy`            | ≥1.10       | Yes      | Sensor noise models        |
-| `mujoco_menagerie` | git clone   | Yes      | G1 MJCF (image, not PyPI)  |
-| `numpy`            | ≥1.24       | Yes      | Array operations           |
-| `pydantic`         | ≥2.0        | Yes      | Config validation          |
-| `gymnasium`        | ≥0.29       | Optional | Gym API wrapper            |
-| `unitree_sdk2py`   | ≥0.1        | Optional | DDS bridge for SONIC       |
-| `rclpy`            | ROS2 Jazzy  | Optional | ROS2 bridge                |
-| `robosuite`        | ≥1.5        | Optional | RoboCasa adapter           |
-| `robocasa`         | ≥0.2        | Optional | Kitchen environments       |
-| `taichi`           | ≥1.7        | Optional | GPU LiDAR backend          |
-| `jax`              | ≥0.4        | Optional | JAX LiDAR backend          |
-| `warp-lang`        | ≥1.0        | Optional | Warp LiDAR backend         |
+- **SONIC** — composition with the official `GR00T-WholeBodyControl` repo.
+  Not a controller type in this package. No DDS in core.
+- **HandController** — Dex3 (then Inspire / gripper) PD or SDK2-like cmd
+  after body+sensors core is tested. No DDS in core.
+- **Other hand kits** — Inspire, Dex5, parallel gripper: new
+  `end_effectors/<kit>/` + `g1_robot_<kit>.xml`. Same flange.
+- **Gym extra** — thin wrapper over `G1Simulacrum` if RL needs it. No padded
+  lidar `Box`, no baked “don’t fall” reward as the package default.
+- **ROS2 extra** — topics from `Observation`, not a second robot.
+- **RoboCasa** — a scene that includes `g1_robot.xml`, or a separate project.
+- **GPU lidar backends** — config flag after CPU is correct.
+- **Calibrated noise from robot logs** — datasheet 1σ is the start, not the end.
+- **23 DoF locked-waist XML** — same package, different MJCF entry.
+- **Mid-360s** — G1 units after April 2026 may ship Livox Mid-360s. Stay on
+  Mid-360 until we pin that datasheet.
+
+---
+
+## Dependencies (core)
+
+| Dependency | Role |
+|------------|------|
+| `mujoco` | Physics, renderer |
+| `mujoco-lidar` | Mid-360 rays (CPU) |
+| `numpy`, `scipy` | Arrays, noise helpers |
+| `pydantic`, `pyyaml` | Config |
+| Menagerie G1 | **Pinned snapshot** in `mjcf/`, not an unpinned pip import |
+
+Optional extras (`gymnasium`, GPU lidar, etc.) stay extras. `unitree_sdk2py`
+is not a core dependency.
