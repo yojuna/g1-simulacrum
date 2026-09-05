@@ -1,4 +1,8 @@
-"""Optional Gymnasium wrapper. Not the core API."""
+"""Optional Gymnasium wrapper. Not the core API.
+
+Thin extra over ``G1Simulacrum``. Observation spaces here are a stub; do
+not treat this module as the package contract (see ARCHITECTURE.md).
+"""
 
 from __future__ import annotations
 

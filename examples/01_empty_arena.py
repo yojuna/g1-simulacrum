@@ -260,7 +260,7 @@ def _run_viewer(
     last_lidar_n = 0
     last_depth_valid = 0
     gantry_note = (
-        "Yellow tether is the SONIC-style elastic gantry (not a weld).\n"
+        "Yellow tether is the elastic gantry (spring-damper on pelvis, not a weld).\n"
         "7/8 lower/raise, 9 toggle. --no-gantry lets it fall.\n"
         if gantry is not None
         else "No gantry — PD hold will not keep a floating base standing.\n"

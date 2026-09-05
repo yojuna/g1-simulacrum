@@ -105,7 +105,7 @@ class RobotConfig(BaseModel):
 
 
 class ViewerOverlayConfig(BaseModel):
-    """Inspect-viewer point overlays. Does not change sensor sample counts."""
+    """Inspect-viewer overlay markers (boxes). Does not change sensor sample counts."""
 
     # 0 = draw every Mid-360 return (~24k). Otherwise evenly subsample.
     lidar_dots: int = 0
