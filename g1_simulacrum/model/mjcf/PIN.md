@@ -76,8 +76,6 @@ Runtime does not run this script.
 - Dex3: copy wrist `inertial` from with-hand; extract `_hand_` bodies and palm geoms by name
 - Dex3 actuators: motors whose `joint` contains `hand` (14)
 - `sensor`: include device IMUs only (`mounts/imus.xml`)
-- Mount `pos`/`euler` from URDF `<joint><origin>` of `mid360_joint` and `d435_joint`
-- D435i cameras: `xyaxes="0 -1 0 0 0 1"` (look along camera-link +X, not MuJoCo +Z)
-- Mid-360 visual cylinder: geom `group="4"` (Python lidar skips group 4)
-- Fragments rooted at `<mujocoinclude>`; `g1_robot.xml` is a copy of the composed body (nested full `<mujoco>` includes duplicate the tree)
-- Scenes: `g1_sensorized.xml` (floor), `g1_inspect.xml` (floor + boxes)
+- Patch authored `mounts/*.xml` `pos`/`euler` from URDF `mid360_joint` / `d435_joint` (cameras, geoms, sites stay in those files)
+- Compose writes `g1_robot.xml` / `g1_robot_none.xml` (nested full `<mujoco>` includes duplicate the tree; no alias copies)
+- Scenes (`g1_sensorized.xml`, `g1_inspect.xml`) are authored; this script only verifies they include the robot file

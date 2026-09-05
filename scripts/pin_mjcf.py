@@ -7,6 +7,8 @@ Pristine Unitree files live in-tree:
     g1_simulacrum/model/mjcf/assets/     STLs named by those MJCFs
 
 This script applies *named* ElementTree edits to produce the owned robot XML.
+Mount fragments and scenes are authored XML; the script patches mount
+``pos``/``euler`` from URDF and does not emit XML as f-strings.
 It does not clone unitree_ros or download a tarball.
 
     cd docker && ./run.sh python scripts/pin_mjcf.py           # offline
@@ -20,7 +22,6 @@ from __future__ import annotations
 import argparse
 import copy
 import hashlib
-import shutil
 import urllib.request
 from datetime import date
 from pathlib import Path
@@ -127,6 +128,12 @@ def find_named(root: ET.Element, tag: str, name: str) -> ET.Element:
         if elem.get("name") == name:
             return elem
     raise LookupError(f"<{tag} name='{name}'> not found")
+
+
+def parse_xml(path: Path) -> ET.Element:
+    """Parse XML keeping comments (authored mounts)."""
+    parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+    return ET.parse(path, parser=parser).getroot()
 
 
 def indent_xml(elem: ET.Element) -> None:
@@ -257,95 +264,50 @@ def require_assets(filenames: list[str]) -> list[tuple[str, str, str]]:
     return records
 
 
-def write_mounts(origins: dict[str, dict[str, tuple[float, ...]]]) -> None:
-    mid = origins["mid360_joint"]
-    cam = origins["d435_joint"]
-    mounts = MJCF / "mounts"
-    mounts.mkdir(parents=True, exist_ok=True)
+# Authored mount files. Pin patches pos/euler only; cameras, geoms, sites stay.
+_MOUNT_BODIES = (
+    ("mid360.xml", "mid360_link", "mid360_joint"),
+    ("d435i.xml", "d435i_link", "d435_joint"),
+)
 
-    (mounts / "mid360.xml").write_text(
-        f"""\
-<mujocoinclude>
-  <!-- Mid-360 on torso_link.
-       URDF mid360_joint unitree_ros@{URDF_PIN_SHA[:12]}
-       xyz={fmt_vec(mid["xyz"])} rpy={fmt_vec(mid["rpy"])}
-       (roll π, pitch ~2.93°). Do not use discoverse quat="0 0 1 0". -->
-  <body name="mid360_link" pos="{fmt_vec(mid["xyz"])}" euler="{fmt_vec(mid["rpy"])}">
-    <inertial pos="0 0 0" mass="0.265" diaginertia="0.0002 0.0002 0.0002"/>
-    <geom name="mid360_visual" type="cylinder" size="0.0325 0.03"
-          rgba="0.15 0.15 0.15 1" contype="0" conaffinity="0" group="4"/>
-    <site name="mid360" pos="0 0 0" size="0.005" rgba="0 1 0 1" group="5"/>
-    <site name="mid360_imu_site" pos="{MID360_IMU_POS}" size="0.004"/>
-  </body>
-</mujocoinclude>
-"""
-    )
-    (mounts / "d435i.xml").write_text(
-        f"""\
-<mujocoinclude>
-  <!-- D435i on torso_link.
-       URDF d435_joint unitree_ros@{URDF_PIN_SHA[:12]} (URDF link d435_link).
-       xyz={fmt_vec(cam["xyz"])} rpy={fmt_vec(cam["rpy"])} (~47.60° pitch).
-       Depth fovy 58° (wiki, 87° H at 4:3); RGB fovy 42° (wiki, 69° H). -->
-  <body name="d435i_link" pos="{fmt_vec(cam["xyz"])}" euler="{fmt_vec(cam["rpy"])}">
-    <inertial pos="0 0 0" mass="0.072" diaginertia="0.00005 0.00005 0.00002"/>
-    <geom type="box" size="0.045 0.013 0.013"
-          rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0" group="4"/>
-    <!-- URDF d435_link is camera_link (X forward, Z up). Look along +X. -->
-    <camera name="d435i_depth" pos="0 0 0" fovy="58" resolution="640 480"
-            xyaxes="0 -1 0 0 0 1"/>
-    <camera name="d435i_rgb" pos="0 0 0" fovy="42" resolution="640 480"
-            xyaxes="0 -1 0 0 0 1"/>
-    <site name="d435i_imu_site" pos="0 0 0" size="0.004"/>
-  </body>
-</mujocoinclude>
-"""
-    )
-    (mounts / "imus.xml").write_text(
-        """\
-<!-- Device IMUs only. Pelvis/torso gyro+accel stay in the body snapshot. -->
-<mujocoinclude>
-  <accelerometer name="mid360_accel" site="mid360_imu_site"/>
-  <gyro name="mid360_gyro" site="mid360_imu_site"/>
-  <accelerometer name="d435i_accel" site="d435i_imu_site"/>
-  <gyro name="d435i_gyro" site="d435i_imu_site"/>
-</mujocoinclude>
-"""
-    )
+# Authored scenes. Nested full <mujoco> includes duplicate the robot tree.
+_SCENES = (
+    ("g1_sensorized.xml", "g1_robot.xml"),
+    ("g1_sensorized_none.xml", "g1_robot_none.xml"),
+    ("g1_inspect.xml", "g1_robot.xml"),
+)
 
 
-def _set_model_name(path: Path, name: str) -> None:
-    tree = ET.parse(path)
-    tree.getroot().set("model", name)
-    write_xml(path, tree.getroot())
+def patch_mount_poses(origins: dict[str, dict[str, tuple[float, ...]]]) -> None:
+    """Set body pos/euler from URDF. Do not rewrite the rest of the fragment."""
+    for filename, body_name, joint_name in _MOUNT_BODIES:
+        path = MJCF / "mounts" / filename
+        if not path.is_file():
+            raise SystemExit(f"missing authored mount {path}")
+        root = parse_xml(path)
+        body = find_named(root, "body", body_name)
+        pose = origins[joint_name]
+        got_pos = parse_vec(body.get("pos") or "0 0 0")
+        got_euler = parse_vec(body.get("euler") or "0 0 0")
+        if vecs_close(got_pos, pose["xyz"]) and vecs_close(got_euler, pose["rpy"]):
+            continue
+        body.set("pos", fmt_vec(pose["xyz"]))
+        body.set("euler", fmt_vec(pose["rpy"]))
+        write_xml(path, root)
 
 
-def write_wrappers() -> None:
-    """One include hop only. Nested full-document includes merge the body twice."""
-    shutil.copyfile(MJCF / "g1_29dof.xml", MJCF / "g1_robot.xml")
-    shutil.copyfile(MJCF / "g1_29dof_none.xml", MJCF / "g1_robot_none.xml")
-    _set_model_name(MJCF / "g1_robot.xml", "g1_robot")
-    _set_model_name(MJCF / "g1_robot_none.xml", "g1_robot_none")
-    scene = """\
-<mujoco model="{model}">
-  <include file="{robot}"/>
-  <option timestep="0.001" gravity="0 0 -9.81"/>
-  <statistic center="0 0 0.8" extent="1.2"/>
-  <visual>
-    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3"/>
-  </visual>
-  <worldbody>
-    <light name="top_light" pos="0 0 3.5" dir="0 0 -1" directional="true"/>
-    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.8 0.8 0.8 1"/>
-  </worldbody>
-</mujoco>
-"""
-    (MJCF / "g1_sensorized.xml").write_text(
-        scene.format(model="g1_sensorized", robot="g1_robot.xml")
-    )
-    (MJCF / "g1_sensorized_none.xml").write_text(
-        scene.format(model="g1_sensorized_none", robot="g1_robot_none.xml")
-    )
+def verify_scenes() -> None:
+    """Scenes are authored. Check they include the composed robot, not a nested full model."""
+    for scene_name, robot_file in _SCENES:
+        path = MJCF / scene_name
+        if not path.is_file():
+            raise SystemExit(f"missing authored scene {path}")
+        root = ET.parse(path).getroot()
+        includes = [c.get("file") for c in root if c.tag == "include"]
+        if robot_file not in includes:
+            raise SystemExit(
+                f"{scene_name} must <include file=\"{robot_file}\">, found {includes}"
+            )
 
 
 def extract_hand_motors(hands_root: ET.Element, dest: Path) -> None:
@@ -474,7 +436,12 @@ def write_pin_record(*, copies: list[tuple[str, str, str]]) -> None:
         "- Dex3: copy wrist `inertial` from with-hand; extract `_hand_` bodies and palm geoms by name",
         "- Dex3 actuators: motors whose `joint` contains `hand` (14)",
         "- `sensor`: include device IMUs only (`mounts/imus.xml`)",
-        "- Mount `pos`/`euler` from URDF `<joint><origin>` of `mid360_joint` and `d435_joint`",
+        "- Patch authored `mounts/*.xml` `pos`/`euler` from URDF "
+        "`mid360_joint` / `d435_joint` (cameras, geoms, sites stay in those files)",
+        "- Compose writes `g1_robot.xml` / `g1_robot_none.xml` "
+        "(nested full `<mujoco>` includes duplicate the tree; no alias copies)",
+        "- Scenes (`g1_sensorized.xml`, `g1_inspect.xml`) are authored; "
+        "this script only verifies they include the robot file",
         "",
     ]
     (MJCF / "PIN.md").write_text("\n".join(lines))
@@ -550,26 +517,26 @@ def main() -> None:
     origins = parse_urdf_origins(urdf_path)
     assert_urdf_matches_wiki(origins)
 
-    write_mounts(origins)
+    patch_mount_poses(origins)
     compose_body(
         UPSTREAM / "g1_29dof_rev_1_0.xml",
         UPSTREAM / "g1_29dof_with_hand_rev_1_0.xml",
         kit="dex3",
-        dest=MJCF / "g1_29dof.xml",
-        model_name="g1_29dof",
+        dest=MJCF / "g1_robot.xml",
+        model_name="g1_robot",
     )
     compose_body(
         UPSTREAM / "g1_29dof_rev_1_0.xml",
         UPSTREAM / "g1_29dof_with_hand_rev_1_0.xml",
         kit="none",
-        dest=MJCF / "g1_29dof_none.xml",
-        model_name="g1_29dof_none",
+        dest=MJCF / "g1_robot_none.xml",
+        model_name="g1_robot_none",
     )
-    write_wrappers()
+    verify_scenes()
 
     mesh_names = sorted(
-        set(mesh_files_from(ET.parse(MJCF / "g1_29dof.xml").getroot()))
-        | set(mesh_files_from(ET.parse(MJCF / "g1_29dof_none.xml").getroot()))
+        set(mesh_files_from(ET.parse(MJCF / "g1_robot.xml").getroot()))
+        | set(mesh_files_from(ET.parse(MJCF / "g1_robot_none.xml").getroot()))
     )
     copies.extend(require_assets(mesh_names))
     write_pin_record(copies=copies)

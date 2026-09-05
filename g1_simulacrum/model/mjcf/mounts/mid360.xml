@@ -1,8 +1,6 @@
 <mujocoinclude>
-  <!-- Mid-360 on torso_link.
-       URDF mid360_joint unitree_ros@7c40519e02d7
-       xyz=0.0002835 3e-05 0.428434 rpy=3.14159265358979 0.0511206937909139 0
-       (roll π, pitch ~2.93°). Do not use discoverse quat="0 0 1 0". -->
+  <!-- Mid-360 on torso_link. pos/euler from URDF mid360_joint.
+       Do not use discoverse quat="0 0 1 0". -->
   <body name="mid360_link" pos="0.0002835 3e-05 0.428434" euler="3.14159265358979 0.0511206937909139 0">
     <inertial pos="0 0 0" mass="0.265" diaginertia="0.0002 0.0002 0.0002"/>
     <!-- group 4: skipped by Mid-360 rays (see sensors/mid360.py). -->

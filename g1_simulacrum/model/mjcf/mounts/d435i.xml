@@ -1,7 +1,5 @@
 <mujocoinclude>
-  <!-- D435i on torso_link.
-       URDF d435_joint unitree_ros@7c40519e02d7 (URDF link d435_link).
-       xyz=0.0576235 0.01753 0.42987 rpy=0 0.830776723949301 0 (~47.60° pitch).
+  <!-- D435i on torso_link. pos/euler from URDF d435_joint (URDF link d435_link).
        Depth fovy 58° (wiki, 87° H at 4:3); RGB fovy 42° (wiki, 69° H). -->
   <body name="d435i_link" pos="0.0576235 0.01753 0.42987" euler="0 0.830776723949301 0">
     <inertial pos="0 0 0" mass="0.072" diaginertia="0.00005 0.00005 0.00002"/>

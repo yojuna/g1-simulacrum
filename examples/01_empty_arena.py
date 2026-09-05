@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import time
+from dataclasses import dataclass
 from pathlib import Path
 
 import mujoco
@@ -24,7 +25,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from g1_simulacrum import G1Simulacrum
-from g1_simulacrum.config import ViewerOverlayConfig
 from g1_simulacrum.gantry import ElasticBand
 from g1_simulacrum.sensors.data_types import DepthFrame, PointCloud
 
@@ -40,6 +40,17 @@ _LIDAR_SITE = "mid360"
 _IDENTITY_MAT = np.eye(3, dtype=np.float64).reshape(9)
 _LIDAR_RGBA = np.array([0.15, 0.95, 0.25, 0.55], dtype=np.float32)
 _DEPTH_RGBA = np.array([0.15, 0.75, 0.95, 0.7], dtype=np.float32)
+
+
+@dataclass
+class OverlayConfig:
+    """Inspect-viewer overlay markers. Does not change sensor sample counts."""
+
+    lidar_dots: int = 0  # 0 = every Mid-360 return (~24k)
+    depth_stride: int = 4
+    lidar_radius: float = 0.006
+    depth_radius: float = 0.008
+
 
 _OVERLAY_PRESETS = {
     "sparse": {"lidar_dots": 1800, "depth_stride": 16, "lidar_radius": 0.012, "depth_radius": 0.018},
@@ -170,7 +181,7 @@ def _paint(
     depth: DepthFrame | None,
     gantry: ElasticBand | None,
     pelvis_id: int,
-    overlay: ViewerOverlayConfig,
+    overlay: OverlayConfig,
     *,
     refresh_clouds: bool,
     inited: list[int],
@@ -251,7 +262,7 @@ def _run_viewer(
     *,
     gantry: ElasticBand | None,
     pelvis_id: int,
-    overlay: ViewerOverlayConfig,
+    overlay: OverlayConfig,
 ) -> None:
     control_hz = sim.config.controller.control_hz
     sync_every = max(1, int(round(control_hz / 60.0)))
@@ -412,21 +423,21 @@ def main() -> None:
         "--overlay",
         choices=tuple(_OVERLAY_PRESETS),
         default=None,
-        help="density preset sparse|dense|full (overrides YAML viewer:). Default is YAML.",
+        help="density preset sparse|dense|full (default: dense)",
     )
     parser.add_argument(
         "--lidar-dots",
         type=int,
         default=None,
         metavar="N",
-        help="max Mid-360 points to draw (0 = all ~24k). Overrides --overlay / YAML",
+        help="max Mid-360 points to draw (0 = all ~24k). Overrides --overlay",
     )
     parser.add_argument(
         "--depth-stride",
         type=int,
         default=None,
         metavar="N",
-        help="keep every Nth D435i pixel (1=finest). Overrides --overlay / YAML",
+        help="keep every Nth D435i pixel (1=finest). Overrides --overlay",
     )
     parser.add_argument(
         "--lidar-radius",
@@ -443,7 +454,7 @@ def main() -> None:
     args = parser.parse_args()
 
     sim = G1Simulacrum.from_config("configs/default.yaml")
-    overlay = sim.config.viewer.model_copy()
+    overlay = OverlayConfig()
     if args.overlay is not None:
         for key, value in _OVERLAY_PRESETS[args.overlay].items():
             setattr(overlay, key, value)
@@ -468,7 +479,7 @@ def main() -> None:
         f"compiled {sim.compiled.xml_path.name}  "
         f"body={len(sim.compiled.body_joint_ids)} hand={len(sim.compiled.hand_joint_ids)}  "
         f"mid360={sim.config.sensors.mid360.enabled} d435i={sim.config.sensors.d435i.enabled}  "
-        f"gantry={gantry is not None}  overlay={args.overlay or 'yaml'}"
+        f"gantry={gantry is not None}  overlay={args.overlay or 'dense'}"
     )
     if args.headless:
         _run_headless(sim, q_hold, gantry=gantry, pelvis_id=pelvis_id)

@@ -34,8 +34,6 @@ jax = ["mujoco-lidar[jax]"]
 warp = ["mujoco-lidar[warp]"]
 gpu-all = ["mujoco-lidar[taichi,jax,warp]"]
 
-gym = ["gymnasium>=0.29"]
-
 dev = [
     "pytest>=7.0",
     "pytest-cov",
@@ -44,7 +42,7 @@ dev = [
 ]
 
 all = [
-    "g1-simulacrum[gpu-all,gym]",
+    "g1-simulacrum[gpu-all]",
 ]
 
 [project.scripts]
