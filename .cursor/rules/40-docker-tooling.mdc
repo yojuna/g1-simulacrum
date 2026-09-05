@@ -1,0 +1,47 @@
+---
+description: All Python and tests run only via docker/run.sh — never host/system Python
+alwaysApply: true
+---
+
+# Docker and tooling
+
+**All project runtime goes through `docker/run.sh`.** That includes tests,
+imports, and one-liners. Host `python` / a host `.venv` / `uv run` on the
+workstation are wrong even for a “quick” check. Git stays on the host.
+
+Do not invent a host venv. Do not add a GEAR-SONIC sidecar to this compose
+file; compose SONIC later from `GR00T-WholeBodyControl`.
+
+```bash
+# ❌ BAD
+python examples/01_walk_around.py
+python3 -c "import g1_simulacrum"
+
+# ✅ GOOD  (from docker/)
+./run.sh python -c "import g1_simulacrum; print(g1_simulacrum.__version__)"
+./run.sh python examples/01_walk_around.py
+```
+
+## Contract (implement and keep)
+
+- Named container; `run.sh` uses `compose exec`. Never `docker compose run`
+  (it fights `container_name`).
+- Bind this git root as `/workspace`. No named Docker volumes.
+- Python in the **image** at `/opt/venv`. Startup does not pip.
+- Base: `nvidia/cuda:12.6.3-base-ubuntu22.04` + local `ghcr.io/astral-sh/uv:0.8.22`.
+  Do not `FROM weltmodelle-lewm:local` or `g1-sim:latest`.
+- `MUJOCO_GL=egl`. GLFW on host Intel X. Do not set
+  `__GLX_VENDOR_LIBRARY_NAME=nvidia`.
+- No restart-on-boot. `./run.sh` starts; `./run.sh stop` for SIGTERM.
+
+```bash
+cd docker
+./run.sh up --build    # first time, or after Dockerfile changes
+./run.sh               # bash, then stop if this invocation started it
+./run.sh python …
+./run.sh stop
+```
+
+Package changes: edit `docker/Dockerfile` and `./run.sh up --build` once.
+Do not `pip` into a running container as the source of truth.
+Do not `compose down` unless you mean to delete the container.
