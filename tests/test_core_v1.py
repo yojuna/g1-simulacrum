@@ -126,3 +126,32 @@ def test_d435i_sees_floor() -> None:
     valid = int(np.count_nonzero((frame.depth >= 0.3) & (frame.depth <= 3.0)))
     assert valid > 1000
     assert frame.rgb.max() > 30
+
+
+def test_gantry_wrench_pulls_up() -> None:
+    from g1_simulacrum.gantry import ElasticBand
+
+    band = ElasticBand(point=np.array([0.0, 0.0, 1.0]))
+    pose = np.array([0.0, 0.0, 0.7, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    wrench = band.advance(pose)
+    assert wrench[2] > 0.0
+
+
+def test_gantry_holds_pelvis_without_weld() -> None:
+    from g1_simulacrum.gantry import ElasticBand
+
+    cfg = G1SimulacrumConfig()
+    cfg.sensors.mid360.enabled = False
+    cfg.sensors.d435i.enabled = False
+    sim = G1Simulacrum(config=cfg)
+    sim.build()
+    obs = sim.reset()
+    q = obs.joint_state.position.copy()
+    pelvis = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_BODY, "pelvis")
+    px, py, _ = sim.data.xpos[pelvis]
+    band = ElasticBand(point=np.array([px, py, 1.0]))
+    for _ in range(500):
+        band.apply(sim.model, sim.data, pelvis)
+        obs = sim.step(q)
+    assert obs.base_state.position[2] > 0.6
+    assert sim.model.neq == 0

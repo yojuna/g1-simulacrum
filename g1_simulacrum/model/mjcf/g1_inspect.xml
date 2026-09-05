@@ -20,8 +20,4 @@
     <geom name="box_yellow" type="box" pos="0.35 1.6 0.15" size="0.2 0.2 0.15"
           rgba="0.9 0.8 0.15 1"/>
   </worldbody>
-  <equality>
-    <!-- Inspect only: nail the pelvis so the statue holds. Not a balance controller. -->
-    <weld name="inspect_pin_pelvis" body1="pelvis"/>
-  </equality>
 </mujoco>

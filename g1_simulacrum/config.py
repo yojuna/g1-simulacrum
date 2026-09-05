@@ -104,10 +104,22 @@ class RobotConfig(BaseModel):
     self_collision: bool = True
 
 
+class ViewerOverlayConfig(BaseModel):
+    """Inspect-viewer point overlays. Does not change sensor sample counts."""
+
+    # 0 = draw every Mid-360 return (~24k). Otherwise evenly subsample.
+    lidar_dots: int = 0
+    # Keep every Nth depth pixel (1 = full 640×480, will cap at scene maxgeom).
+    depth_stride: int = 4
+    lidar_radius: float = 0.006
+    depth_radius: float = 0.008
+
+
 class G1SimulacrumConfig(BaseModel):
     robot: RobotConfig = Field(default_factory=RobotConfig)
     sensors: SensorsConfig = Field(default_factory=SensorsConfig)
     controller: ControllerConfig = Field(default_factory=ControllerConfig)
+    viewer: ViewerOverlayConfig = Field(default_factory=ViewerOverlayConfig)
     render: bool = True
     seed: int = 42
 
