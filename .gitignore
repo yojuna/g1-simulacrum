@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtualenvs — runtime is the Docker image, not a host venv
+.venv/
+venv/
+
+# Envs / secrets
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Docker bind-mount home and leftover host caches
+docker/home/
+docker/.venv/
+docker/.cache/
+
+# MuJoCo / rendering
+MUJOCO_LOG.TXT
+*.mjlog
+
+# Generated / large
+*.ckpt
+*.onnx
+*.pt
+wandb/
+outputs/

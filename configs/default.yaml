@@ -1,0 +1,67 @@
+# g1-simulacrum default configuration
+# All sensor and controller parameters match the real G1 hardware stack.
+
+robot:
+  model: g1_29dof
+  initial_height: 0.82
+
+sensors:
+  mid360:
+    enabled: true
+    backend: cpu
+    rate_hz: 10.0
+    noise:
+      range_sigma: 0.02
+      dropout_rate: 0.02
+      near_field_clutter_rate: 0.01
+      near_field_max_range: 0.3
+    mount_body: torso_link
+    mount_pos: [0.0, 0.0, 0.05]
+    mount_quat: [1.0, 0.0, 0.0, 0.0]
+
+  d435i:
+    enabled: true
+    rate_hz: 30.0
+    resolution: [640, 480]
+    noise:
+      edge_erosion: true
+      depth_noise_sigma: 0.005
+      hole_rate: 0.01
+      max_range: 10.0
+      min_range: 0.105
+    mount_body: head_link
+    mount_pos: [0.05, 0.0, 0.0]
+    mount_quat: [1.0, 0.0, 0.0, 0.0]
+
+  imu:
+    enabled: true
+    rate_hz: 200.0
+    noise:
+      accel_sigma: 0.01
+      gyro_sigma: 0.005
+      accel_bias_drift: 0.0001
+      gyro_bias_drift: 0.00005
+
+controller:
+  type: pd
+  physics_hz: 1000.0
+  control_hz: 200.0
+
+environment:
+  type: empty_arena
+  ground_friction: [1.0, 0.005, 0.0001]
+  spawn_pos: [0.0, 0.0, 0.82]
+  spawn_quat: [1.0, 0.0, 0.0, 0.0]
+
+interface:
+  gym:
+    enabled: true
+    obs_keys: [proprioception, lidar, depth, imu]
+    reward_type: sparse
+    max_episode_steps: 1000
+  ros2:
+    enabled: false
+    namespace: /g1
+
+render: true
+seed: 42

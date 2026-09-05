@@ -1,0 +1,69 @@
+# SONIC v1.1 deployment configuration
+# Matches the GR00T-WholeBodyControl/gear_sonic_deploy settings exactly.
+#
+# Usage:
+#   Terminal 1: python -m g1_simulacrum.run --config configs/sonic_v1_1.yaml
+#   Terminal 2: cd GR00T-WholeBodyControl/gear_sonic_deploy && ./deploy.sh \
+#               --cp policy/sonic_v1_1/model \
+#               --obs-config policy/sonic_v1_1/observation_config.yaml sim
+
+robot:
+  model: g1_29dof
+  initial_height: 0.82
+
+sensors:
+  mid360:
+    enabled: true
+    backend: cpu
+    rate_hz: 10.0
+    noise:
+      range_sigma: 0.02
+      dropout_rate: 0.02
+    mount_body: torso_link
+    mount_pos: [0.0, 0.0, 0.05]
+
+  d435i:
+    enabled: true
+    rate_hz: 30.0
+    resolution: [640, 480]
+    mount_body: head_link
+    mount_pos: [0.05, 0.0, 0.0]
+
+  imu:
+    enabled: true
+    rate_hz: 200.0
+
+controller:
+  type: sonic
+  physics_hz: 1000.0
+  control_hz: 200.0
+  sonic:
+    dds_domain: 0
+    checkpoint: sonic_v1_1
+    observation_history_len: 4
+    observation_dt: 0.02
+    # Scale ankle gains for stability (matches SONIC deploy.sh defaults)
+    motor_kp_scale:
+      4: 1.5     # left_ankle_pitch
+      5: 1.5     # left_ankle_roll
+      10: 1.5    # right_ankle_pitch
+      11: 1.5    # right_ankle_roll
+    motor_kd_scale:
+      4: 1.5
+      5: 1.5
+      10: 1.5
+      11: 1.5
+
+environment:
+  type: empty_arena
+  ground_friction: [1.0, 0.005, 0.0001]
+  spawn_pos: [0.0, 0.0, 0.82]
+
+interface:
+  gym:
+    enabled: false
+  ros2:
+    enabled: false
+
+render: true
+seed: 42

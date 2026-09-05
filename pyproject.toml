@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "g1-simulacrum"
+version = "0.1.0"
+description = "Modular MuJoCo simulation for Unitree G1 with Mid-360 LiDAR, D435i depth, and GEAR-SONIC whole-body control"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10,<3.14"
+authors = [{ name = "yojuna", email = "datamongeraami@gmail.com" }]
+keywords = ["mujoco", "unitree", "g1", "lidar", "robotics", "simulation"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3",
+]
+
+dependencies = [
+    "mujoco>=3.2",
+    "mujoco-lidar>=0.3",
+    "mujoco-menagerie",
+    "numpy>=1.24",
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# GPU LiDAR backends
+taichi = ["mujoco-lidar[taichi]"]
+jax = ["mujoco-lidar[jax]"]
+warp = ["mujoco-lidar[warp]"]
+gpu-all = ["mujoco-lidar[taichi,jax,warp]"]
+
+# GEAR-SONIC integration
+sonic = [
+    "unitree_sdk2py>=0.1",
+    "onnxruntime>=1.16",
+]
+
+# Gym interface
+gym = ["gymnasium>=0.29"]
+
+# ROS2 interface (install in a ROS2 workspace)
+# rclpy, sensor_msgs, nav_msgs, tf2_ros are ROS2 system packages
+
+# RoboCasa environments
+robocasa = [
+    "robosuite>=1.5",
+    "robocasa>=0.2",
+]
+
+# Development
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "ruff",
+    "mypy",
+]
+
+# Everything except ROS2 (which needs system install)
+all = [
+    "g1-simulacrum[gpu-all,sonic,gym,robocasa]",
+]
+
+[project.scripts]
+g1-simulacrum = "g1_simulacrum.cli:main"
+
+[project.urls]
+Repository = "https://github.com/yojuna/g1-simulacrum"
+
+[tool.hatch.build.targets.wheel]
+packages = ["g1_simulacrum"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
