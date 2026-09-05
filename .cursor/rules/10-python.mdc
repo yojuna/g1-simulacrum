@@ -14,7 +14,7 @@ magic numbers; add a config field.
 
 - Type hints on public functions and dataclasses.
 - Fail loudly (missing MJCF body, unknown controller type, missing extra).
-- Keep layers separable: model, sensors, control, interface.
+- Keep layers separable: model, sensors, control.
 - Do not prefix every type with `G1Simulacrum`. Sensors and managers stay
   domain-named.
 - Do not import `unitree_sdk2py` / GEAR-SONIC in the core path.

@@ -20,7 +20,7 @@ Naming (do not mix):
 |---------|------|
 | pip / CLI / image / GitHub | `g1-simulacrum` |
 | import / this folder | `g1_simulacrum` |
-| facade / config / gym | `G1Simulacrum`, `G1SimulacrumConfig`, `G1SimulacrumEnv` |
+| facade / config | `G1Simulacrum`, `G1SimulacrumConfig` |
 
 Domain types keep domain names (`Mid360Lidar`, `SensorManager`). Git: `30-git.mdc`.
 Runtime: `40-docker-tooling.mdc` — no host `.venv`.
