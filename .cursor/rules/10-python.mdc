@@ -17,8 +17,7 @@ magic numbers; add a config field.
 - Keep layers separable: model, sensors, control, interface.
 - Do not prefix every type with `G1Simulacrum`. Sensors and managers stay
   domain-named.
-- Do not import `unitree_sdk2py` / GEAR-SONIC in the core path. Optional
-  extras are fine until the architecture rewrite removes them.
+- Do not import `unitree_sdk2py` / GEAR-SONIC in the core path.
 
 ```python
 # ❌ BAD

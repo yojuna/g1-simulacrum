@@ -1,10 +1,12 @@
 # g1-simulacrum
 
-Sensorized Unitree G1 simulation in MuJoCo: 29-DoF model, Livox Mid-360, RealSense D435i, and IMU.
+Sensorized Unitree G1 simulation in MuJoCo: 29-DoF EDU body, Dex3-1 hands by default (controller later), Livox Mid-360, RealSense D435i, pelvis and torso IMUs, 500 Hz PD or torque loop.
 
-This is an early prototype. The public import is `g1_simulacrum`; the distribution name is `g1-simulacrum`. Architecture notes live in [`ARCHITECTURE.md`](ARCHITECTURE.md) and will be rewritten before the implementation is treated as stable.
+This is an early prototype. The public import is `g1_simulacrum`; the distribution name is `g1-simulacrum`.
 
-Runtime is a Docker image (not a host venv). See [`docs/docker_usage.md`](docs/docker_usage.md).
+- Design decisions: [`ARCHITECTURE.md`](ARCHITECTURE.md) (normative).
+- Compiled hardware facts and citations: [`wiki/`](wiki/README.md).
+- Runtime is Docker, not a host venv: [`docs/docker_usage.md`](docs/docker_usage.md).
 
 ```bash
 cd docker

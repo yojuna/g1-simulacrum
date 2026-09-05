@@ -24,7 +24,7 @@ Precedence: Team > Project (`.cursor/rules/`) > User rules. Agent Chat only.
 
 **Token hygiene:** keep always-on files small. Push detail into glob-scoped
 files. Do not paste architecture drafts into always-on rules — point at
-`ARCHITECTURE.md` / `docs/`.
+`ARCHITECTURE.md` / `wiki/` / `docs/`.
 
 Dropped from weltmodelle on purpose: JEPA research discipline, experiment
 campaigns, parent/submodule git.
@@ -53,13 +53,14 @@ Good triggers:
 **Plan first, then diff.** Beyond a one-file tweak, ask for a short plan
 and approve it before code.
 
-**Specs before implementation.** Docker is in place (`docker/run.sh`). The
-next real work is rewriting `ARCHITECTURE.md` and writing `docs/` specs
-(including decoupling SONIC). Do not “just fix” `SonicBridge` in place if
-the spec will remove it.
+**Specs before implementation.** `ARCHITECTURE.md` is normative for design.
+`wiki/` is the cited hardware fact book. Numbers in code must match both.
+Implement that core (pinned MJCF includes, PD/passthrough, sensors). Do not
+add SONIC, ROS2, or RoboCasa into core. Do not “just fix” `SonicBridge` —
+it is out of the plan.
 
 **Ask, don’t guess.** Joint order, frames, MuJoCo depth units, mount poses →
-stop and ask.
+read `wiki/`, then ask if the wiki has no citation.
 
 **Plain language.** Short sentences. Jargon is for named quantities
 (Mid-360, D435i, `qpos`), not style.
