@@ -43,14 +43,15 @@ wait_running() {
 
 ensure_up() {
   local build_flag="${1:-}"
+  if [[ "$build_flag" == "--build" ]]; then
+    docker compose up -d --build
+    wait_running
+    return
+  fi
   if is_running; then
     return 0
   fi
-  if [[ "$build_flag" == "--build" ]]; then
-    docker compose up -d --build
-  else
-    docker compose up -d
-  fi
+  docker compose up -d
   wait_running
 }
 

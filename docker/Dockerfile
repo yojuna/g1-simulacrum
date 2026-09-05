@@ -83,5 +83,12 @@ COPY docker/entrypoint.sh /opt/g1/entrypoint.sh
 RUN chmod +x /opt/g1/entrypoint.sh
 
 WORKDIR /workspace
+
+# NVIDIA Warp for mujoco-lidar. Own layer so gym/dev + menagerie stay cached.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    UV_HTTP_TIMEOUT=900 \
+    uv pip install --python /opt/venv/bin/python "mujoco-lidar[warp]" \
+    && chmod -R a+rX /opt/venv
+
 ENTRYPOINT ["/opt/g1/entrypoint.sh"]
 CMD ["bash"]
