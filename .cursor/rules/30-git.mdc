@@ -1,0 +1,38 @@
+---
+description: Single-repo git layout, remotes, and local yojuna identity
+alwaysApply: true
+---
+
+# Git
+
+One repository. Root is this directory. Do not `git init` in `ws_simulacra/`
+or `src/`. Do not treat the Cursor workspace (`/home/aj/code`) as this repo.
+
+| Remote | URL |
+|--------|-----|
+| `origin` | `git@github.com:yojuna/g1-simulacrum.git` |
+
+Integration branch: **`main`**. Topic branches: `31-git-hygiene.mdc`.
+
+## Local identity (this repo only)
+
+Already set. **Never** `git config --global`. Host default stays
+`a.chakraborty` / haverboecker.
+
+```
+user.name  = yojuna
+user.email = datamongeraami@gmail.com
+core.sshCommand = ssh -i ~/.ssh/yojuna -o IdentitiesOnly=yes
+```
+
+`Host github.com` in `~/.ssh/config` is a different account. Pushes to
+`yojuna/*` must use this repo’s `core.sshCommand`.
+
+## Do not
+
+- `git push` unless asked.
+- Amend, force-push, or skip hooks unless asked.
+- Commit `.env`, checkpoints, `docker/home/`, or a host `.venv`.
+- Use the haverboecker identity on commits here.
+
+Git itself runs on the host. Python runtime is Docker (`40-docker-tooling.mdc`).

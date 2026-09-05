@@ -1,0 +1,38 @@
+---
+description: Python conventions for the g1_simulacrum package
+globs: ["**/*.py"]
+alwaysApply: false
+---
+
+# Python
+
+Import `g1_simulacrum`. Facade class is `G1Simulacrum`. Config is Pydantic
+(`G1SimulacrumConfig`) loaded from YAML under `configs/`. Do not scatter new
+magic numbers; add a config field.
+
+## Style
+
+- Type hints on public functions and dataclasses.
+- Fail loudly (missing MJCF body, unknown controller type, missing extra).
+- Keep layers separable: model, sensors, control, interface.
+- Do not prefix every type with `G1Simulacrum`. Sensors and managers stay
+  domain-named.
+- Do not import `unitree_sdk2py` / GEAR-SONIC in the core path. Optional
+  extras are fine until the architecture rewrite removes them.
+
+```python
+# ❌ BAD
+from g1_sim_stack import G1SimRobot
+q = data.qpos[7:36]  # unexplained slice, no config
+
+# ✅ GOOD
+from g1_simulacrum import G1Simulacrum, G1SimulacrumConfig
+sim = G1Simulacrum.from_config("configs/default.yaml")
+```
+
+## Tests and runtime
+
+Run Python only via `docker/run.sh` once it exists (`40-docker-tooling.mdc`).
+Never host/system Python or a repo `.venv`. Add a focused test for nontrivial
+numerics (noise models, z-buffer conversion, joint indexing) rather than
+trusting by inspection.

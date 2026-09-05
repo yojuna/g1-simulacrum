@@ -1,0 +1,48 @@
+---
+description: Project identity, layout, scope, and working agreement
+alwaysApply: true
+---
+
+# Project: g1-simulacrum
+
+Sensorized Unitree G1 in MuJoCo (29-DoF, Mid-360, D435i, IMU). Git root is
+**this directory** (`…/ws_simulacra/src/g1_simulacrum`). `ws_simulacra/` and
+`src/` are holding folders, not repos.
+
+**Not GEAR-SONIC.** Whole-body control lives in
+`GR00T-WholeBodyControl`. This package should stay a drop-in sensorized G1
+that other stacks can compose with. Do not grow a SONIC runtime into core.
+
+Naming (do not mix):
+
+| Surface | Form |
+|---------|------|
+| pip / CLI / image / GitHub | `g1-simulacrum` |
+| import / this folder | `g1_simulacrum` |
+| facade / config / gym | `G1Simulacrum`, `G1SimulacrumConfig`, `G1SimulacrumEnv` |
+
+Domain types keep domain names (`Mid360Lidar`, `SensorManager`). Git: `30-git.mdc`.
+Runtime: `40-docker-tooling.mdc` — no host `.venv`.
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `g1_simulacrum/` | Import package |
+| `configs/` | YAML, validated by Pydantic |
+| `docs/` | Implementation specs (normative when present) |
+| `ARCHITECTURE.md` | Architecture (rewrite before treating code as stable) |
+| `docker/` | GPU container (`run.sh`) |
+| `examples/` | Runnable demos |
+| `tests/` | Tests, run in the image |
+
+This tree is an early prototype. Specs win over code. Do not invent layers
+the spec dropped. Keep the package lean.
+
+## Working agreement
+
+- Before multi-file changes or a refactor, state a short plan and wait.
+- Never add a dependency without asking (image packages → Dockerfile).
+- When a convention is ambiguous, ask. Prefer editing existing files.
+- Write in short, plain sentences. The human should be able to repeat the claim.
+- Rules grow from mistakes: if the user undoes something, encode it here.

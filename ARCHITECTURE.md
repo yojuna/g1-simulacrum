@@ -1,6 +1,10 @@
 # g1-simulacrum — Architecture
 
-**A modular MuJoCo simulation package for the Unitree G1 humanoid with full sensor suite and GEAR-SONIC whole-body control integration.**
+**A modular MuJoCo simulation package for the Unitree G1 humanoid with a full sensor suite.**
+
+This document is the original prototype design and is **ahead of the code**. A rewrite is planned (including keeping GEAR-SONIC out of this package). Until then, treat the layers below as intent, not a file inventory.
+
+Runtime is the GPU container in `docker/` — always `docker/run.sh`, never a host venv. See [`docs/docker_usage.md`](docs/docker_usage.md). Compose has **no** SONIC sidecar; that stack lives in `GR00T-WholeBodyControl`.
 
 ## Problem
 
@@ -345,17 +349,19 @@ g1_simulacrum/
 │   ├── 05_rl_training.py           # RL policy training with Gym API
 │   └── 06_sensor_visualization.py  # Visualize all sensor outputs
 │
-├── tests/
-│   ├── test_model_loading.py
-│   ├── test_sensors.py
-│   ├── test_sonic_bridge.py
-│   ├── test_environments.py
-│   └── test_gym_env.py
+├── tests/                          # (placeholder; run via docker/run.sh)
+│
+├── docs/
+│   └── docker_usage.md             # How to run the GPU container
+│
+├── .cursor/rules/                  # Project Cursor rules
 │
 └── docker/
-    ├── Dockerfile                  # Full stack with ROS2
-    ├── Dockerfile.headless         # Headless training
-    └── docker-compose.yaml         # Multi-container (sim + SONIC deploy)
+    ├── Dockerfile                  # CUDA 12.6 + Python 3.10 + MuJoCo
+    ├── compose.yaml                # named container g1-simulacrum
+    ├── run.sh                      # only supported entry: compose exec
+    ├── entrypoint.sh
+    └── README.md
 ```
 
 ---
@@ -483,11 +489,15 @@ interface:
 
 ## Dependency Matrix
 
+Install extras via `pyproject.toml`. Runtime Python lives in the image
+(`/opt/venv`); Menagerie is cloned to `/opt/mujoco_menagerie`, not pip.
+
 | Dependency          | Version     | Required | Purpose                   |
 |---------------------|-------------|----------|---------------------------|
 | `mujoco`           | ≥3.2        | Yes      | Physics engine             |
 | `mujoco-lidar`     | ≥0.3        | Yes      | Mid-360 LiDAR simulation   |
-| `mujoco_menagerie` | latest      | Yes      | G1 and D435i MJCF models   |
+| `scipy`            | ≥1.10       | Yes      | Sensor noise models        |
+| `mujoco_menagerie` | git clone   | Yes      | G1 MJCF (image, not PyPI)  |
 | `numpy`            | ≥1.24       | Yes      | Array operations           |
 | `pydantic`         | ≥2.0        | Yes      | Config validation          |
 | `gymnasium`        | ≥0.29       | Optional | Gym API wrapper            |
