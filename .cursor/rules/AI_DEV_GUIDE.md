@@ -56,8 +56,8 @@ and approve it before code.
 **Specs before implementation.** `ARCHITECTURE.md` is normative for design.
 `wiki/` is the cited hardware fact book. Numbers in code must match both.
 Implement that core (pinned MJCF includes, PD/passthrough, sensors). Do not
-add SONIC, ROS2, or RoboCasa into core. Do not “just fix” `SonicBridge` —
-it is out of the plan.
+add SONIC, ROS2, or RoboCasa into core. `SonicBridge` was deleted; do not
+bring it back.
 
 **Ask, don’t guess.** Joint order, frames, MuJoCo depth units, mount poses →
 read `wiki/`, then ask if the wiki has no citation.

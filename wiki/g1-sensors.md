@@ -87,7 +87,9 @@ and yaw the optical frame 180°. Keep Unitree; the Livox flower will still
 look like a Mid-360, with X-forward consistent with `livox_frame`.
 
 Also copy discoverse’s **self-hit** practice: exclude `torso_link` (head
-mesh lives there) so rays are not eaten by the skull.
+mesh lives there) so rays are not eaten by the skull. The cosmetic Mid-360
+cylinder is geom **group 4**; `MjLidarWrapper` sets `geomgroup[4]=0` so
+rays skip that shell.
 
 ## Four IMUs
 
@@ -165,4 +167,12 @@ Hardware can do 90 fps depth; say so in config comments.
 
 MuJoCo cameras are **pinhole**. D435i depth is **stereo**. Separate MJCF
 cameras: depth `fovy="58"` (Intel V), RGB `fovy="42"`. Do not render both
-from one camera. See [sim-fidelity.md](sim-fidelity.md).
+from one camera.
+
+Unitree `d435_link` is a ROS camera_link: **+X** forward, +Z up. MuJoCo
+cameras default to looking along **+Z**. Both cameras use
+`xyaxes="0 -1 0 0 0 1"` so they look along body +X (the 47.6° URDF pitch
+then aims at the floor). On MuJoCo 3.12, depth from
+`Renderer.enable_depth_rendering()` is already **metric metres**.
+
+See [sim-fidelity.md](sim-fidelity.md).

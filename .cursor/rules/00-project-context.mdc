@@ -38,8 +38,9 @@ Runtime: `40-docker-tooling.mdc` — no host `.venv`.
 | `examples/` | Runnable demos |
 | `tests/` | Tests, run in the image |
 
-This tree is an early prototype. Specs win over code. Do not invent layers
-the spec dropped. Keep the package lean.
+This tree is the core v1 package (pinned MJCF, facade, inspect viewer).
+Specs still win over code. Do not invent layers the spec dropped. Keep
+the package lean.
 
 ## Working agreement
 

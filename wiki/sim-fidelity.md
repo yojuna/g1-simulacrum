@@ -26,13 +26,18 @@ If a later Unitree URDF revises a pose, bump the pin; do not lerp in Python.
 - Not: real photonics, multi-return, 100 klx sunlight, IP67 housing, PTP.
 - Range 1σ may start at Livox’s ≤ 2 cm @ 10 m; dropout is a **placeholder**
   until we have robot logs.
-- CPU raycast first. GPU backends are extras.
+- CPU raycast first. YAML default is `backend: cpu`. GPU/Warp is an image
+  extra, not the package default.
+- Cosmetic lidar/camera housings are geom **group 4**; rays skip that group
+  so they are not eaten by a 3 cm shell. Also `bodyexclude=torso_link`.
 
 ### D435i
 
-- Two pinhole cameras (depth fovy 58°, RGB fovy 42°), 30 Hz, metric depth
-  from the MuJoCo renderer (document z-buffer vs metric for the image’s
-  MuJoCo version).
+- Two pinhole cameras (depth fovy 58°, RGB fovy 42°), 30 Hz. Cameras look
+  along `d435i_link` **+X** (`xyaxes="0 -1 0 0 0 1"`), matching URDF
+  camera-link, not MuJoCo’s default +Z (sky).
+- On **MuJoCo 3.12**, `Renderer.enable_depth_rendering()` already returns
+  **metric metres**. Do not apply the older OpenGL z-buffer formula again.
 - Not: stereo matching, IR projector, rolling-shutter RGB, Intel’s <2% @ 2 m
   as a guaranteed sim error, 90 fps.
 - Useful depth band in config: 0.3–3 m. Do not advertise 0.1–10 m as equally
@@ -59,7 +64,7 @@ If a later Unitree URDF revises a pose, bump the pin; do not lerp in Python.
 
 1. Mount XML matches the URDF table to the last digit we copied.
 2. Lidar rays are not emitted at `torso_link` origin; site frame is Unitree, not discoverse’s Y-flip.
-3. Camera parent is `torso_link`, not a made-up `head_link`.
+3. Camera parent is `torso_link`, not a made-up `head_link`. Cameras look along body +X.
 4. `control_hz: 500`, not 200.
 5. Hands attach at Unitree palm joints; Dex3 is not folded into the 29.
 6. README / Architecture / wiki numbers are the same.

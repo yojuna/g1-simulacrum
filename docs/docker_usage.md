@@ -6,10 +6,11 @@ fights the fixed name `g1-simulacrum`).
 
 ## Image
 
-`g1-simulacrum:local` — CUDA 12.6, Python 3.10, MuJoCo, mujoco-lidar (CPU),
-gymnasium, pytest/ruff/mypy, and a clone of `mujoco_menagerie` at
-`/opt/mujoco_menagerie`. The venv is **`/opt/venv` inside the image**.
-Startup does not run pip.
+`g1-simulacrum:local` — CUDA 12.6, Python 3.10, MuJoCo, mujoco-lidar
+(CPU default; Warp extra layer), gymnasium, pytest/ruff/mypy, and a clone
+of `mujoco_menagerie` at `/opt/mujoco_menagerie`. The venv is
+**`/opt/venv` inside the image**. Startup does not run pip. Core YAML still
+uses `sensors.mid360.backend: cpu`.
 
 MuJoCo viewers: **EGL** offscreen on the NVIDIA GPU, **GLFW** on the host X
 display (Intel). Do not force `__GLX_VENDOR_LIBRARY_NAME=nvidia`.
@@ -47,9 +48,13 @@ From `docker/`:
 If the container was already up (`./run.sh up`), a later `./run.sh python …`
 does **not** stop it — call `./run.sh stop` when finished.
 
+`./run.sh up --build` **always** rebuilds, even when the container is already
+running. Without `--build`, a running container is reused.
+
 ```bash
 ./run.sh python -c "import g1_simulacrum, mujoco; print(g1_simulacrum.__version__)"
 ./run.sh python -c "import mujoco_menagerie; print(mujoco_menagerie.__path__)"
+./run.sh python examples/01_empty_arena.py
 ```
 
 Pin MJCF (authoring only). Default is offline against vendored
@@ -62,7 +67,8 @@ the named XML, URDF, and STL files from GitHub raw (not the unitree_ros tarball)
 ```
 
 **Don't** `docker compose down` unless you mean to delete the container
-(image and host files stay). Don't `up --build` every session.
+(image and host files stay). Don't `up --build` every session — only after
+Dockerfile or `pyproject.toml` extras change.
 
 To change Python packages, edit `pyproject.toml` (and the Dockerfile if the
 install extras change) and `./run.sh up --build` once.
