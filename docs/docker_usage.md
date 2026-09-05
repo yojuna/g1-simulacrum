@@ -52,6 +52,15 @@ does **not** stop it — call `./run.sh stop` when finished.
 ./run.sh python -c "import mujoco_menagerie; print(mujoco_menagerie.__path__)"
 ```
 
+Pin MJCF (authoring only). Default is offline against vendored
+`g1_simulacrum/model/mjcf/upstream/` + `assets/`. `--fetch` downloads **only**
+the named XML, URDF, and STL files from GitHub raw (not the unitree_ros tarball):
+
+```bash
+./run.sh python scripts/pin_mjcf.py
+./run.sh python scripts/pin_mjcf.py --fetch
+```
+
 **Don't** `docker compose down` unless you mean to delete the container
 (image and host files stay). Don't `up --build` every session.
 
