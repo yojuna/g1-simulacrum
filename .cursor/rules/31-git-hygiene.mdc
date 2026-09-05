@@ -14,7 +14,7 @@ One commit = one reviewable decision. Stage **named paths** only.
 
 Split these; never mix in one commit:
 
-- package code vs `docs/` / `ARCHITECTURE.md` vs `docker/` vs `.cursor/rules/`
+- package code vs `docs/` / `wiki/` / `ARCHITECTURE.md` vs `docker/` vs `.cursor/rules/`
 - a failing test fix vs a new example
 - a rename vs a behaviour change
 
