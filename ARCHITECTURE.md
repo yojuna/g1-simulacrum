@@ -168,7 +168,9 @@ Four IMU models: pelvis, torso, Mid-360, D435i. Do not share one noise block.
 
 The compiler is the composer. The **runtime** loader does not mutate XML
 (`from_xml_path` only). Authoring (`scripts/pin_mjcf.py`) uses named
-ElementTree edits; that script is not on the step path.
+ElementTree edits: compose the robot, patch mount `pos`/`euler` from URDF.
+That script is not on the step path. It does not emit mounts or scenes as
+strings. Mount fragments and floor/inspect scenes are authored XML.
 
 ### Files
 
@@ -178,26 +180,24 @@ Authoring: `docker/run.sh python scripts/pin_mjcf.py` (optional `--fetch`).
 
 | File | Role |
 |------|------|
-| `g1_simulacrum/model/mjcf/g1_29dof.xml` | Composed Dex3 robot (body + mounts + hands). Copy, not a nested include of a full `<mujoco>` document |
-| `g1_simulacrum/model/mjcf/g1_29dof_none.xml` | Same body+sensors, rubber hands |
-| `g1_simulacrum/model/mjcf/mounts/mid360.xml` | Lidar body at URDF pose, site `mid360`, group-4 visual cylinder, device IMU site |
-| `g1_simulacrum/model/mjcf/mounts/d435i.xml` | Camera body at URDF pose; **two** cameras looking along camera-link **+X** (depth fovy 58°, RGB fovy 42°) |
-| `g1_simulacrum/model/mjcf/mounts/imus.xml` | Accel/gyro for pelvis, torso, Mid-360, D435i sites |
+| `g1_simulacrum/model/mjcf/g1_robot.xml` | Composed Dex3 robot (body + mounts + hands). Pin writes this; scenes include it |
+| `g1_simulacrum/model/mjcf/g1_robot_none.xml` | Same body+sensors, rubber hands |
+| `g1_simulacrum/model/mjcf/mounts/mid360.xml` | Authored lidar body; pin patches `pos`/`euler` from URDF. Site `mid360`, group-4 visual cylinder, device IMU site |
+| `g1_simulacrum/model/mjcf/mounts/d435i.xml` | Authored camera body; pin patches `pos`/`euler`. **Two** cameras looking along camera-link **+X** (depth fovy 58°, RGB fovy 42°) |
+| `g1_simulacrum/model/mjcf/mounts/imus.xml` | Device accel/gyro (Mid-360, D435i). Pelvis/torso IMU sites stay in the Unitree body snapshot |
 | `g1_simulacrum/model/mjcf/end_effectors/dex3/{left,right}.xml` | Dex3-1 subtree + actuators, snapshot from Unitree `g1_29dof_with_hand_rev_1_0` |
 | `g1_simulacrum/model/mjcf/end_effectors/none/{left,right}.xml` | Rubber-hand visual only (from `g1_29dof_rev_1_0`) |
-| `g1_simulacrum/model/mjcf/g1_robot.xml` | Default robot file the scenes include (`g1_29dof.xml` contents) |
-| `g1_simulacrum/model/mjcf/g1_robot_none.xml` | Rubber-hand robot file |
-| `g1_simulacrum/model/mjcf/g1_sensorized.xml` | Default complete model: `g1_robot.xml` + floor |
-| `g1_simulacrum/model/mjcf/g1_sensorized_none.xml` | Floor scene with rubber hands |
-| `g1_simulacrum/model/mjcf/g1_inspect.xml` | Same include + coloured boxes (inspect viewer). Same directory so `meshdir=assets` resolves |
+| `g1_simulacrum/model/mjcf/g1_sensorized.xml` | Authored floor scene: includes `g1_robot.xml` |
+| `g1_simulacrum/model/mjcf/g1_sensorized_none.xml` | Authored floor scene with rubber hands |
+| `g1_simulacrum/model/mjcf/g1_inspect.xml` | Authored inspect scene: same include + coloured boxes. Same directory so `meshdir=assets` resolves |
 
 Keep pelvis/torso IMU sites from Unitree; do not delete them when adding
 lidar/camera.
 
 Fragments (`mounts/`, `end_effectors/`) **must** be rooted at
 `<mujocoinclude>`. Nested includes of a full `<mujoco>` document duplicate
-the tree. `g1_robot.xml` is therefore a copy of the composed body, not
-`<include file="g1_29dof.xml"/>` of another complete model.
+the tree. There is one composed robot file per kit (`g1_robot.xml` /
+`g1_robot_none.xml`), not a second copy under a `g1_29dof*.xml` alias.
 
 Sensor includes go on `torso_link`:
 
@@ -354,12 +354,12 @@ balance policy. Keys **7 / 8** change length, **9** toggles. `--no-gantry`
 **Cameras:** click the 3D view, **C** cycles free → `d435i_rgb` →
 `d435i_depth` (or Rendering → Camera in the right panel). No PiP window.
 
-**Overlays:** green Mid-360, cyan D435i depth. YAML `viewer:` sets density;
-CLI `--overlay sparse|dense|full` and `--lidar-dots` / `--depth-stride`
-override. Dense default is all ~24k lidar returns and every 4th depth
-pixel. User geoms are **boxes** inited once, then only `pos` is written,
-and clouds refresh at sensor rate (not every display frame). MuJoCo has
-no point-sprite primitive. Overlay shadows/reflections are off.
+**Overlays:** green Mid-360, cyan D435i depth. CLI `--overlay sparse|dense|full`
+and `--lidar-dots` / `--depth-stride` set density (default dense: all ~24k
+lidar returns and every 4th depth pixel). Overlay knobs are example-only,
+not core YAML. User geoms are **boxes** inited once, then only `pos` is
+written, and clouds refresh at sensor rate (not every display frame). MuJoCo
+has no point-sprite primitive. Overlay shadows/reflections are off.
 
 ---
 
@@ -369,8 +369,9 @@ YAML + Pydantic (`G1SimulacrumConfig`). Core keys:
 
 ```yaml
 robot:
-  model: g1_sensorized          # pinned MJCF entry (not a Menagerie hunt)
   hands: dex3                   # dex3 | none; later: inspire, gripper, dex5
+  spawn_pos: [0.0, 0.0, 0.82]
+  spawn_quat: [1.0, 0.0, 0.0, 0.0]
 
 sensors:
   mid360: { enabled: true, backend: cpu, rate_hz: 10 }
@@ -385,24 +386,15 @@ controller:
   type: pd                      # pd | passthrough
   physics_hz: 1000
   control_hz: 500               # SDK2 G1 low-level; not 200
-
-viewer:                         # inspect overlay only; not sensor rates
-  lidar_dots: 0                 # 0 = all Mid-360 returns (~24k)
-  depth_stride: 4
-  lidar_radius: 0.006
-  depth_radius: 0.008
-
-render: true
-seed: 42
 ```
 
 `robot.hands` selects which **pinned scene XML** to compile
 (`g1_sensorized.xml` for Dex3, `g1_sensorized_none.xml` for rubber). Those
 scenes include `g1_robot.xml` / `g1_robot_none.xml`. It is not a pose patch.
 
-The core schema has no `sonic` controller, no `robocasa` environment, and
-no `ros2` interface block. `interface/gym_env.py` is an optional extra,
-not a required config key.
+The core schema has no `sonic` controller, no `robocasa` environment, no
+Gym wrapper, and no `ros2` interface block. Inspect overlay density lives
+on the example CLI, not on `G1SimulacrumConfig`.
 
 ---
 
@@ -429,19 +421,17 @@ g1_simulacrum/                    git root
     ├── cli.py                    compile + print maps
     ├── simulacrum.py
     ├── config.py
-    ├── gantry.py                 inspect ElasticBand; not the facade
+    ├── gantry.py                 ElasticBand wrench; not the facade
     ├── model/
     │   ├── joints.py             BODY_JOINT_NAMES / HAND_JOINT_NAMES
     │   ├── loader.py
     │   └── mjcf/                 pinned XML + PIN.md + upstream/ + assets/
     ├── sensors/                  base, mid360, d435i, imu, manager, noise, data_types
-    ├── controllers/
-    │   ├── base.py               body API + Dex3 hold_hands
-    │   ├── pd.py
-    │   ├── passthrough.py
-    │   └── gains.py              SDK2-cited body PD; FINGER_HOLD_*
-    └── interface/
-        └── gym_env.py            optional extra only; not the core API
+    └── controllers/
+        ├── base.py               body API + Dex3 hold_hands
+        ├── pd.py
+        ├── passthrough.py
+        └── gains.py              SDK2-cited body PD; FINGER_HOLD_*
 ```
 
 ---
@@ -456,8 +446,8 @@ Revisit only when we open that work:
   after body+sensors core is tested. No DDS in core.
 - **Other hand kits** — Inspire, Dex5, parallel gripper: new
   `end_effectors/<kit>/` + `g1_robot_<kit>.xml`. Same flange.
-- **Gym extra** — `interface/gym_env.py` exists as a thin optional wrapper.
-  Do not make it the core API. No padded lidar `Box` as the package default.
+- **Gym extra** — deferred. No Gym wrapper in this tree. Do not make Gym
+  the core API. No padded lidar `Box` as the package default.
 - **ROS2 extra** — topics from `Observation`, not a second robot.
 - **RoboCasa** — a scene that includes `g1_robot.xml`, or a separate project.
 - **GPU lidar backends** — Warp (and others) as a **config flag** after CPU
@@ -481,5 +471,5 @@ Revisit only when we open that work:
 | `unitree_ros` G1 | **Pinned** in `mjcf/upstream/` + `assets/` (`PIN.md`). Not an unpinned pip import |
 | Menagerie G1 | Docker clones it to `/opt/mujoco_menagerie` (`PYTHONPATH=/opt`). Runtime robot XML is the package pin, not this clone |
 
-Optional extras (`gymnasium`, GPU lidar, etc.) stay extras. `unitree_sdk2py`
+Optional extras (GPU lidar) stay extras. `unitree_sdk2py`
 is not a core dependency.

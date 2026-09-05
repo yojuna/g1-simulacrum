@@ -44,7 +44,7 @@ Green overlays are Mid-360, cyan is D435i depth. Default scene is
 | **C** | Cycle free camera → `d435i_rgb` → `d435i_depth` |
 | **7 / 8 / 9** | Gantry length down / up / toggle |
 | `--no-gantry` | Drop the elastic band (robot falls; PD is joints only) |
-| `--overlay sparse\|dense\|full` | Overlay density (YAML `viewer:` is the default) |
+| `--overlay sparse\|dense\|full` | Overlay density (default dense) |
 | `--headless` | 50 control steps, no window |
 
 The gantry is a spring-damper wrench on `pelvis`, not a weld. Overlay dots

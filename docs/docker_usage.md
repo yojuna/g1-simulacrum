@@ -7,7 +7,7 @@ fights the fixed name `g1-simulacrum`).
 ## Image
 
 `g1-simulacrum:local` — CUDA 12.6, Python 3.10, MuJoCo, mujoco-lidar
-(CPU default; Warp extra layer), gymnasium, pytest/ruff/mypy, and a clone
+(CPU default; Warp extra layer), pytest/ruff/mypy, and a clone
 of `mujoco_menagerie` at `/opt/mujoco_menagerie`. The venv is
 **`/opt/venv` inside the image**. Startup does not run pip. Core YAML still
 uses `sensors.mid360.backend: cpu`.
