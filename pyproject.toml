@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "g1-simulacrum"
 version = "0.1.0"
-description = "Modular MuJoCo simulation for Unitree G1 with Mid-360 LiDAR, D435i depth, and GEAR-SONIC whole-body control"
+description = "Sensorized Unitree G1 in MuJoCo: 29-DoF body, Dex3, Mid-360, D435i, 500 Hz PD"
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10,<3.14"
@@ -34,25 +34,8 @@ jax = ["mujoco-lidar[jax]"]
 warp = ["mujoco-lidar[warp]"]
 gpu-all = ["mujoco-lidar[taichi,jax,warp]"]
 
-# GEAR-SONIC integration
-sonic = [
-    "unitree_sdk2py>=0.1",
-    "onnxruntime>=1.16",
-]
-
-# Gym interface
 gym = ["gymnasium>=0.29"]
 
-# ROS2 interface (install in a ROS2 workspace)
-# rclpy, sensor_msgs, nav_msgs, tf2_ros are ROS2 system packages
-
-# RoboCasa environments
-robocasa = [
-    "robosuite>=1.5",
-    "robocasa>=0.2",
-]
-
-# Development
 dev = [
     "pytest>=7.0",
     "pytest-cov",
@@ -60,9 +43,8 @@ dev = [
     "mypy",
 ]
 
-# Everything except ROS2 (which needs system install)
 all = [
-    "g1-simulacrum[gpu-all,sonic,gym,robocasa]",
+    "g1-simulacrum[gpu-all,gym]",
 ]
 
 [project.scripts]

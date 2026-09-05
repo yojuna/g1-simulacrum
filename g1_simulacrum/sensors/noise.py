@@ -1,8 +1,7 @@
-"""Sensor noise models for sim-to-real transfer.
+"""Sensor noise models.
 
-These are calibrated against real sensor data from Livox Mid-360 and
-Intel RealSense D435i.  Domain randomization parameters can be tuned
-via the config.
+Datasheet 1σ starting points and labeled placeholders (Architecture).
+Not calibrated from robot logs.
 """
 
 from __future__ import annotations

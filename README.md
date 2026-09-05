@@ -15,7 +15,10 @@ cd docker
 ```
 
 ```python
-from g1_simulacrum import G1Simulacrum, G1SimulacrumConfig
+from g1_simulacrum import G1Simulacrum
 
 sim = G1Simulacrum.from_config("configs/default.yaml")
+sim.build()
+obs = sim.reset()
+obs = sim.step(obs.joint_state.position)  # (29,) body targets; None holds last
 ```
