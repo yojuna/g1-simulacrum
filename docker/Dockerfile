@@ -59,7 +59,7 @@ RUN mkdir -p g1_simulacrum \
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     UV_HTTP_TIMEOUT=900 UV_CONCURRENT_DOWNLOADS=2 \
-    uv pip install --python /opt/venv/bin/python ".[gym,dev]"
+    uv pip install --python /opt/venv/bin/python ".[dev]"
 
 # Menagerie is not a PyPI package. Import path: mujoco_menagerie (PYTHONPATH=/opt).
 RUN git clone --depth 1 https://github.com/google-deepmind/mujoco_menagerie.git \
