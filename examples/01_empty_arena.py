@@ -6,7 +6,8 @@ From ``docker/``::
 
 Green dots are Mid-360, cyan is D435i depth. Density is configurable
 (``--overlay sparse|dense|full``, or ``--lidar-dots`` / ``--depth-stride``).
-Press ``C`` to look through ``d435i_rgb`` / ``d435i_depth``.
+Press ``C`` to look through ``d435i_rgb`` / ``d435i_depth`` (viewpoint
+only). Metric depth is the colorized PiP, not the 3D view.
 
 ``--empty`` uses the floor-only default XML. ``--scene`` loads a cached
 RoboCasa dump (or any MJCF that includes ``g1_robot.xml``). ``--spawn`` /
@@ -55,6 +56,12 @@ _LIDAR_SITE = "mid360"
 _IDENTITY_MAT = np.eye(3, dtype=np.float64).reshape(9)
 _LIDAR_RGBA = np.array([0.15, 0.95, 0.25, 0.55], dtype=np.float32)
 _DEPTH_RGBA = np.array([0.15, 0.75, 0.95, 0.7], dtype=np.float32)
+_FRUSTUM_RGBA = np.array([0.95, 0.55, 0.15, 0.85], dtype=np.float32)
+_FRUSTUM_LEN = 0.18  # metres; MuJoCo's built-in frustum default is 10 m
+_PIP_W = 320
+_PIP_H = 240
+_PIP_NEAR = 0.3
+_PIP_FAR = 3.0
 
 
 @dataclass
@@ -220,6 +227,89 @@ def _paint_gantry(
         scn.ngeom += 1
 
 
+def _add_capsule(
+    scn: mujoco.MjvScene,
+    a: NDArray[np.float64],
+    b: NDArray[np.float64],
+    *,
+    radius: float,
+    rgba: NDArray[np.float32],
+) -> None:
+    if scn.ngeom >= scn.maxgeom:
+        return
+    geom = scn.geoms[scn.ngeom]
+    mujoco.mjv_initGeom(
+        geom,
+        mujoco.mjtGeom.mjGEOM_CAPSULE,
+        np.zeros(3),
+        np.zeros(3),
+        _IDENTITY_MAT,
+        rgba,
+    )
+    mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_CAPSULE, radius, a, b)
+    scn.ngeom += 1
+
+
+def _paint_depth_frustum(scn: mujoco.MjvScene, model: mujoco.MjModel, data: mujoco.MjData) -> None:
+    """Small FOV wedge at the D435i. Not MuJoCo's 10 m mjVIS_CAMERA box."""
+    cid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "d435i_depth")
+    if cid < 0:
+        return
+    fovy = float(model.cam_fovy[cid])
+    res = model.cam_resolution[cid]
+    aspect = float(res[0]) / float(res[1]) if res[1] else 4.0 / 3.0
+    z = _FRUSTUM_LEN
+    half_h = z * np.tan(np.deg2rad(fovy) * 0.5)
+    half_w = half_h * aspect
+    corners_cam = np.array(
+        [
+            [half_w, half_h, -z],
+            [-half_w, half_h, -z],
+            [-half_w, -half_h, -z],
+            [half_w, -half_h, -z],
+        ],
+        dtype=np.float64,
+    )
+    pos = data.cam_xpos[cid]
+    rot = data.cam_xmat[cid].reshape(3, 3)
+    corners = pos + corners_cam @ rot.T
+    for p in corners:
+        _add_capsule(scn, pos, p, radius=0.003, rgba=_FRUSTUM_RGBA)
+    for i in range(4):
+        _add_capsule(scn, corners[i], corners[(i + 1) % 4], radius=0.003, rgba=_FRUSTUM_RGBA)
+
+
+def _colorize_depth(depth: NDArray[np.float32]) -> NDArray[np.uint8]:
+    """RealSense-style jet: near warm, far cool, 0 = invalid black. Metric metres."""
+    ys = np.linspace(0, depth.shape[0] - 1, _PIP_H).astype(np.int32)
+    xs = np.linspace(0, depth.shape[1] - 1, _PIP_W).astype(np.int32)
+    d = np.asarray(depth[np.ix_(ys, xs)], dtype=np.float32)
+    t = np.clip((d - _PIP_NEAR) / (_PIP_FAR - _PIP_NEAR), 0.0, 1.0)
+    u = 1.0 - t
+    r = np.clip(1.5 - np.abs(4.0 * u - 3.0), 0.0, 1.0)
+    g = np.clip(1.5 - np.abs(4.0 * u - 2.0), 0.0, 1.0)
+    b = np.clip(1.5 - np.abs(4.0 * u - 1.0), 0.0, 1.0)
+    rgb = np.stack(
+        [(255.0 * r).astype(np.uint8), (255.0 * g).astype(np.uint8), (255.0 * b).astype(np.uint8)],
+        axis=-1,
+    )
+    rgb[d <= 0.0] = 0
+    return rgb
+
+
+def _paint_depth_pip(viewer: mujoco.viewer.Handle, frame: DepthFrame | None) -> None:
+    """HUD depth image. Simulate's 3D view is always shaded RGB, even on d435i_depth."""
+    if frame is None:
+        viewer.clear_images()
+        return
+    vp = viewer.viewport
+    if vp is None or int(vp.width) < _PIP_W + 16 or int(vp.height) < _PIP_H + 16:
+        return
+    rect = mujoco.MjrRect(int(vp.width) - _PIP_W - 12, 12, _PIP_W, _PIP_H)
+    image = np.ascontiguousarray(_colorize_depth(frame.depth))
+    viewer.set_images((rect, image))
+
+
 def _paint(
     viewer: mujoco.viewer.Handle,
     model: mujoco.MjModel,
@@ -261,6 +351,7 @@ def _paint(
             )
         drawn[0], drawn[1] = n_l, n_d
     scn.ngeom = drawn[0] + drawn[1]
+    _paint_depth_frustum(scn, model, data)
     if gantry is not None and gantry.enable:
         _paint_gantry(scn, data.xpos[attach_id], gantry)
 
@@ -274,9 +365,11 @@ def _configure_viewer(
     viewer.cam.lookat[:] = lookat
     for i in range(len(viewer.opt.sitegroup)):
         viewer.opt.sitegroup[i] = 1
+    # Off: MuJoCo draws a 10 m frustum box when cameras have resolution>1.
+    # The D435i housing geom (group 4) plus a short overlay wedge are enough.
     cam_flag = getattr(mujoco.mjtVisFlag, "mjVIS_CAMERA", None)
     if cam_flag is not None:
-        viewer.opt.flags[cam_flag] = True
+        viewer.opt.flags[cam_flag] = False
     # User overlay is thousands of tiny boxes; shadows/reflections dominate GPU time.
     shadow = getattr(mujoco.mjtRndFlag, "mjRND_SHADOW", None)
     refl = getattr(mujoco.mjtRndFlag, "mjRND_REFLECTION", None)
@@ -332,9 +425,10 @@ def _run_viewer(
         + f"Overlay: lidar_dots={'all' if overlay.lidar_dots == 0 else overlay.lidar_dots}  "
         f"depth_stride={overlay.depth_stride}  "
         f"radii lidar={overlay.lidar_radius} depth={overlay.depth_radius}\n"
-        "Viewer: green = Mid-360, cyan = D435i depth.\n"
+        "Viewer: green = Mid-360, cyan = unprojected depth, orange = D435i FOV.\n"
+        "Bottom-right PiP is colorized metric depth (0.3–3 m), not the 3D view.\n"
         "Click the 3D view so it has focus, then press C to cycle\n"
-        "free cam → d435i_rgb → d435i_depth (looks through the RealSense).\n"
+        "free cam → d435i_rgb → d435i_depth (viewpoint only; still a shaded scene).\n"
         "Or: right-hand panel tab → Rendering → Camera dropdown.\n"
         "Close the window to exit."
     )
@@ -453,6 +547,7 @@ def _run_viewer(
                     drawn=drawn,
                 )
                 clouds_dirty = False
+                _paint_depth_pip(viewer, last_depth)
                 viewer.sync()
                 now = time.perf_counter()
                 if now - last_print >= 0.5:

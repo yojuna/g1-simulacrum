@@ -268,12 +268,15 @@ joint name map (29), and the hand joint name map (14 for Dex3, empty for
   `bodyexclude=torso_link` and skip geom **group 4** (cosmetic lidar/camera
   housings) so rays hit the floor and scene, not a 3 cm shell. Default
   backend is **CPU**.
-- `D435iCamera` — MuJoCo renderer: depth camera **fovy 58°** (87° H at 4:3
-  is the RealSense depth FOV), RGB camera **fovy 42°**. Cameras look along
-  `d435i_link` **+X**. Do not render both from one camera. This is a pinhole
-  stand-in for stereo (see wiki). On **MuJoCo 3.12**,
-  `Renderer.enable_depth_rendering()` already returns **metric metres**;
-  do not apply the older OpenGL z-buffer formula a second time.
+- `D435iCamera` — MuJoCo renderer: depth camera **fovy 58°**, RGB camera
+  **fovy 42°** (Intel vertical FOVs). Horizontal 87° / 69° is the RealSense
+  **stereo / 16:9** spec, not a 4:3 pinhole (640×480 with fovy 58° is
+  ~73° H). Cameras look along `d435i_link` **+X**. Do not render both from
+  one camera. This is a pinhole stand-in for stereo (see wiki). On
+  **MuJoCo 3.12**, `Renderer.enable_depth_rendering()` already returns
+  **metric metres**; do not apply the older OpenGL z-buffer formula a
+  second time. Simulate's 3D view is always shaded RGB; the inspect
+  example colorizes metres in a PiP.
 - `ImuSensor` — **four** named pairs: `imu_in_pelvis`, `imu_in_torso`,
   Mid-360, D435i. Core `SensorBundle` exposes pelvis (primary) and torso
   (secondary). Device IMUs are optional fields.
@@ -367,9 +370,13 @@ the crane. `--spawn` / `--yaw` set the start pose. `--no-gantry` skips
 the crane.
 
 **Cameras:** click the 3D view, **C** cycles free → `d435i_rgb` →
-`d435i_depth` (or Rendering → Camera in the right panel). No PiP window.
+`d435i_depth` (or Rendering → Camera in the right panel). That only
+changes the **viewpoint**; Simulate always shades RGB. Metric depth is
+the offscreen `Renderer` (cyan unproject + colorized PiP, 0.3–3 m jet).
+`mjVIS_CAMERA` stays off — MuJoCo's default frustum is 10 m and looks
+like a giant box. A 18 cm orange wedge shows the depth FOV instead.
 
-**Overlays:** green Mid-360, cyan D435i depth. CLI `--overlay sparse|dense|full`
+**Overlays:** green Mid-360, cyan D435i depth, orange camera FOV. CLI `--overlay sparse|dense|full`
 and `--lidar-dots` / `--depth-stride` set density (default dense: all ~24k
 lidar returns and every 4th depth pixel). Overlay knobs are example-only,
 not core YAML. User geoms are **boxes** inited once, then only `pos` is

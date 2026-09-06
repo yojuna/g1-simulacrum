@@ -28,7 +28,7 @@ obs = sim.step(obs.joint_state.position)  # (29,) body targets; None holds last
 
 ## Inspect viewer
 
-![G1 inspect viewer with Mid-360 (green), D435i depth (cyan), and camera frustum](docs/inspect_viewer.png)
+![G1 inspect viewer with Mid-360 (green), D435i depth (cyan), and FOV wedge](docs/inspect_viewer.png)
 
 GLFW on the host X display. From `docker/`:
 
@@ -41,7 +41,7 @@ Green overlays are Mid-360, cyan is D435i depth. Default scene is
 
 | Key / flag | Effect |
 |------------|--------|
-| **C** | Cycle free camera → `d435i_rgb` → `d435i_depth` |
+| **C** | Cycle free camera → `d435i_rgb` → `d435i_depth` (viewpoint; depth is the PiP) |
 | **Numpad 8 / 2 / 4 / 6** | Crane trolley XY in current heading |
 | **Numpad 7 / 9** | Change heading lock ±5° (torso stays facing that yaw) |
 | **Numpad + / − / 5** | Shorten cable / lengthen (lower) / toggle crane |
@@ -53,5 +53,6 @@ Green overlays are Mid-360, cyan is D435i depth. Default scene is
 
 The crane is a Unitree-style overhead cable on `torso_link` (hook at
 `z = 2`) plus a GEAR-SONIC heading lock. Body PD stays on and holds the
-spawn pose.
-Overlay dots are cheap boxes, refreshed at sensor rate.
+spawn pose. Bottom-right PiP is colorized D435i depth (0.3–3 m); **C**
+only changes the 3D viewpoint. Overlay dots are cheap boxes, refreshed
+at sensor rate.

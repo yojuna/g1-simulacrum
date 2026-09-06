@@ -166,14 +166,25 @@ retrieved via Intel’s published tech specs (2026-09-05).
 This package: RGB and depth at **30 Hz**, 640 × 480, to keep the sim cheap.
 Hardware can do 90 fps depth; say so in config comments.
 
-MuJoCo cameras are **pinhole**. D435i depth is **stereo**. Separate MJCF
-cameras: depth `fovy="58"` (Intel V), RGB `fovy="42"`. Do not render both
-from one camera.
+MuJoCo cameras are **pinhole**. D435i depth is **stereo** (D430 module,
+~50 mm baseline, IR projector). Separate MJCF cameras: depth `fovy="58"`
+(Intel **vertical** FOV), RGB `fovy="42"`. Do not render both from one
+camera. Intel’s **87° × 58°** depth FOV is a ~16:9 stereo spec; a 4:3
+640×480 pinhole with fovy 58° is about **73° H**, not 87°.
 
 Unitree `d435_link` is a ROS camera_link: **+X** forward, +Z up. MuJoCo
 cameras default to looking along **+Z**. Both cameras use
 `xyaxes="0 -1 0 0 0 1"` so they look along body +X (the 47.6° URDF pitch
 then aims at the floor). On MuJoCo 3.12, depth from
-`Renderer.enable_depth_rendering()` is already **metric metres**.
+`Renderer.enable_depth_rendering()` is already **metric metres** (OpenGL
+range, not stereo matching).
+
+The inspect viewer **3D pane is not a depth image**. Simulate always
+shades RGB; **C** only changes viewpoint. Metric depth is the offscreen
+renderer: cyan unprojected points in the world, plus a colorized PiP
+(0.3–3 m jet, invalid = black). MuJoCo’s built-in camera frustum is 10 m
+when `mjVIS_CAMERA` is on (`resolution>1`); the example leaves that flag
+off and draws an ~18 cm FOV wedge instead. Housing geom is ~90×26×26 mm
+(Intel module 90×25×25 mm).
 
 See [sim-fidelity.md](sim-fidelity.md).

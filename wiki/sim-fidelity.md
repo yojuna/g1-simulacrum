@@ -36,10 +36,16 @@ If a later Unitree URDF revises a pose, bump the pin; do not lerp in Python.
 - Two pinhole cameras (depth fovy 58°, RGB fovy 42°), 30 Hz. Cameras look
   along `d435i_link` **+X** (`xyaxes="0 -1 0 0 0 1"`), matching URDF
   camera-link, not MuJoCo’s default +Z (sky).
+- Intel depth FOV **87° × 58°** is stereo / ~16:9; our 640×480 pinhole
+  with fovy 58° is ~73° H. RGB 69° × 42° similarly becomes ~54° H at 4:3.
 - On **MuJoCo 3.12**, `Renderer.enable_depth_rendering()` already returns
   **metric metres**. Do not apply the older OpenGL z-buffer formula again.
+- The inspect 3D view is **not** that depth buffer: Simulate always draws
+  a shaded scene. Colorize metres for a depth image (example PiP, 0.3–3 m).
+  `mjVIS_CAMERA` stays off (default frustum is 10 m). Overlay: 18 cm FOV
+  wedge + group-4 housing (~90×26×26 mm).
 - Not: stereo matching, IR projector, rolling-shutter RGB, Intel’s <2% @ 2 m
-  as a guaranteed sim error, 90 fps.
+  as a guaranteed sim error, 90 fps, 50 mm stereo baseline.
 - Useful depth band in config: 0.3–3 m. Do not advertise 0.1–10 m as equally
   good.
 
