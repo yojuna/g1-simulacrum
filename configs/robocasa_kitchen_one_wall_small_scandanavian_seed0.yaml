@@ -1,0 +1,4 @@
+# Spawn for a cached RoboCasa dump. Other keys use G1SimulacrumConfig defaults.
+robot:
+  spawn_pos: [3.123805, -0.860000, 0.820000]
+  spawn_quat: [1.0, 0.0, 0.0, 0.0]

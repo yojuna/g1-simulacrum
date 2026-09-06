@@ -66,6 +66,15 @@ the named XML, URDF, and STL files from GitHub raw (not the unitree_ros tarball)
 ./run.sh python scripts/pin_mjcf.py --fetch
 ```
 
+RoboCasa dumps (`scripts/export_robocasa_scene.py`) need the ws_robocasa
+venv, not this image. Runtime only loads the cached MJCF:
+
+```bash
+./run.sh python examples/01_empty_arena.py \
+  --scene g1_simulacrum/model/mjcf/robocasa_kitchen_one_wall_small_scandanavian_seed0.xml \
+  --config configs/robocasa_kitchen_one_wall_small_scandanavian_seed0.yaml
+```
+
 **Don't** `docker compose down` unless you mean to delete the container
 (image and host files stay). Don't `up --build` every session — only after
 Dockerfile or `pyproject.toml` extras change.

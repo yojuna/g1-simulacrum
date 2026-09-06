@@ -34,6 +34,7 @@ class Controller(ABC):
             name: float(data.qpos[adr])
             for name, adr in compiled.hand_qposadr.items()
         }
+        self.body_passive = False
 
     def set_targets(self, q_target: NDArray[np.float64]) -> None:
         q = np.asarray(q_target, dtype=np.float64)
@@ -55,6 +56,11 @@ class Controller(ABC):
             name: float(self._data.qpos[adr])
             for name, adr in self._compiled.hand_qposadr.items()
         }
+        self.body_passive = False
+
+    def zero_body_ctrl(self) -> None:
+        for name in BODY_JOINT_NAMES:
+            self._data.ctrl[self._compiled.body_actuator_ids[name]] = 0.0
 
     def body_qpos(self) -> NDArray[np.float64]:
         out = np.empty(NUM_BODY_JOINTS, dtype=np.float64)

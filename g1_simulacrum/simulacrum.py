@@ -145,6 +145,11 @@ class G1Simulacrum:
         return self._data
 
     @property
+    def controller(self) -> Controller:
+        assert self._controller is not None
+        return self._controller
+
+    @property
     def compiled(self) -> CompiledModel:
         assert self._compiled is not None
         return self._compiled

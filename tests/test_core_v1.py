@@ -7,6 +7,8 @@ From ``docker/``::
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import mujoco
 import numpy as np
 import pytest
@@ -14,6 +16,11 @@ import pytest
 from g1_simulacrum import G1Simulacrum, G1SimulacrumConfig
 from g1_simulacrum.model.joints import BODY_JOINT_NAMES, HAND_JOINT_NAMES, NUM_BODY_JOINTS
 from g1_simulacrum.model.loader import ModelLoader
+
+_ROBOCASA_KITCHEN = (
+    Path(__file__).resolve().parents[1]
+    / "g1_simulacrum/model/mjcf/robocasa_kitchen_one_wall_small_scandanavian_seed0.xml"
+)
 
 
 def test_compile_dex3_maps_and_sites() -> None:
@@ -130,16 +137,73 @@ def test_d435i_sees_floor() -> None:
     assert frame.rgb.max() > 30
 
 
-def test_gantry_wrench_pulls_up() -> None:
-    from g1_simulacrum.gantry import ElasticBand
+def test_gantry_cable_pulls_toward_hook() -> None:
+    from g1_simulacrum.gantry import HOOK_Z, ElasticBand
 
-    band = ElasticBand(point=np.array([0.0, 0.0, 1.0]))
-    pose = np.array([0.0, 0.0, 0.7, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    band = ElasticBand(point=np.array([0.0, 0.0, HOOK_Z]), length=0.5)
+    pose = np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     wrench = band.advance(pose)
     assert wrench[2] > 0.0
+    assert np.allclose(wrench[3:6], 0.0)
 
 
-def test_gantry_holds_pelvis_without_weld() -> None:
+def test_gantry_cable_slack_is_unilateral() -> None:
+    from g1_simulacrum.gantry import HOOK_Z, ElasticBand
+
+    band = ElasticBand(point=np.array([0.0, 0.0, HOOK_Z]), length=5.0)
+    # Tilted: slack must still produce zero force; attitude PD may torque.
+    half = 0.5 * (np.pi / 2)
+    pose = np.array(
+        [0.0, 0.0, 1.2, np.cos(half), np.sin(half), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    )
+    wrench = band.advance(pose)
+    assert np.allclose(wrench[0:3], 0.0)
+    assert np.linalg.norm(wrench[3:6]) > 1.0
+
+
+def test_gantry_attitude_restores_when_tilted() -> None:
+    from g1_simulacrum.gantry import HOOK_Z, ElasticBand
+
+    band = ElasticBand(point=np.array([0.0, 0.0, HOOK_Z]), length=0.5)
+    half = 0.5 * (np.pi / 2)
+    pose = np.array(
+        [0.0, 0.0, 1.0, np.cos(half), np.sin(half), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    )
+    wrench = band.advance(pose)
+    assert wrench[3] < 0.0
+    assert np.linalg.norm(wrench[3:6]) == pytest.approx(band.kp_ang * (np.pi / 2))
+
+
+def test_gantry_attitude_zero_when_aligned() -> None:
+    from g1_simulacrum.gantry import HOOK_Z, ElasticBand, quat_wxyz_from_yaw
+
+    yaw = np.pi / 2
+    q = quat_wxyz_from_yaw(yaw)
+    band = ElasticBand(point=np.array([0.0, 0.0, HOOK_Z]), length=5.0, quat_wxyz=q)
+    pose = np.array(
+        [0.0, 0.0, 1.2, q[0], q[1], q[2], q[3], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    )
+    wrench = band.advance(pose)
+    assert np.allclose(wrench[0:3], 0.0)
+    assert np.allclose(wrench[3:6], 0.0)
+
+
+def test_gantry_trolley_nudge_is_heading_frame() -> None:
+    from g1_simulacrum.gantry import HOOK_Z, ElasticBand, quat_wxyz_from_yaw
+
+    yaw = np.pi / 2
+    band = ElasticBand(
+        point=np.array([0.0, 0.0, HOOK_Z]),
+        length=0.5,
+        quat_wxyz=quat_wxyz_from_yaw(yaw),
+    )
+    band.nudge_local(forward=0.1)
+    assert band.point[1] == pytest.approx(0.1)
+    band.nudge_yaw(-yaw)
+    assert band.yaw == pytest.approx(0.0)
+
+
+def test_gantry_holds_without_weld() -> None:
     from g1_simulacrum.gantry import ElasticBand
 
     cfg = G1SimulacrumConfig()
@@ -147,13 +211,27 @@ def test_gantry_holds_pelvis_without_weld() -> None:
     cfg.sensors.d435i.enabled = False
     sim = G1Simulacrum(config=cfg)
     sim.build()
-    obs = sim.reset()
-    q = obs.joint_state.position.copy()
-    pelvis = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_BODY, "pelvis")
-    px, py, _ = sim.data.xpos[pelvis]
-    band = ElasticBand(point=np.array([px, py, 1.0]))
+    sim.reset()
+    sim.controller.body_passive = True
+    torso = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_BODY, "torso_link")
+    band = ElasticBand.overhead(sim.data.xpos[torso])
+    q = sim.controller.body_qpos()
     for _ in range(500):
-        band.apply(sim.model, sim.data, pelvis)
-        obs = sim.step(q)
-    assert obs.base_state.position[2] > 0.6
+        band.apply(sim.model, sim.data, torso)
+        sim.step(q)
+    assert sim.data.xpos[torso][2] > 0.6
     assert sim.model.neq == 0
+
+
+@pytest.mark.skipif(not _ROBOCASA_KITCHEN.is_file(), reason="no cached RoboCasa dump")
+def test_compile_robocasa_kitchen_dump() -> None:
+    sim = G1Simulacrum.from_config(
+        "configs/robocasa_kitchen_one_wall_small_scandanavian_seed0.yaml"
+    )
+    sim.build(scene_xml=_ROBOCASA_KITCHEN)
+    assert len(sim.compiled.body_joint_ids) == NUM_BODY_JOINTS
+    assert sim.model.ngeom > 50
+    pelvis = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_BODY, "pelvis")
+    assert pelvis >= 0
+    obs = sim.reset()
+    assert obs.base_state.position[0] > 1.0

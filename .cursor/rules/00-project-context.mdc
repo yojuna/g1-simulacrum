@@ -36,7 +36,7 @@ Runtime: `40-docker-tooling.mdc` — no host `.venv`.
 | `wiki/` | Compiled G1 hardware facts + citations (not decisions) |
 | `docker/` | GPU container (`run.sh`) |
 | `examples/` | GLFW inspect viewer (`01_empty_arena.py`) |
-| `scripts/` | `pin_mjcf.py` authoring only |
+| `scripts/` | `pin_mjcf.py`, `export_robocasa_scene.py` authoring only |
 | `tests/` | Tests, run in the image |
 
 This tree is the core v1 package (pinned MJCF, facade, inspect viewer).

@@ -8,13 +8,17 @@ Green dots are Mid-360, cyan is D435i depth. Density is configurable
 (``--overlay sparse|dense|full``, or ``--lidar-dots`` / ``--depth-stride``).
 Press ``C`` to look through ``d435i_rgb`` / ``d435i_depth``.
 
-``--empty`` uses the floor-only default XML. ``--headless`` is a short smoke
-with no window. ``--no-gantry`` drops the elastic band (robot will fall).
+``--empty`` uses the floor-only default XML. ``--scene`` loads a cached
+RoboCasa dump (or any MJCF that includes ``g1_robot.xml``). ``--spawn`` /
+``--yaw`` set spawn heading (live: numpad trolley, not WASD — those are MuJoCo's).
+``--headless`` is a short smoke with no window. ``--no-gantry`` skips the
+overhead crane (floating base will fall).
 """
 
 from __future__ import annotations
 
 import argparse
+import faulthandler
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,14 +29,25 @@ import numpy as np
 from numpy.typing import NDArray
 
 from g1_simulacrum import G1Simulacrum
-from g1_simulacrum.gantry import ElasticBand
+from g1_simulacrum.gantry import ElasticBand, quat_wxyz_from_yaw
 from g1_simulacrum.sensors.data_types import DepthFrame, PointCloud
 
-_GLFW_KEY_7 = 55
-_GLFW_KEY_8 = 56
-_GLFW_KEY_9 = 57
+faulthandler.enable()
+
 _GLFW_KEY_C = 67
+_GLFW_KEY_KP_2 = 322
+_GLFW_KEY_KP_4 = 324
+_GLFW_KEY_KP_5 = 325
+_GLFW_KEY_KP_6 = 326
+_GLFW_KEY_KP_7 = 327
+_GLFW_KEY_KP_8 = 328
+_GLFW_KEY_KP_9 = 329
+_GLFW_KEY_KP_SUBTRACT = 333
+_GLFW_KEY_KP_ADD = 334
 _GANTRY_RGBA = np.array([0.95, 0.85, 0.15, 0.9], dtype=np.float32)
+_GANTRY_HEADING_RGBA = np.array([0.98, 0.45, 0.12, 0.95], dtype=np.float32)
+_GANTRY_STEP_XY = 0.05
+_GANTRY_STEP_YAW = np.deg2rad(5.0)
 
 _PKG = Path(__file__).resolve().parents[1]
 _INSPECT_XML = _PKG / "g1_simulacrum" / "model" / "mjcf" / "g1_inspect.xml"
@@ -153,24 +168,56 @@ def _write_points(
     return n
 
 
+def _attach_body_id(model: mujoco.MjModel) -> int:
+    """Unitree G1 crane hangs from torso; pelvis if that body is missing."""
+    for name in ("torso_link", "pelvis"):
+        bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, name)
+        if bid >= 0:
+            return bid
+    raise ValueError("no torso_link or pelvis to hang the crane from")
+
+
+def _print_gantry(gantry: ElasticBand) -> None:
+    t = gantry.target
+    print(
+        f"crane hook={t[0]:.3f} {t[1]:.3f} {t[2]:.3f}  "
+        f"cable={gantry.length:.2f}m  yaw={np.rad2deg(gantry.yaw):.1f}°",
+        flush=True,
+    )
+
+
 def _paint_gantry(
     scn: mujoco.MjvScene,
-    pelvis: NDArray[np.float64],
-    anchor: NDArray[np.float64],
+    body: NDArray[np.float64],
+    gantry: ElasticBand,
 ) -> None:
-    if scn.ngeom >= scn.maxgeom:
-        return
-    geom = scn.geoms[scn.ngeom]
-    mujoco.mjv_initGeom(
-        geom,
-        mujoco.mjtGeom.mjGEOM_CAPSULE,
-        np.zeros(3),
-        np.zeros(3),
-        _IDENTITY_MAT,
-        _GANTRY_RGBA,
-    )
-    mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_CAPSULE, 0.012, pelvis, anchor)
-    scn.ngeom += 1
+    hook = gantry.target
+    if scn.ngeom < scn.maxgeom:
+        geom = scn.geoms[scn.ngeom]
+        mujoco.mjv_initGeom(
+            geom,
+            mujoco.mjtGeom.mjGEOM_CAPSULE,
+            np.zeros(3),
+            np.zeros(3),
+            _IDENTITY_MAT,
+            _GANTRY_RGBA,
+        )
+        mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_CAPSULE, 0.008, body, hook)
+        scn.ngeom += 1
+    fwd = gantry.forward_xy
+    tip = body + np.array([0.4 * fwd[0], 0.4 * fwd[1], 0.0])
+    if scn.ngeom < scn.maxgeom:
+        geom = scn.geoms[scn.ngeom]
+        mujoco.mjv_initGeom(
+            geom,
+            mujoco.mjtGeom.mjGEOM_CAPSULE,
+            np.zeros(3),
+            np.zeros(3),
+            _IDENTITY_MAT,
+            _GANTRY_HEADING_RGBA,
+        )
+        mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_CAPSULE, 0.018, body, tip)
+        scn.ngeom += 1
 
 
 def _paint(
@@ -180,7 +227,7 @@ def _paint(
     cloud: PointCloud | None,
     depth: DepthFrame | None,
     gantry: ElasticBand | None,
-    pelvis_id: int,
+    attach_id: int,
     overlay: OverlayConfig,
     *,
     refresh_clouds: bool,
@@ -215,14 +262,16 @@ def _paint(
         drawn[0], drawn[1] = n_l, n_d
     scn.ngeom = drawn[0] + drawn[1]
     if gantry is not None and gantry.enable:
-        _paint_gantry(scn, data.xpos[pelvis_id], gantry.target)
+        _paint_gantry(scn, data.xpos[attach_id], gantry)
 
 
-def _configure_viewer(viewer: mujoco.viewer.Handle) -> None:
+def _configure_viewer(
+    viewer: mujoco.viewer.Handle, *, lookat: NDArray[np.float64]
+) -> None:
     viewer.cam.azimuth = 140.0
     viewer.cam.elevation = -18.0
     viewer.cam.distance = 3.6
-    viewer.cam.lookat[:] = [0.5, 0.0, 0.75]
+    viewer.cam.lookat[:] = lookat
     for i in range(len(viewer.opt.sitegroup)):
         viewer.opt.sitegroup[i] = 1
     cam_flag = getattr(mujoco.mjtVisFlag, "mjVIS_CAMERA", None)
@@ -261,7 +310,7 @@ def _run_viewer(
     q_hold: np.ndarray,
     *,
     gantry: ElasticBand | None,
-    pelvis_id: int,
+    attach_id: int,
     overlay: OverlayConfig,
 ) -> None:
     control_hz = sim.config.controller.control_hz
@@ -271,10 +320,12 @@ def _run_viewer(
     last_lidar_n = 0
     last_depth_valid = 0
     gantry_note = (
-        "Yellow tether is the elastic gantry (spring-damper on pelvis, not a weld).\n"
-        "7/8 lower/raise, 9 toggle. --no-gantry lets it fall.\n"
+        "Yellow cable is the overhead crane (Unitree cable + GEAR heading lock, "
+        "hook at z=2). Body PD stays on and holds the spawn pose, same as GEAR-SONIC.\n"
+        "Numpad 8/2/4/6 trolley, 7/9 change the heading lock (±5°), +/− cable, "
+        "5 toggles the crane (PD keeps holding). Letter keys stay with MuJoCo.\n"
         if gantry is not None
-        else "No gantry — PD hold will not keep a floating base standing.\n"
+        else "No crane — PD hold will not keep a floating base standing.\n"
     )
     print(
         gantry_note
@@ -293,19 +344,53 @@ def _run_viewer(
     ]
     cam_i = {"i": -1}
 
+    def _set_crane(on: bool) -> None:
+        if gantry is None:
+            return
+        gantry.enable = on
+        if on:
+            print("crane on — PD hold + cable", flush=True)
+            return
+        q_hold[:] = sim.controller.body_qpos()
+        sim.controller.set_targets(q_hold)
+        print("crane off — PD hold, no cable", flush=True)
+
     def _on_key(keycode: int) -> None:
         if gantry is not None:
-            if keycode == _GLFW_KEY_7:
-                gantry.length -= 0.1
-                print(f"gantry length={gantry.length:.2f} target_z={gantry.target[2]:.2f}", flush=True)
+            if keycode == _GLFW_KEY_KP_8:
+                gantry.nudge_local(forward=_GANTRY_STEP_XY)
+                _print_gantry(gantry)
                 return
-            if keycode == _GLFW_KEY_8:
+            if keycode == _GLFW_KEY_KP_2:
+                gantry.nudge_local(forward=-_GANTRY_STEP_XY)
+                _print_gantry(gantry)
+                return
+            if keycode == _GLFW_KEY_KP_4:
+                gantry.nudge_local(left=_GANTRY_STEP_XY)
+                _print_gantry(gantry)
+                return
+            if keycode == _GLFW_KEY_KP_6:
+                gantry.nudge_local(left=-_GANTRY_STEP_XY)
+                _print_gantry(gantry)
+                return
+            if keycode == _GLFW_KEY_KP_7:
+                gantry.nudge_yaw(_GANTRY_STEP_YAW)
+                _print_gantry(gantry)
+                return
+            if keycode == _GLFW_KEY_KP_9:
+                gantry.nudge_yaw(-_GANTRY_STEP_YAW)
+                _print_gantry(gantry)
+                return
+            if keycode == _GLFW_KEY_KP_SUBTRACT:
+                gantry.length = max(0.0, gantry.length - 0.1)
+                _print_gantry(gantry)
+                return
+            if keycode == _GLFW_KEY_KP_ADD:
                 gantry.length += 0.1
-                print(f"gantry length={gantry.length:.2f} target_z={gantry.target[2]:.2f}", flush=True)
+                _print_gantry(gantry)
                 return
-            if keycode == _GLFW_KEY_9:
-                gantry.enable = not gantry.enable
-                print(f"gantry {'on' if gantry.enable else 'off'}", flush=True)
+            if keycode == _GLFW_KEY_KP_5:
+                _set_crane(not gantry.enable)
                 return
         if keycode != _GLFW_KEY_C:
             return
@@ -334,7 +419,7 @@ def _run_viewer(
         show_right_ui=True,
     ) as viewer:
         viewer_holder[0] = viewer
-        _configure_viewer(viewer)
+        _configure_viewer(viewer, lookat=sim.data.xpos[attach_id].copy())
         step_i = 0
         last_print = 0.0
         inited = [0]
@@ -342,7 +427,7 @@ def _run_viewer(
         clouds_dirty = True
         while viewer.is_running():
             if gantry is not None:
-                gantry.apply(sim.model, sim.data, pelvis_id)
+                gantry.apply(sim.model, sim.data, attach_id)
             obs = sim.step(q_hold)
             if obs.sensors.lidar is not None:
                 last_cloud = obs.sensors.lidar
@@ -361,7 +446,7 @@ def _run_viewer(
                     last_cloud,
                     last_depth,
                     gantry,
-                    pelvis_id,
+                    attach_id,
                     overlay,
                     refresh_clouds=clouds_dirty,
                     inited=inited,
@@ -389,11 +474,11 @@ def _run_headless(
     q_hold: np.ndarray,
     *,
     gantry: ElasticBand | None,
-    pelvis_id: int,
+    attach_id: int,
 ) -> None:
     for i in range(50):
         if gantry is not None:
-            gantry.apply(sim.model, sim.data, pelvis_id)
+            gantry.apply(sim.model, sim.data, attach_id)
         obs = sim.step(q_hold)
         if i == 0 or (obs.sensors.imu_pelvis is not None and i % 10 == 0):
             print(
@@ -403,7 +488,6 @@ def _run_headless(
                 f"depth={obs.sensors.depth is not None}"
             )
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -411,13 +495,33 @@ def main() -> None:
         action="store_true",
         help="floor-only g1_sensorized.xml instead of the inspect boxes",
     )
+    parser.add_argument(
+        "--scene",
+        default=None,
+        help="MJCF that already includes g1_robot.xml (e.g. a robocasa dump)",
+    )
+    parser.add_argument("--config", default="configs/default.yaml")
+    parser.add_argument(
+        "--spawn",
+        nargs=3,
+        type=float,
+        metavar=("X", "Y", "Z"),
+        default=None,
+        help="G1 freejoint spawn (metres). Crane hook XY follows this",
+    )
+    parser.add_argument(
+        "--yaw",
+        type=float,
+        default=None,
+        help="heading degrees about +Z (0 faces +X). Sets spawn and gantry yaw",
+    )
     parser.add_argument("--headless", action="store_true", help="50 control steps, no GLFW window")
     parser.add_argument(
         "--no-gantry",
         "--free-base",
         action="store_true",
         dest="no_gantry",
-        help="disable the elastic gantry (robot will fall; PD is joints-only)",
+        help="no overhead crane; PD only (floating base will fall)",
     )
     parser.add_argument(
         "--overlay",
@@ -452,8 +556,15 @@ def main() -> None:
         help="cyan depth overlay box half-size in metres",
     )
     args = parser.parse_args()
+    if args.empty and args.scene:
+        parser.error("use only one of --empty and --scene")
 
-    sim = G1Simulacrum.from_config("configs/default.yaml")
+    sim = G1Simulacrum.from_config(args.config)
+    if args.spawn is not None:
+        sim.config.robot.spawn_pos = (args.spawn[0], args.spawn[1], args.spawn[2])
+    if args.yaw is not None:
+        q = quat_wxyz_from_yaw(np.deg2rad(args.yaw))
+        sim.config.robot.spawn_quat = (float(q[0]), float(q[1]), float(q[2]), float(q[3]))
     overlay = OverlayConfig()
     if args.overlay is not None:
         for key, value in _OVERLAY_PRESETS[args.overlay].items():
@@ -466,15 +577,25 @@ def main() -> None:
         overlay.lidar_radius = args.lidar_radius
     if args.depth_radius is not None:
         overlay.depth_radius = args.depth_radius
-    scene = None if args.empty else _INSPECT_XML
+    if args.scene is not None:
+        scene = Path(args.scene)
+        if not scene.is_file():
+            scene = _PKG / args.scene
+        if not scene.is_file():
+            raise FileNotFoundError(args.scene)
+    else:
+        scene = None if args.empty else _INSPECT_XML
     sim.build(scene_xml=scene)
     obs = sim.reset()
     q_hold = obs.joint_state.position.copy()
-    pelvis_id = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_BODY, "pelvis")
+    attach_id = _attach_body_id(sim.model)
     gantry: ElasticBand | None = None
-    if not args.no_gantry and pelvis_id >= 0:
-        px, py, pz = sim.data.xpos[pelvis_id]
-        gantry = ElasticBand(point=np.array([px, py, 1.0]))
+    if not args.no_gantry:
+        gantry = ElasticBand.overhead(
+            sim.data.xpos[attach_id],
+            quat_wxyz=sim.config.robot.spawn_quat,
+        )
+        _print_gantry(gantry)
     print(
         f"compiled {sim.compiled.xml_path.name}  "
         f"body={len(sim.compiled.body_joint_ids)} hand={len(sim.compiled.hand_joint_ids)}  "
@@ -482,9 +603,9 @@ def main() -> None:
         f"gantry={gantry is not None}  overlay={args.overlay or 'dense'}"
     )
     if args.headless:
-        _run_headless(sim, q_hold, gantry=gantry, pelvis_id=pelvis_id)
+        _run_headless(sim, q_hold, gantry=gantry, attach_id=attach_id)
         return
-    _run_viewer(sim, q_hold, gantry=gantry, pelvis_id=pelvis_id, overlay=overlay)
+    _run_viewer(sim, q_hold, gantry=gantry, attach_id=attach_id, overlay=overlay)
 
 
 if __name__ == "__main__":

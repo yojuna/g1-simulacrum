@@ -40,8 +40,8 @@ Runtime is `docker/run.sh`. See [`docs/docker_usage.md`](docs/docker_usage.md).
 - A ROS2 robot driver.
 - A Gym locomotion environment as the primary API.
 
-Gym, ROS2, RoboCasa, and a SONIC adapter may return later as optional extras.
-They do not shape the core.
+Gym, ROS2, and a SONIC adapter may return later as optional extras.
+They do not shape the core. RoboCasa is authoring-only (cached MJCF).
 
 ---
 
@@ -225,14 +225,23 @@ then aims at the floor, not the sky).
 
 `compiler meshdir=assets` is relative to these MJCF files. Python only
 calls `mujoco.MjModel.from_xml_path` on `g1_sensorized.xml`,
-`g1_inspect.xml`, or a scene that includes `g1_robot.xml`.
+`g1_inspect.xml`, a cached `mjcf/robocasa_<slug>.xml`, or a
+scene that includes `g1_robot.xml`.
 
 ### Dropping the robot into a user scene
 
 The user scene is MJCF that includes `g1_robot.xml` (or copies that include
 line). Python does not merge worldbodies in memory. If a scene cannot use
 `<include>`, that is a scene-authoring problem, not a reason to resurrect
-runtime injection.
+runtime injection. Dumped scenes sit next to `g1_robot.xml` so
+`compiler meshdir=assets` still resolves (same constraint as `g1_inspect.xml`).
+
+RoboCasa / RoboSuite are **authoring**. `scripts/export_robocasa_scene.py`
+runs where those packages are installed, strips the dummy robot, copies
+used meshes/textures, and writes `mjcf/robocasa_<slug>.xml`. Runtime
+does not import robocasa. Re-dump to bump a scene; do not call
+`create_fixtures` on the step path. `--env` is any registered env;
+`--layout` / `--style` apply only if that env accepts them.
 
 ---
 
@@ -345,11 +354,17 @@ facade. From `docker/`:
 Default scene is `g1_inspect.xml` (floor + boxes). `--empty` compiles
 `g1_sensorized.xml` instead.
 
-**Gantry** (`g1_simulacrum/gantry.py`, `ElasticBand`): spring-damper wrench
-on `pelvis` via `data.xfrc_applied`. Same idea as Unitree MuJoCo /
-GEAR-SONIC. The freejoint stays free — this is not a weld and not a
-balance policy. Keys **7 / 8** change length, **9** toggles. `--no-gantry`
-/ `--free-base` lets the robot fall (PD is joints only).
+**Gantry** (`g1_simulacrum/gantry.py`): Unitree MuJoCo overhead **cable**
+(force, hook at `z = 2`, hang from `torso_link`) plus GEAR-SONIC **attitude
+PD** on that body (heading lock to spawn yaw). Not GEAR's 6-D spring to
+`[0,0,1]`, and not a weld. Slack is unilateral so the cable cannot push the
+robot into the floor. Body joint PD stays on while the crane is on (GEAR
+does the same: band wrench and joint PD every step), holding the spawn
+pose so limbs do not go limp. Numpad **8 / 2 / 4 / 6** move the trolley,
+**7 / 9** change the heading-lock target (Python field only — never write
+`qpos` from the viewer callback), **+ / −** cable length, **5** toggles
+the crane. `--spawn` / `--yaw` set the start pose. `--no-gantry` skips
+the crane.
 
 **Cameras:** click the 3D view, **C** cycles free → `d435i_rgb` →
 `d435i_depth` (or Rendering → Camera in the right panel). No PiP window.
@@ -414,6 +429,7 @@ g1_simulacrum/                    git root
 ├── docs/inspect_viewer.png       README screenshot
 ├── docker/                       run.sh image
 ├── scripts/pin_mjcf.py           authoring only; runtime does not run this
+├── scripts/export_robocasa_scene.py  authoring; writes mjcf/robocasa_<slug>.xml
 ├── examples/01_empty_arena.py    GLFW inspect viewer
 ├── tests/test_core_v1.py
 └── g1_simulacrum/
@@ -449,7 +465,6 @@ Revisit only when we open that work:
 - **Gym extra** — deferred. No Gym wrapper in this tree. Do not make Gym
   the core API. No padded lidar `Box` as the package default.
 - **ROS2 extra** — topics from `Observation`, not a second robot.
-- **RoboCasa** — a scene that includes `g1_robot.xml`, or a separate project.
 - **GPU lidar backends** — Warp (and others) as a **config flag** after CPU
   is the measured default. The image may install `mujoco-lidar[warp]`;
   `sensors.mid360.backend` stays `cpu` until we switch on purpose.

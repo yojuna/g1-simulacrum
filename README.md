@@ -42,10 +42,16 @@ Green overlays are Mid-360, cyan is D435i depth. Default scene is
 | Key / flag | Effect |
 |------------|--------|
 | **C** | Cycle free camera → `d435i_rgb` → `d435i_depth` |
-| **7 / 8 / 9** | Gantry length down / up / toggle |
-| `--no-gantry` | Drop the elastic band (robot falls; PD is joints only) |
+| **Numpad 8 / 2 / 4 / 6** | Crane trolley XY in current heading |
+| **Numpad 7 / 9** | Change heading lock ±5° (torso stays facing that yaw) |
+| **Numpad + / − / 5** | Shorten cable / lengthen (lower) / toggle crane |
+| `--spawn X Y Z` | Spawn and gantry start (metres) |
+| `--yaw DEG` | Heading about +Z (0 faces +X) |
+| `--no-gantry` | No crane; PD only (floating base falls) |
 | `--overlay sparse\|dense\|full` | Overlay density (default dense) |
 | `--headless` | 50 control steps, no window |
 
-The gantry is a spring-damper wrench on `pelvis`, not a weld. Overlay dots
-are cheap boxes, refreshed at sensor rate.
+The crane is a Unitree-style overhead cable on `torso_link` (hook at
+`z = 2`) plus a GEAR-SONIC heading lock. Body PD stays on and holds the
+spawn pose.
+Overlay dots are cheap boxes, refreshed at sensor rate.
