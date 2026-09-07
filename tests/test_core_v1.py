@@ -223,6 +223,45 @@ def test_gantry_holds_without_weld() -> None:
     assert sim.model.neq == 0
 
 
+def test_gantry_gear_force_is_cartesian_pd() -> None:
+    from g1_simulacrum.gantry import ElasticBand
+
+    band = ElasticBand.gear_hold(np.array([0.0, 0.0, 0.82]))
+    assert band.mode == "gear"
+    assert np.allclose(band.point, [0.0, 0.0, 1.0])
+    pose = np.array([0.0, 0.0, 0.82, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    wrench = band.advance(pose)
+    assert wrench[2] == pytest.approx(band.kp_pos * 0.18)
+    assert np.allclose(wrench[0:2], 0.0)
+    pose_v = pose.copy()
+    pose_v[9] = 1.0  # +Z linear velocity
+    wrench_v = band.advance(pose_v)
+    assert wrench_v[2] == pytest.approx(band.kp_pos * 0.18 - band.kd_pos)
+
+
+def test_gantry_gear_hold_on_pelvis() -> None:
+    from g1_simulacrum.gantry import ElasticBand
+
+    cfg = G1SimulacrumConfig()
+    cfg.controller.type = "passthrough"
+    cfg.controller.physics_hz = 1000.0
+    cfg.controller.control_hz = 200.0
+    cfg.sensors.mid360.enabled = False
+    cfg.sensors.d435i.enabled = False
+    sim = G1Simulacrum(config=cfg)
+    sim.build()
+    sim.reset()
+    sim.controller.zero_body_ctrl()
+    pelvis = mujoco.mj_name2id(sim.model, mujoco.mjtObj.mjOBJ_BODY, "pelvis")
+    band = ElasticBand.gear_hold(sim.data.qpos[0:3])
+    for _ in range(200):
+        band.apply(sim.model, sim.data, pelvis)
+        sim.step_physics()
+        assert np.isfinite(sim.data.qacc).all()
+        assert float(sim.data.qpos[2]) > 0.5
+    assert float(sim.data.time) == pytest.approx(1.0)
+
+
 @pytest.mark.skipif(not _ROBOCASA_KITCHEN.is_file(), reason="no cached RoboCasa dump")
 def test_compile_robocasa_kitchen_dump() -> None:
     sim = G1Simulacrum.from_config(

@@ -79,20 +79,45 @@ class G1Simulacrum:
         if action is not None:
             self._controller.set_targets(action)
         self._controller.step(self._data.time)
+        return self._step_physics(previous_action=prev, action=action)
 
+    def step_physics(
+        self,
+        *,
+        previous_action: NDArray[np.float64] | None = None,
+        sensors: bool = True,
+    ) -> Observation:
+        """Physics + optional sensors. Caller must write ``data.ctrl`` (e.g. SONIC LowCmd PD).
+
+        SONIC ``SonicDdsSimLoop`` always passes ``sensors=False`` and may scan
+        lidar/depth afterward on leftover wall time. Inspect ``step()`` still
+        uses the default ``sensors=True``.
+        """
+        assert self._initialized
+        return self._step_physics(
+            previous_action=previous_action, action=None, sensors=sensors
+        )
+
+    def _step_physics(
+        self,
+        *,
+        previous_action: NDArray[np.float64] | None,
+        action: NDArray[np.float64] | None,
+        sensors: bool = True,
+    ) -> Observation:
         physics_hz = self._config.controller.physics_hz
         control_hz = self._config.controller.control_hz
         substeps = max(1, int(round(physics_hz / control_hz)))
         for _ in range(substeps):
             mujoco.mj_step(self._model, self._data)
 
-        sensors = self._sensor_manager.step(self._data.time)
-        obs = self._build_observation(sensors, previous_action=prev)
-        self._previous_action = (
-            np.asarray(action, dtype=np.float64).copy()
-            if action is not None
-            else prev
-        )
+        if sensors:
+            bundle = self._sensor_manager.step(self._data.time)
+        else:
+            bundle = SensorBundle(timestamp=self._data.time)
+        obs = self._build_observation(bundle, previous_action=previous_action)
+        if action is not None:
+            self._previous_action = np.asarray(action, dtype=np.float64).copy()
         return obs
 
     def reset(self) -> Observation:
@@ -153,6 +178,11 @@ class G1Simulacrum:
     def compiled(self) -> CompiledModel:
         assert self._compiled is not None
         return self._compiled
+
+    @property
+    def sensor_manager(self) -> SensorManager:
+        assert self._sensor_manager is not None
+        return self._sensor_manager
 
     @property
     def config(self) -> G1SimulacrumConfig:

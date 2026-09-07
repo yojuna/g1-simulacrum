@@ -56,3 +56,16 @@ The crane is a Unitree-style overhead cable on `torso_link` (hook at
 spawn pose. Bottom-right PiP is colorized D435i depth (0.3–3 m); **C**
 only changes the 3D viewpoint. Overlay dots are cheap boxes, refreshed
 at sensor rate.
+
+## SONIC DDS (optional extra)
+
+Unchanged GEAR `deploy.sh sim` talks `rt/lowstate` / `rt/lowcmd`. This
+package is the MuJoCo plant. From `docker/`:
+
+```bash
+./run.sh sonic python examples/02_sonic_dds_bridge.py              # cameras off
+./run.sh sonic python examples/02_sonic_dds_bridge.py --sensors    # leftover-budget lidar/depth + overlays
+```
+
+How-to: [`docs/sonic_dds.md`](docs/sonic_dds.md). What broke and what the
+loop does now: [`wiki/sonic-integration.md`](wiki/sonic-integration.md).

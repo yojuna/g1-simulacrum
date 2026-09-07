@@ -14,5 +14,6 @@ if [[ -z "${DISPLAY:-}" ]]; then
 fi
 
 mkdir -p "$HOME" 2>/dev/null || true
+
 cd /workspace
 exec "$@"

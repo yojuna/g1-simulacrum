@@ -1,0 +1,31 @@
+dds:
+  domain_id: 0
+  interface: lo
+  dds_peer: null
+
+bridge:
+  robot_type: g1_29dof
+  num_motors: 29
+  num_hand_motors: 7
+  use_sensor: false
+  use_joystick: 0
+  joystick_type: xbox
+  joystick_device: 0
+
+loop:
+  control_hz: 200.0
+  publish_before_step: true
+  wait_for_cmd: false
+  fall_height: 0.2
+  gear_parity: false
+  onscreen: true
+  viewer_dt: 0.02
+  cameras: false  # --sensors: leftover-budget lidar/depth + overlays; not in step_physics
+  sensor_budget: 0.65  # fraction of the 5 ms slot reserved for LowState + mj_step
+
+gantry:
+  enabled: true
+  attach_body: pelvis
+  mode: gear  # GEAR cartesian PD to (spawn_xy, 1). cable = inspect hook.
+
+hands: dex3

@@ -1,0 +1,15 @@
+# SONIC DDS overlay — host network + image with unitree_sdk2py baked in.
+# Usage: ./run.sh sonic python examples/02_sonic_dds_bridge.py
+#
+# Does not install GEAR-SONIC. Build context `unitree_sdk` is the Python DDS
+# package already on this machine (GEAR's vendored unitree_sdk2_python).
+
+services:
+  sim:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.sonic
+      additional_contexts:
+        unitree_sdk: ${GROOT_ROOT:-../../../../GR00T-WholeBodyControl}/external_dependencies/unitree_sdk2_python
+    image: g1-simulacrum:sonic
+    network_mode: host

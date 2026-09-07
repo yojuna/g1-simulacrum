@@ -4,6 +4,10 @@ Goal: kinematics, IMU **sites**, control rate, and sensor **geometry** match
 the cited robot. Optics and noise will not be factory-identical. Label the
 gap instead of hiding it.
 
+Matching **rates** is not enough if they run on the wrong clock or the
+wrong thread. Wall-clock LowState vs best-effort lidar:
+[sim-process-model.md](sim-process-model.md).
+
 ## High (copy XML / URDF)
 
 | Aspect | How |

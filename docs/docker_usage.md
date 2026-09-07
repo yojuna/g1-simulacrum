@@ -30,8 +30,32 @@ there are no Docker volumes. Host files survive stop and reboot.
 
 Needs NVIDIA driver + nvidia-container-toolkit. Do not create a host `.venv`.
 
-GEAR-SONIC is **not** in this image. Compose it later from
-`GR00T-WholeBodyControl`, not as a sidecar here.
+GEAR-SONIC deploy can run in **its** Docker (`run-ros2-dev.sh`, host network).
+The sim extra image copies `unitree_sdk2py` from that local GEAR tree at build
+time (see [`sonic_dds.md`](sonic_dds.md)). `./run.sh sonic` uses
+`g1-simulacrum:sonic` and host networking. Do not pip at container start.
+
+## SONIC DDS (optional)
+
+From `docker/`:
+
+```bash
+./run.sh up --build              # base image once
+./run.sh sonic up --build        # extra layer: pip-install unitree_sdk2py from local GEAR tree
+./run.sh sonic python examples/02_sonic_dds_bridge.py
+```
+
+That example is sim + GLFW viewer + DDS in **one process** (GEAR `run_sim_loop.py`).
+Default cameras **off**. `--sensors` runs leftover-budget lidar/depth and
+inspect overlays without putting them in `step_physics`. Deploy in GEAR’s
+container: `./docker/run-ros2-dev.sh` then `bash deploy.sh sim`.
+See [`sonic_dds.md`](sonic_dds.md).
+
+Smoke without deploy or DDS:
+
+```bash
+./run.sh python examples/02_sonic_dds_bridge.py --headless-smoke
+```
 
 ## Run
 

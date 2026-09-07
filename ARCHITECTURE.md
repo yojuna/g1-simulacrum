@@ -33,15 +33,19 @@ Runtime is `docker/run.sh`. See [`docs/docker_usage.md`](docs/docker_usage.md).
 
 **This package is not**
 
-- GEAR-SONIC, DDS, or a 95-D policy observation. Whole-body control lives in
-  `GR00T-WholeBodyControl`. How to compose the two is **out of scope** until
-  we revisit it against that repo.
-- A RoboCasa / RoboSuite task suite.
+- GEAR-SONIC, a 95-D policy, or Unitree DDS **in core**. Whole-body control
+  lives in `GR00T-WholeBodyControl`. Optional extra
+  [`extras/sonic_dds/`](extras/sonic_dds/README.md) is the MuJoCo plant for
+  unchanged `deploy.sh sim` (see [`docs/sonic_dds.md`](docs/sonic_dds.md),
+  [`wiki/sonic-integration.md`](wiki/sonic-integration.md)).
+- A RoboCasa / RoboSuite task suite (exported kitchen MJCF may be loaded
+  with `--scene`; dumps are not the core API).
 - A ROS2 robot driver.
 - A Gym locomotion environment as the primary API.
 
-Gym, ROS2, and a SONIC adapter may return later as optional extras.
-They do not shape the core. RoboCasa is authoring-only (cached MJCF).
+Gym and ROS2 may return later as optional extras. They do not shape the
+core. RoboCasa is authoring-only (cached MJCF). The SONIC extra is in
+`extras/sonic_dds/` and is not imported by `g1_simulacrum`.
 
 ---
 
@@ -357,17 +361,16 @@ facade. From `docker/`:
 Default scene is `g1_inspect.xml` (floor + boxes). `--empty` compiles
 `g1_sensorized.xml` instead.
 
-**Gantry** (`g1_simulacrum/gantry.py`): Unitree MuJoCo overhead **cable**
-(force, hook at `z = 2`, hang from `torso_link`) plus GEAR-SONIC **attitude
-PD** on that body (heading lock to spawn yaw). Not GEAR's 6-D spring to
-`[0,0,1]`, and not a weld. Slack is unilateral so the cable cannot push the
-robot into the floor. Body joint PD stays on while the crane is on (GEAR
-does the same: band wrench and joint PD every step), holding the spawn
-pose so limbs do not go limp. Numpad **8 / 2 / 4 / 6** move the trolley,
-**7 / 9** change the heading-lock target (Python field only — never write
-`qpos` from the viewer callback), **+ / −** cable length, **5** toggles
-the crane. `--spawn` / `--yaw` set the start pose. `--no-gantry` skips
-the crane.
+**Gantry** (`g1_simulacrum/gantry.py`): two force models. Inspect uses
+Unitree MuJoCo overhead **cable** (hook at `z = 2`, hang from `torso_link`)
+plus heading PD. Slack is unilateral so the cable cannot push the robot
+into the floor. SONIC extra uses `ElasticBand.gear_hold`: GEAR's
+cartesian 6-D spring on **pelvis** to `(spawn_xy, 1)`, `kp=10000`,
+`kd=1000`. Body joint PD stays on while the crane is on. Numpad **8 / 2
+/ 4 / 6** move the trolley, **7 / 9** change the heading-lock target
+(Python field only — never write `qpos` from the viewer callback),
+**+ / −** length, **5** toggles the crane. `--spawn` / `--yaw` set the
+start pose. `--no-gantry` skips the crane.
 
 **Cameras:** click the 3D view, **C** cycles free → `d435i_rgb` →
 `d435i_depth` (or Rendering → Camera in the right panel). That only
@@ -432,13 +435,18 @@ g1_simulacrum/                    git root
 ├── ARCHITECTURE.md               this file (normative decisions)
 ├── wiki/                         compiled G1 hardware facts + sources
 ├── configs/default.yaml
+├── configs/sonic_dds.yaml        extras/sonic_dds loop (200 Hz, gantry gear)
 ├── docs/docker_usage.md
+├── docs/sonic_dds.md             two-terminal sim2sim how-to
 ├── docs/inspect_viewer.png       README screenshot
-├── docker/                       run.sh image
+├── docker/                       run.sh image; Dockerfile.sonic + compose.sonic
 ├── scripts/pin_mjcf.py           authoring only; runtime does not run this
 ├── scripts/export_robocasa_scene.py  authoring; writes mjcf/robocasa_<slug>.xml
 ├── examples/01_empty_arena.py    GLFW inspect viewer
+├── examples/02_sonic_dds_bridge.py  SONIC plant + viewer + DDS
+├── extras/sonic_dds/             optional; not imported by core
 ├── tests/test_core_v1.py
+├── tests/test_sonic_dds_adapter.py
 └── g1_simulacrum/
     ├── __init__.py               G1Simulacrum, G1SimulacrumConfig
     ├── cli.py                    compile + print maps
@@ -463,8 +471,14 @@ g1_simulacrum/                    git root
 
 Revisit only when we open that work:
 
-- **SONIC** — composition with the official `GR00T-WholeBodyControl` repo.
-  Not a controller type in this package. No DDS in core.
+- **SONIC extra** — in tree as `extras/sonic_dds/` (not a core controller).
+  Plant matches GEAR deploy over `rt/lowstate` / `rt/lowcmd`. Motion calls
+  `step_physics(sensors=False)`. `--sensors` is a **leftover-budget
+  stopgap** on that same thread (absolute wall deadline, skip when late);
+  not a lidar/camera machine. Target split:
+  [`wiki/sim-process-model.md`](wiki/sim-process-model.md).
+  Integration log: [`wiki/sonic-integration.md`](wiki/sonic-integration.md).
+  No DDS in core.
 - **HandController** — Dex3 (then Inspire / gripper) PD or SDK2-like cmd
   after body+sensors core is tested. No DDS in core.
 - **Other hand kits** — Inspire, Dex5, parallel gripper: new

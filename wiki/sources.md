@@ -16,6 +16,9 @@ must follow until we bump them on purpose. Current pin:
 | Menagerie G1 | [mujoco_menagerie `unitree_g1`](https://github.com/google-deepmind/mujoco_menagerie/tree/main/unitree_g1) | Derived from the Unitree MJCF above. Docker image clones this to `/opt/mujoco_menagerie`. |
 | Low-level SDK | [unitree_sdk2](https://github.com/unitreerobotics/unitree_sdk2) | G1 uses `unitree_hg` (`LowCmd_`, `LowState_`), not `unitree_go`. |
 | G1 low-level example | [`g1_ankle_swing_example.cpp`](https://github.com/unitreerobotics/unitree_sdk2/blob/main/example/g1/low_level/g1_ankle_swing_example.cpp) | 2 ms loop, `G1JointIndex` 0–28, pelvis vs torso IMU topics |
+| G1 lidar service | [support.unitree.com lidar_service](https://support.unitree.com/home/en/G1_developer/lidar_service) | Mid-360 topics, 10 Hz cloud / 200 Hz IMU, `InitChannel` queue length 1 |
+| MuJoCo threading | [Programming](https://mujoco.readthedocs.io/en/stable/programming.html), [`mj_copyData`](https://mujoco.readthedocs.io/en/stable/APIreference/APIfunctions.html#mj-copydata), [passive viewer](https://mujoco.readthedocs.io/en/stable/python.html#passive-viewer), [mujoco#1402](https://github.com/google-deepmind/mujoco/issues/1402) | One `mjData` per thread; copy then `mj_forward` |
+| Real-time factor | [Isaac Gain Tuner (RTF)](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/robot_setup/gain_tuner.html) | RTF = sim_time / wall_time |
 | Developer docs | [support.unitree.com G1](https://support.unitree.com/home/en/G1_developer) | Product DoF, FOV prose, lidar/camera service pages |
 | Product page | [unitree.com/g1](https://www.unitree.com/g1/) | Size, mass, EDU options; not CAD |
 | Mid-360 datasheet | [livoxtech.com/mid-360/specs](https://www.livoxtech.com/mid-360/specs) | FOV, range, precision, IMU model, mass |

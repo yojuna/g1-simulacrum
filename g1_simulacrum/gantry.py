@@ -1,21 +1,20 @@
-"""Overhead crane: Unitree cable plus GEAR-SONIC heading lock.
+"""Overhead crane: inspect cable, or GEAR-SONIC cartesian hold.
 
-Unitree ``ElasticBand`` is a spring along the line from a world hook to one
-body, written to ``xfrc_applied``. The original Unitree hook sits at
-``z = 3`` m; ours defaults to ``HOOK_Z`` (2 m) and applies **force only**
-on the cable. GEAR-SONIC kept the class but added a 6-D spring to
-``[0, 0, 1]`` plus attitude PD to identity.
+Two force models write ``xfrc_applied`` on one body:
 
-This module keeps Unitree's overhead cable for lift / lower / trolley, and
-GEAR's attitude PD so the attach body heading stays locked. Local changes:
+- ``cable`` (inspect viewer): Unitree unilateral spring along hook→body.
+  Hook Z is ``HOOK_Z`` (2 m); slack does not push into the floor.
+- ``gear`` (SONIC DDS): GEAR ``ElasticBand.Advance`` — cartesian PD to
+  ``(spawn_xy, 1)`` with ``kp_pos=10000``, ``kd_pos=1000``, plus attitude
+  PD. ``length`` is a vertical offset (keys 7/8), not a cable rest length.
 
-- hook XY is movable (trolley); Z stays overhead
-- tension only (slack does not push the robot into the floor)
-- attitude PD holds ``self.quat`` (spawn yaw, then numpad 7/9), not identity
-- the viewer key callback must not write ``mjData`` (UI thread vs ``mj_step``)
+Attitude PD holds ``self.quat`` (spawn yaw, then numpad 7/9). The viewer
+key callback must not write ``mjData`` (UI thread vs ``mj_step``).
 """
 
 from __future__ import annotations
+
+from typing import Literal
 
 import mujoco
 import numpy as np
@@ -26,11 +25,17 @@ from scipy.spatial.transform import Rotation
 # Slightly stiffer so a taut init holds a ~35 kg G1 near spawn height (mg/k ≈ 0.17 m).
 _STIFFNESS = 2000.0
 _DAMPING = 200.0
+# gear_sonic/utils/mujoco_sim/unitree_sdk2py_bridge.py ElasticBand.
+_GEAR_KP_POS = 10000.0
+_GEAR_KD_POS = 1000.0
+_GEAR_HOLD_Z = 1.0
 # GEAR-SONIC ElasticBand attitude PD (identity lock); we track self.quat instead.
 _KP_ANG = 1000.0
 _KD_ANG = 10.0
 HOOK_Z = 2.0
 _G1_MASS_KG = 35.0
+
+GantryMode = Literal["cable", "gear"]
 
 
 def quat_wxyz_from_yaw(yaw_rad: float) -> NDArray[np.float64]:
@@ -71,12 +76,21 @@ class ElasticBand:
         damping: float = _DAMPING,
         kp_ang: float = _KP_ANG,
         kd_ang: float = _KD_ANG,
+        mode: GantryMode = "cable",
+        kp_pos: float = _GEAR_KP_POS,
+        kd_pos: float = _GEAR_KD_POS,
     ) -> None:
+        self.mode: GantryMode = mode
         self.stiffness = float(stiffness)
         self.damping = float(damping)
+        self.kp_pos = float(kp_pos)
+        self.kd_pos = float(kd_pos)
         self.kp_ang = float(kp_ang)
         self.kd_ang = float(kd_ang)
-        self.point = np.array([0.0, 0.0, HOOK_Z] if point is None else point, dtype=np.float64)
+        default_z = _GEAR_HOLD_Z if mode == "gear" else HOOK_Z
+        self.point = np.array(
+            [0.0, 0.0, default_z] if point is None else point, dtype=np.float64
+        )
         self.length = 0.0 if length is None else float(length)
         self.quat = np.array(
             [1.0, 0.0, 0.0, 0.0] if quat_wxyz is None else quat_wxyz,
@@ -104,6 +118,24 @@ class ElasticBand:
             point=hook,
             length=max(0.0, dist - sag),
             quat_wxyz=quat_wxyz,
+            mode="cable",
+        )
+
+    @classmethod
+    def gear_hold(
+        cls,
+        attach_pos: NDArray[np.float64],
+        *,
+        quat_wxyz: NDArray[np.float64] | tuple[float, ...] | None = None,
+        hold_z: float = _GEAR_HOLD_Z,
+    ) -> ElasticBand:
+        """GEAR cartesian setpoint: ``(attach_xy, hold_z)``, ``length=0``."""
+        pos = np.asarray(attach_pos, dtype=np.float64)
+        return cls(
+            point=np.array([pos[0], pos[1], hold_z], dtype=np.float64),
+            length=0.0,
+            quat_wxyz=quat_wxyz,
+            mode="gear",
         )
 
     @property
@@ -140,8 +172,15 @@ class ElasticBand:
         return np.concatenate([force, torque])
 
     def _force(self, pos: NDArray[np.float64], lin_vel: NDArray[np.float64]) -> NDArray[np.float64]:
+        pos = np.asarray(pos, dtype=np.float64)
+        vel = np.asarray(lin_vel, dtype=np.float64)
+        if self.mode == "gear":
+            # GEAR: f = kp*(point - pos + [0,0,length]) + kd*(0 - v)
+            delta = self.point - pos
+            delta[2] += self.length
+            return self.kp_pos * delta + self.kd_pos * (0.0 - vel)
         # Unitree Advance(x, dx): direction from body to hook, stiffness*(distance - length).
-        delta = self.point - np.asarray(pos, dtype=np.float64)
+        delta = self.point - pos
         distance = float(np.linalg.norm(delta))
         if distance < 1e-9:
             return np.zeros(3, dtype=np.float64)
@@ -149,7 +188,7 @@ class ElasticBand:
         if extension <= 0.0:
             return np.zeros(3, dtype=np.float64)
         direction = delta / distance
-        v = float(np.dot(lin_vel, direction))
+        v = float(np.dot(vel, direction))
         return (self.stiffness * extension - self.damping * v) * direction
 
     def _torque(
