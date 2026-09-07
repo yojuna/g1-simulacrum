@@ -6,7 +6,7 @@ import mujoco
 
 from ..config import SensorsConfig
 from .d435i import D435iCamera
-from .data_types import SensorBundle
+from .data_types import DepthFrame, PointCloud, SensorBundle
 from .imu import ImuSensor
 from .mid360 import Mid360Lidar
 
@@ -70,6 +70,22 @@ class SensorManager:
             imu_d435i=readings.get("d435i"),
             timestamp=sim_time,
         )
+
+    def lidar_due(self, sim_time: float) -> bool:
+        return self._lidar is not None and self._lidar.should_read(sim_time)
+
+    def depth_due(self, sim_time: float) -> bool:
+        return self._camera is not None and self._camera.should_read(sim_time)
+
+    def step_lidar(self, sim_time: float) -> PointCloud | None:
+        if self._lidar is None:
+            return None
+        return self._lidar.step(sim_time)
+
+    def step_depth(self, sim_time: float) -> DepthFrame | None:
+        if self._camera is None:
+            return None
+        return self._camera.step(sim_time)
 
     def reset(self) -> None:
         if self._lidar is not None:

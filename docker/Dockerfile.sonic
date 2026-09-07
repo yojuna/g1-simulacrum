@@ -1,0 +1,14 @@
+# SONIC DDS extra image. Layers on g1-simulacrum:local.
+# Rebuild: ./run.sh sonic up --build
+#
+# Not GEAR-SONIC. Copies this machine's
+#   $GROOT_ROOT/external_dependencies/unitree_sdk2_python
+# and editable-installs it (same as install_mujoco_sim.sh). A non-editable
+# wheel drops b2/g1 (no __init__.py); -e keeps the tree GEAR uses.
+FROM g1-simulacrum:local
+
+COPY --from=unitree_sdk / /opt/unitree_sdk2_python
+
+RUN uv pip install --python /opt/venv/bin/python "cyclonedds==0.10.2" \
+    && uv pip install --python /opt/venv/bin/python --no-deps -e /opt/unitree_sdk2_python \
+    && chmod -R a+rX /opt/venv /opt/unitree_sdk2_python

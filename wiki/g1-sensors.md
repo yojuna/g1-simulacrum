@@ -187,4 +187,6 @@ when `mjVIS_CAMERA` is on (`resolution>1`); the example leaves that flag
 off and draws an ~18 cm FOV wedge instead. Housing geom is ~90×26×26 mm
 (Intel module 90×25×25 mm).
 
-See [sim-fidelity.md](sim-fidelity.md).
+See [sim-fidelity.md](sim-fidelity.md). Mid-360 and D435i are **not**
+packed into LowState; they run as other machines —
+[sim-process-model.md](sim-process-model.md).

@@ -31,6 +31,7 @@ venv/
 docker/home/
 docker/.venv/
 docker/.cache/
+docker/sonic_py/
 
 # MuJoCo / rendering
 MUJOCO_LOG.TXT

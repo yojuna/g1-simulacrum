@@ -4,6 +4,9 @@ G1 low-level is **`unitree_hg`**, not the Go2 `unitree_go` types. This
 package does not speak DDS; the rates and joint order below are what the
 sim must **match** so later stacks can compose.
 
+LowState is the **motion machine**. Lidar and cameras are other machines
+on the same DDS domain — see [Sim process model](sim-process-model.md).
+
 Source of truth:
 [`g1_ankle_swing_example.cpp`](https://github.com/unitreerobotics/unitree_sdk2/blob/main/example/g1/low_level/g1_ankle_swing_example.cpp)
 on unitree_sdk2 `main` (read 2026-09-05).
