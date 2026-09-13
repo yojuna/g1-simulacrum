@@ -85,11 +85,13 @@ Measured 2026-09-07 (this machine, `--gear-parity --sensors`):
 | GLFW overlays | ~199–201 Hz | 1.00 | ~1 Hz (sync eats leftover) |
 | Inlined `SensorManager.step` (old) | ~110 Hz | ~0.55 | n/a |
 
-5 s log with sensors:
+5 s log with sensors (enable `loop.stats_log_interval_s: 5` in sonic YAML):
 
 ```text
 rt/lowstate published N times  ~200 Hz  sim/wall=1.00  lidar=9.0 Hz depth=26.2 Hz skip=133
 ```
+
+By default periodic stats are **off** so bringup logs stay readable.
 
 If `sim/wall` is not ~1, turn `--sensors` off for policy work.
 

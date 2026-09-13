@@ -6,6 +6,7 @@ and DDS PublishLowState / LowCmd actuation. There is no separate sim process.
 
 from __future__ import annotations
 
+import json
 import time
 from pathlib import Path
 from typing import Callable
@@ -184,6 +185,7 @@ class SonicDdsSimLoop:
         self._lowstate_t0 = 0.0
         self._lowstate_n0 = 0
         self._lowstate_sim_t0 = 0.0
+        self._lowstate_stats_interval_s = float(sonic_config.loop.stats_log_interval_s)
         self._recover_count = 0
         self._overlay = OverlayConfig()
         self._overlay_inited = [0]
@@ -194,6 +196,133 @@ class SonicDdsSimLoop:
         self._lidar_ok = 0
         self._depth_ok = 0
         self._sensor_skip = 0
+        self._bringup_done = not (
+            sonic_config.gantry.enabled and sonic_config.gantry.bringup.enabled
+        )
+        self._bringup_released = False
+        self._bringup_lower_ticks = 0
+        self._bringup_lower_wait_ticks = 0
+        self._bringup_settle_t0: float | None = None
+        self._bringup_cmd_t0: float | None = None
+        self._bringup_waiting_cmd_announced = False
+        self._bringup_standing_announced = False
+        self._plant_state_path = Path("/workspace/ws_sonic_redux/logs/.plant_state.json")
+        self._plant_state_tick = 0
+
+    def _tick_gantry_bringup(self) -> None:
+        cfg = self._sonic.gantry.bringup
+        if self._bringup_done or not cfg.enabled or self._gantry is None:
+            return
+
+        cmd = self._bridge.cmd_received()
+        if cfg.wait_for_lowcmd_to_lower and not cmd:
+            return
+
+        if self._bringup_lower_ticks < cfg.lower_steps:
+            interval = max(1, int(cfg.lower_interval_ticks))
+            self._bringup_lower_wait_ticks += 1
+            if self._bringup_lower_wait_ticks % interval != 0:
+                return
+            step = float(cfg.lower_step_m)
+            if self._gantry.mode == "gear":
+                self._gantry.length -= step
+            else:
+                self._gantry.length = max(0.0, self._gantry.length - step)
+            self._bringup_lower_ticks += 1
+            if self._bringup_lower_ticks == 1:
+                print("gantry bringup: lowering (auto)", flush=True)
+            if self._bringup_lower_ticks == cfg.lower_steps:
+                _print_gantry(self._gantry)
+            return
+
+        if self._bringup_settle_t0 is None:
+            self._bringup_settle_t0 = time.monotonic()
+            pelvis_z = float(self._sim.data.qpos[2])
+            print(
+                f"gantry bringup: lowered, settling {cfg.settle_s:.1f}s "
+                f"(pelvis_z={pelvis_z:.3f})",
+                flush=True,
+            )
+            return
+
+        if time.monotonic() - self._bringup_settle_t0 < cfg.settle_s:
+            return
+
+        if cfg.release and cfg.wait_for_lowcmd_to_release and not cmd:
+            self._bringup_cmd_t0 = None
+            if not self._bringup_waiting_cmd_announced:
+                print(
+                    "gantry bringup: waiting for deploy ] (LowCmd) before release",
+                    flush=True,
+                )
+                self._bringup_waiting_cmd_announced = True
+            return
+
+        post_settle = float(cfg.post_cmd_settle_s)
+        if cfg.release and post_settle > 0.0:
+            if self._bringup_cmd_t0 is None:
+                self._bringup_cmd_t0 = time.monotonic()
+                pelvis_z = float(self._sim.data.qpos[2])
+                print(
+                    f"gantry bringup: LowCmd active — balancing {post_settle:.1f}s "
+                    f"with harness (pelvis_z={pelvis_z:.3f})",
+                    flush=True,
+                )
+                return
+            if time.monotonic() - self._bringup_cmd_t0 < post_settle:
+                return
+
+        pelvis_z = float(self._sim.data.qpos[2])
+        if cfg.release and cfg.require_standing_to_release:
+            if pelvis_z < cfg.min_pelvis_z or pelvis_z > cfg.max_pelvis_z:
+                if not self._bringup_standing_announced:
+                    print(
+                        f"gantry bringup: waiting for stable stand "
+                        f"(pelvis_z={pelvis_z:.3f}, want {cfg.min_pelvis_z:.2f}–{cfg.max_pelvis_z:.2f})",
+                        flush=True,
+                    )
+                    self._bringup_standing_announced = True
+                return
+            self._bringup_standing_announced = False
+
+        if cfg.release:
+            self._gantry.enable = False
+            self._bringup_released = True
+            print(
+                f"gantry bringup: RELEASED (pelvis_z={pelvis_z:.3f}) — balancing on ground",
+                flush=True,
+            )
+        else:
+            print(f"gantry bringup: done (pelvis_z={pelvis_z:.3f}, crane still on)", flush=True)
+        self._bringup_done = True
+
+    def _write_plant_state(self) -> None:
+        self._plant_state_tick += 1
+        if self._plant_state_tick % 10 != 0:
+            return
+        pelvis_z = float(self._sim.data.qpos[2])
+        gantry_on = bool(self._gantry.enable) if self._gantry is not None else False
+        fallen = pelvis_z < self._sonic.loop.fall_height
+        standing = (
+            self._sonic.gantry.bringup.min_pelvis_z
+            <= pelvis_z
+            <= self._sonic.gantry.bringup.max_pelvis_z
+        )
+        payload = {
+            "pelvis_z": pelvis_z,
+            "gantry_enabled": gantry_on,
+            "bringup_done": self._bringup_done,
+            "bringup_released": self._bringup_released,
+            "lowcmd": self._bridge.cmd_received(),
+            "sim_time": float(self._sim.data.time),
+            "recover_count": self._recover_count,
+            "standing": standing and not fallen,
+            "fallen": fallen,
+        }
+        tmp = self._plant_state_path.with_suffix(".tmp")
+        self._plant_state_path.parent.mkdir(parents=True, exist_ok=True)
+        tmp.write_text(json.dumps(payload))
+        tmp.replace(self._plant_state_path)
 
     @property
     def sim(self) -> G1Simulacrum:
@@ -312,7 +441,11 @@ class SonicDdsSimLoop:
         self._last_depth = None
         self._overlay_refresh = True
         if self._sonic.gantry.enabled:
-            self._gantry = self._make_gantry()
+            if self._bringup_released and self._gantry is not None:
+                # Fall recovery after crane release: keep harness off.
+                self._gantry.enable = False
+            else:
+                self._gantry = self._make_gantry()
 
     def _apply_standing_pose(self) -> None:
         compiled = self._sim.compiled
@@ -362,7 +495,10 @@ class SonicDdsSimLoop:
                 self._lowstate_t0 = time.monotonic()
                 self._lowstate_n0 = 1
                 self._lowstate_sim_t0 = float(data.time)
-            elif time.monotonic() - self._lowstate_t0 >= 5.0:
+            elif (
+                self._lowstate_stats_interval_s > 0.0
+                and time.monotonic() - self._lowstate_t0 >= self._lowstate_stats_interval_s
+            ):
                 wall = time.monotonic() - self._lowstate_t0
                 n = self._lowstate_count - self._lowstate_n0
                 sim_dt = float(data.time) - self._lowstate_sim_t0
@@ -389,6 +525,7 @@ class SonicDdsSimLoop:
                 self._bridge.PublishWirelessController()
 
         if self._gantry is not None and self._sonic.gantry.enabled:
+            self._tick_gantry_bringup()
             self._gantry.apply(self._sim.model, data, self._attach_id)
 
         if loop.wait_for_cmd and not self._bridge.cmd_received():
@@ -408,6 +545,7 @@ class SonicDdsSimLoop:
 
         self._sim.step_physics(sensors=False)
         self._recover_if_exploded("post-step")
+        self._write_plant_state()
 
     def _sensors_due(self) -> bool:
         t = float(self._sim.data.time)

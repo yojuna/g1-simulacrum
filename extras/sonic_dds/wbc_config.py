@@ -55,12 +55,34 @@ class LoopConfig(BaseModel):
     # Fraction of the control slot reserved for LowState + mj_step. Remainder
     # may run lidar/depth; if the tick is already late, those frames drop.
     sensor_budget: float = 0.65
+    # Periodic rt/lowstate rate / sim-wall stats (seconds). 0 = off (default).
+    stats_log_interval_s: float = 0.0
+
+
+class GantryBringupConfig(BaseModel):
+    """Automatic lower-and-release sequence (replaces manual 7/8/9 in viewer)."""
+
+    enabled: bool = False
+    # Lower on sim start (False) vs wait for deploy ] / LowCmd (True).
+    wait_for_lowcmd_to_lower: bool = False
+    # Keep harness on until deploy sends LowCmd, then release (typical sim2sim).
+    wait_for_lowcmd_to_release: bool = True
+    lower_step_m: float = 0.1
+    lower_steps: int = 2
+    lower_interval_ticks: int = 40
+    settle_s: float = 1.0
+    post_cmd_settle_s: float = 5.0
+    require_standing_to_release: bool = True
+    min_pelvis_z: float = 0.55
+    max_pelvis_z: float = 1.05
+    release: bool = True
 
 
 class GantryConfig(BaseModel):
     enabled: bool = True
     attach_body: str = "pelvis"
     mode: Literal["cable", "gear"] = "gear"
+    bringup: GantryBringupConfig = Field(default_factory=GantryBringupConfig)
 
 
 class SonicDdsConfig(BaseModel):
