@@ -20,6 +20,13 @@ do; a plain RoboSuite ``Lift`` does not.
     /path/to/.venv_robocasa/bin/python scripts/export_robocasa_scene.py \
         --env PnPCounterToCab --layout 0 --style 1 --seed 0
 
+    # KitchenDemo with objects. Free-body poses are baked from mjData after
+    # reset (model.get_xml() does not include qpos). --g1-spawn keeps G1 off
+    # the dummy Panda's counter overlap.
+    /path/to/.venv_robocasa/bin/python scripts/export_robocasa_scene.py \
+        --env KitchenDemo --layout one_wall_small --style scandanavian \
+        --seed 0 --set num_objs=3 --g1-spawn 2.0,-1.8,0.82
+
 Runtime (this image)::
 
     ./run.sh python examples/01_empty_arena.py \\
@@ -340,6 +347,78 @@ def _strip_robot(root: ET.Element, prefixes: tuple[str, ...]) -> None:
                 parent.remove(child)
 
 
+def _fmt_vec(values, ndigits: int = 6) -> str:
+    return " ".join(f"{float(v):.{ndigits}f}" for v in values)
+
+
+def _joint_qpos7(model, data, joint_name: str) -> list[float] | None:
+    """7-DoF free-joint qpos from mujoco-py or native MuJoCo bindings."""
+    try:
+        if hasattr(model, "get_joint_qpos_addr"):
+            addr = model.get_joint_qpos_addr(joint_name)
+            start, end = addr if isinstance(addr, tuple) else (addr, addr + 7)
+            return [float(x) for x in data.qpos[start:end]]
+        if hasattr(model, "joint_name2id"):
+            jid = model.joint_name2id(joint_name)
+            adr = int(model.jnt_qposadr[jid])
+            return [float(x) for x in data.qpos[adr : adr + 7]]
+    except Exception:
+        return None
+    return None
+
+
+def _body_world_pose7(model, data, body_name: str) -> list[float] | None:
+    try:
+        bid = model.body_name2id(body_name)
+        pos = data.body_xpos[bid]
+        quat = data.body_xquat[bid]
+        return [float(x) for x in (*pos, *quat)]
+    except Exception:
+        return None
+
+
+def _bake_free_body_poses(root: ET.Element, env) -> int:
+    """Copy post-reset free-body poses onto XML body pos/quat.
+
+    RoboCasa places sampled objects by writing ``mjData.qpos`` after
+    ``env.reset()``. ``model.get_xml()`` dumps the compiled model only, so
+    those bodies would otherwise compile at the origin and explode contacts.
+    """
+    sim = getattr(env, "sim", None)
+    if sim is None:
+        return 0
+    model, data = sim.model, sim.data
+    baked = 0
+    for body in root.iter("body"):
+        free = [j for j in body.findall("joint") if j.get("type") == "free"]
+        if not free:
+            continue
+        pose = None
+        jname = free[0].get("name")
+        if jname:
+            pose = _joint_qpos7(model, data, jname)
+        if pose is None and body.get("name"):
+            pose = _body_world_pose7(model, data, body.get("name"))
+        if pose is None or len(pose) < 7:
+            continue
+        body.set("pos", _fmt_vec(pose[0:3]))
+        body.set("quat", _fmt_vec(pose[3:7]))
+        baked += 1
+    return baked
+
+
+def _parse_g1_spawn(raw: str | None) -> tuple[float, float, float] | None:
+    if not raw:
+        return None
+    parts = [p.strip() for p in raw.replace(" ", ",").split(",") if p.strip()]
+    if len(parts) != 3:
+        raise SystemExit(f"--g1-spawn expects x,y,z got {raw!r}")
+    try:
+        return float(parts[0]), float(parts[1]), float(parts[2])
+    except ValueError as exc:
+        raise SystemExit(f"--g1-spawn expects floats, got {raw!r}") from exc
+
+
 def _spawn_xy(root: ET.Element, prefixes: tuple[str, ...], env) -> tuple[float, float]:
     try:
         model = env.robots[0].robot_model
@@ -489,6 +568,7 @@ def _write_pin(
     slug: str,
     extra: dict,
     n_assets: int,
+    n_baked: int,
     spawn: tuple[float, float, float],
     scene_path: Path,
 ) -> None:
@@ -512,6 +592,7 @@ def _write_pin(
         f"| extra kwargs | `{extra_txt}` |",
         f"| robocasa | `{Path(robocasa.__file__).resolve()}` |",
         f"| assets copied | `{n_assets}` |",
+        f"| baked free bodies | `{n_baked}` |",
         f"| G1 spawn_pos | `{spawn[0]:.5f} {spawn[1]:.5f} {spawn[2]:.5f}` |",
         "",
         f"Scene sha256 `{_sha256(scene_path)}`.",
@@ -520,13 +601,24 @@ def _write_pin(
     path.write_text("\n".join(lines))
 
 
-def _write_runtime_config(path: Path, spawn: tuple[float, float, float]) -> None:
+def _write_runtime_config(
+    path: Path,
+    spawn: tuple[float, float, float],
+    *,
+    spawn_override: bool = False,
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    comment = (
+        "# Spawn for a cached RoboCasa dump (--g1-spawn). "
+        "Dummy Panda XY often overlaps the counter.\n"
+        if spawn_override
+        else "# Spawn for a cached RoboCasa dump. Other keys use G1SimulacrumConfig defaults.\n"
+    )
     path.write_text(
-        "# Spawn for a cached RoboCasa dump. Other keys use G1SimulacrumConfig defaults.\n"
-        "robot:\n"
-        f"  spawn_pos: [{spawn[0]:.6f}, {spawn[1]:.6f}, {spawn[2]:.6f}]\n"
-        "  spawn_quat: [1.0, 0.0, 0.0, 0.0]\n"
+        comment
+        + "robot:\n"
+        + f"  spawn_pos: [{spawn[0]:.6f}, {spawn[1]:.6f}, {spawn[2]:.6f}]\n"
+        + "  spawn_quat: [1.0, 0.0, 0.0, 0.0]\n"
     )
 
 
@@ -577,6 +669,12 @@ def main() -> None:
         metavar="KEY=VALUE",
         help="extra env __init__ kwargs (obj_instance_split=A, init_robot_base_pos=counter, …)",
     )
+    parser.add_argument(
+        "--g1-spawn",
+        default=None,
+        metavar="X,Y,Z",
+        help="G1 spawn_pos override (dummy Panda XY often overlaps the counter)",
+    )
     args = parser.parse_args()
     if args.list:
         _list_and_exit()
@@ -602,9 +700,14 @@ def main() -> None:
     )
     prefixes = _robot_prefixes(env)
     dumped = ET.fromstring(_dumped_xml(env))
-    spawn_x, spawn_y = _spawn_xy(dumped, prefixes, env)
-    spawn = (spawn_x, spawn_y, G1_SPAWN_Z)
+    spawn_override = _parse_g1_spawn(args.g1_spawn)
+    if spawn_override is not None:
+        spawn = spawn_override
+    else:
+        spawn_x, spawn_y = _spawn_xy(dumped, prefixes, env)
+        spawn = (spawn_x, spawn_y, G1_SPAWN_Z)
     _strip_robot(dumped, prefixes)
+    n_baked = _bake_free_body_poses(dumped, env)
     _shell_dumped_meshes(dumped)
 
     asset_dest = MJCF / "assets" / "robocasa" / slug
@@ -630,15 +733,17 @@ def main() -> None:
         slug=slug,
         extra=extra,
         n_assets=n_assets,
+        n_baked=n_baked,
         spawn=spawn,
         scene_path=scene_path,
     )
     cfg_path = CONFIGS / f"robocasa_{slug}.yaml"
-    _write_runtime_config(cfg_path, spawn)
+    _write_runtime_config(cfg_path, spawn, spawn_override=spawn_override is not None)
 
     env.close()
     print(f"cached {scene_path.relative_to(ROOT)}")
     print(f"  assets {n_assets} → {asset_dest.relative_to(ROOT)}")
+    print(f"  baked {n_baked} free-body poses from mjData")
     print(f"  spawn {spawn[0]:.4f} {spawn[1]:.4f} {spawn[2]:.4f}")
     print(f"  config {cfg_path.relative_to(ROOT)}")
     print(

@@ -149,6 +149,27 @@ def test_sensor_manager_lidar_depth_hooks_when_disabled() -> None:
     assert mgr.step_depth(t) is None
 
 
+def test_pick_budgeted_sensor_alternates_when_both_due() -> None:
+    from extras.sonic_dds.sim_loop import pick_budgeted_sensor
+
+    assert pick_budgeted_sensor(False, False, "") is None
+    assert pick_budgeted_sensor(True, False, "") == "lidar"
+    assert pick_budgeted_sensor(False, True, "") == "depth"
+    assert pick_budgeted_sensor(True, True, "") == "lidar"
+    assert pick_budgeted_sensor(True, True, "lidar") == "depth"
+    assert pick_budgeted_sensor(True, True, "depth") == "lidar"
+
+
+def test_overlay_presets_sparse_is_default() -> None:
+    from extras.sonic_dds.overlay import OverlayConfig, overlay_from_preset
+
+    sparse = overlay_from_preset("sparse")
+    default = OverlayConfig()
+    assert sparse.lidar_dots == default.lidar_dots == 1800
+    assert overlay_from_preset("full").lidar_dots == 0
+    assert overlay_from_preset("full").depth_stride == 2
+
+
 def test_compute_body_torques_clips_q_des_to_joint_range() -> None:
     sim = _minimal_sim()
     name = BODY_JOINT_NAMES[0]

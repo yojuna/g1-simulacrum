@@ -29,10 +29,43 @@ _PIP_FAR = 3.0
 
 @dataclass
 class OverlayConfig:
-    lidar_dots: int = 1800
+    lidar_dots: int = 1800  # 0 = every Mid-360 return (~24k)
     depth_stride: int = 16
     lidar_radius: float = 0.012
     depth_radius: float = 0.018
+
+
+# Inspect-viewer density only. Does not change lidar/depth sample counts.
+OVERLAY_PRESETS: dict[str, dict[str, float | int]] = {
+    "sparse": {
+        "lidar_dots": 1800,
+        "depth_stride": 16,
+        "lidar_radius": 0.012,
+        "depth_radius": 0.018,
+    },
+    "dense": {
+        "lidar_dots": 0,
+        "depth_stride": 4,
+        "lidar_radius": 0.006,
+        "depth_radius": 0.008,
+    },
+    "full": {
+        "lidar_dots": 0,
+        "depth_stride": 2,
+        "lidar_radius": 0.004,
+        "depth_radius": 0.005,
+    },
+}
+
+
+def overlay_from_preset(name: str) -> OverlayConfig:
+    if name not in OVERLAY_PRESETS:
+        known = ", ".join(OVERLAY_PRESETS)
+        raise ValueError(f"unknown overlay preset {name!r} (known: {known})")
+    cfg = OverlayConfig()
+    for key, value in OVERLAY_PRESETS[name].items():
+        setattr(cfg, key, value)
+    return cfg
 
 
 def _site_world(

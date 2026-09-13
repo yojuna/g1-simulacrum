@@ -1,4 +1,4 @@
-# Spawn for a cached RoboCasa dump. Other keys use G1SimulacrumConfig defaults.
+# Spawn for a cached RoboCasa dump (--g1-spawn). Dummy Panda XY often overlaps the counter.
 robot:
-  spawn_pos: [3.123805, -0.860000, 0.820000]
+  spawn_pos: [2.000000, -1.800000, 0.820000]
   spawn_quat: [1.0, 0.0, 0.0, 0.0]

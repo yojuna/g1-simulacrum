@@ -67,6 +67,9 @@ class GantryBringupConfig(BaseModel):
     wait_for_lowcmd_to_lower: bool = False
     # Keep harness on until deploy sends LowCmd, then release (typical sim2sim).
     wait_for_lowcmd_to_release: bool = True
+    # Drop crane wrench when LowCmd starts (before post_cmd_settle_s timer).
+    # Default false: keep harness on through post_cmd_settle_s, then release.
+    release_harness_on_lowcmd: bool = False
     lower_step_m: float = 0.1
     lower_steps: int = 2
     lower_interval_ticks: int = 40

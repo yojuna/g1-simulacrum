@@ -14,6 +14,7 @@ Terminal 2 (GEAR deploy, also Docker with host network)::
 Deploy controls: ``]`` init, ``9`` gantry, ``T`` planner, ``O`` operator.
 Viewer (this window): ``7``/``8`` hold height, ``9`` toggle crane (GEAR); numpad trolley.
 ``--sensors``: leftover-budget Mid-360/D435i + inspect overlays (not in ``step_physics``).
+``--overlay sparse|dense|full``: overlay density (default sparse). Does not change sensor rates.
 """
 
 from __future__ import annotations
@@ -76,6 +77,12 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Enable Mid-360 + D435i on leftover control-slot budget + GLFW overlays",
     )
+    p.add_argument(
+        "--overlay",
+        choices=("sparse", "dense", "full"),
+        default="sparse",
+        help="GLFW overlay density (default sparse: 1800 lidar boxes). Used with --sensors",
+    )
     return p.parse_args()
 
 
@@ -107,6 +114,7 @@ def main() -> None:
         return
 
     from extras.sonic_dds import SonicDdsConfig, SonicDdsSimLoop  # noqa: E402
+    from extras.sonic_dds.overlay import overlay_from_preset  # noqa: E402
 
     sonic_cfg = SonicDdsConfig.from_yaml(args.sonic_config)
 
@@ -120,7 +128,12 @@ def main() -> None:
         sonic_cfg.loop.onscreen = False
 
     print("=== g1-simulacrum SONIC DDS (sim + viewer + DDS, one process) ===", flush=True)
-    loop = SonicDdsSimLoop(sim_cfg, sonic_cfg, scene_xml=args.scene)
+    loop = SonicDdsSimLoop(
+        sim_cfg,
+        sonic_cfg,
+        scene_xml=args.scene,
+        overlay=overlay_from_preset(args.overlay),
+    )
     loop.reset()
     print(
         "\nStart deploy in another terminal (host network):\n"

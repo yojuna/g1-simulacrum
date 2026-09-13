@@ -37,6 +37,21 @@ from .overlay import (
 from .unitree_sdk2py_bridge import UnitreeSdk2Bridge
 from .wbc_config import DEFAULT_STANDING_Q, SonicDdsConfig, bridge_config_dict
 
+
+def pick_budgeted_sensor(lidar_due: bool, depth_due: bool, last: str) -> str | None:
+    """At most one leftover-budget sensor per tick. Alternate when both are due.
+
+    Always preferring lidar starves D435i: skipped scans stay due, so every
+    leftover slot is claimed by Mid-360 and depth stays at 0 Hz.
+    """
+    if lidar_due and depth_due:
+        return "depth" if last == "lidar" else "lidar"
+    if lidar_due:
+        return "lidar"
+    if depth_due:
+        return "depth"
+    return None
+
 # GLFW keycodes — GEAR ElasticBand uses number-row 7/8/9; inspect viewer uses numpad.
 _GLFW_KEY_7 = 55
 _GLFW_KEY_8 = 56
@@ -111,6 +126,7 @@ class SonicDdsSimLoop:
         *,
         scene_xml: str | Path | None = None,
         onscreen: bool | None = None,
+        overlay: OverlayConfig | None = None,
     ) -> None:
         self._sonic = sonic_config
         self._wbc = bridge_config_dict(sonic_config)
@@ -187,7 +203,7 @@ class SonicDdsSimLoop:
         self._lowstate_sim_t0 = 0.0
         self._lowstate_stats_interval_s = float(sonic_config.loop.stats_log_interval_s)
         self._recover_count = 0
-        self._overlay = OverlayConfig()
+        self._overlay = overlay if overlay is not None else OverlayConfig()
         self._overlay_inited = [0]
         self._overlay_drawn = [0, 0]
         self._overlay_refresh = False
@@ -196,6 +212,7 @@ class SonicDdsSimLoop:
         self._lidar_ok = 0
         self._depth_ok = 0
         self._sensor_skip = 0
+        self._sensor_turn = ""
         self._bringup_done = not (
             sonic_config.gantry.enabled and sonic_config.gantry.bringup.enabled
         )
@@ -263,11 +280,20 @@ class SonicDdsSimLoop:
             if self._bringup_cmd_t0 is None:
                 self._bringup_cmd_t0 = time.monotonic()
                 pelvis_z = float(self._sim.data.qpos[2])
-                print(
-                    f"gantry bringup: LowCmd active — balancing {post_settle:.1f}s "
-                    f"with harness (pelvis_z={pelvis_z:.3f})",
-                    flush=True,
-                )
+                if cfg.release_harness_on_lowcmd and self._gantry is not None:
+                    self._gantry.enable = False
+                    self._bringup_released = True
+                    print(
+                        f"gantry bringup: LowCmd active — harness OFF, "
+                        f"balancing {post_settle:.1f}s on policy (pelvis_z={pelvis_z:.3f})",
+                        flush=True,
+                    )
+                else:
+                    print(
+                        f"gantry bringup: LowCmd active — balancing {post_settle:.1f}s "
+                        f"with harness (pelvis_z={pelvis_z:.3f})",
+                        flush=True,
+                    )
                 return
             if time.monotonic() - self._bringup_cmd_t0 < post_settle:
                 return
@@ -286,12 +312,19 @@ class SonicDdsSimLoop:
             self._bringup_standing_announced = False
 
         if cfg.release:
-            self._gantry.enable = False
-            self._bringup_released = True
-            print(
-                f"gantry bringup: RELEASED (pelvis_z={pelvis_z:.3f}) — balancing on ground",
-                flush=True,
-            )
+            if not self._bringup_released:
+                if self._gantry is not None:
+                    self._gantry.enable = False
+                self._bringup_released = True
+                print(
+                    f"gantry bringup: RELEASED (pelvis_z={pelvis_z:.3f}) — balancing on ground",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"gantry bringup: done (pelvis_z={pelvis_z:.3f}) — policy on ground",
+                    flush=True,
+                )
         else:
             print(f"gantry bringup: done (pelvis_z={pelvis_z:.3f}, crane still on)", flush=True)
         self._bringup_done = True
@@ -413,9 +446,10 @@ class SonicDdsSimLoop:
             self._viewer.cam.trackbodyid = pelvis
         if self._sonic.loop.cameras:
             configure_overlay_viewer(self._viewer)
+            dots = "all" if self._overlay.lidar_dots <= 0 else str(self._overlay.lidar_dots)
             print(
                 "Overlay: green Mid-360, cyan depth, orange FOV, depth PiP "
-                f"(lidar_dots={self._overlay.lidar_dots}, "
+                f"(lidar_dots={dots}, "
                 f"depth_stride={self._overlay.depth_stride})",
                 flush=True,
             )
@@ -526,7 +560,8 @@ class SonicDdsSimLoop:
 
         if self._gantry is not None and self._sonic.gantry.enabled:
             self._tick_gantry_bringup()
-            self._gantry.apply(self._sim.model, data, self._attach_id)
+            if self._gantry.enable:
+                self._gantry.apply(self._sim.model, data, self._attach_id)
 
         if loop.wait_for_cmd and not self._bridge.cmd_received():
             mujoco.mj_forward(self._sim.model, data)
@@ -571,19 +606,24 @@ class SonicDdsSimLoop:
             return
         t = float(self._sim.data.time)
         mgr = self._sim.sensor_manager
-        if mgr.lidar_due(t):
+        which = pick_budgeted_sensor(
+            mgr.lidar_due(t), mgr.depth_due(t), self._sensor_turn
+        )
+        if which == "lidar":
             cloud = mgr.step_lidar(t)
             if cloud is not None:
                 self._last_cloud = cloud
                 self._lidar_ok += 1
                 self._overlay_refresh = True
+            self._sensor_turn = "lidar"
             return
-        if mgr.depth_due(t):
+        if which == "depth":
             depth = mgr.step_depth(t)
             if depth is not None:
                 self._last_depth = depth
                 self._depth_ok += 1
                 self._overlay_refresh = True
+            self._sensor_turn = "depth"
 
     def _paint_overlays(self) -> None:
         if self._viewer is None or not self._sonic.loop.cameras:
