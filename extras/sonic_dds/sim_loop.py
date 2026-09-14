@@ -223,7 +223,9 @@ class SonicDdsSimLoop:
         self._bringup_cmd_t0: float | None = None
         self._bringup_waiting_cmd_announced = False
         self._bringup_standing_announced = False
-        self._plant_state_path = Path("/workspace/ws_sonic_redux/logs/.plant_state.json")
+        self._plant_state_path = Path(
+            "/workspace/docker/ws_sonic_redux/logs/.plant_state.json"
+        )
         self._plant_state_tick = 0
 
     def _tick_gantry_bringup(self) -> None:

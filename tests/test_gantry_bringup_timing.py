@@ -12,7 +12,7 @@ from extras.sonic_dds.wbc_config import GantryBringupConfig, SonicDdsConfig  # n
 
 def _redux_backend_dir() -> Path:
     here = Path(__file__).resolve()
-    docker = Path("/workspace/ws_sonic_redux/configs/backends/g1_simulacrum")
+    docker = Path("/workspace/docker/ws_sonic_redux/configs/backends/g1_simulacrum")
     if docker.is_dir():
         return docker
     try:
