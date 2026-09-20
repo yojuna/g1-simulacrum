@@ -1,4 +1,4 @@
-"""Tests for Phase 2 dedicated lidar worker."""
+"""Tests for Phase 2 dedicated depth worker."""
 
 from __future__ import annotations
 
@@ -10,15 +10,15 @@ _PKG = Path(__file__).resolve().parents[1]
 if str(_PKG) not in sys.path:
     sys.path.insert(0, str(_PKG))
 
-from extras.sonic_dds.lidar_worker import LidarWorker  # noqa: E402
+from extras.sonic_dds.depth_worker import DepthWorker  # noqa: E402
 from extras.sonic_dds.pose_snapshot import PoseSnapshotBuffer  # noqa: E402
 from g1_simulacrum import G1Simulacrum, G1SimulacrumConfig  # noqa: E402
 
 
 def _sensorized_sim() -> G1Simulacrum:
     cfg = G1SimulacrumConfig()
-    cfg.sensors.mid360.enabled = True
-    cfg.sensors.d435i.enabled = False
+    cfg.sensors.mid360.enabled = False
+    cfg.sensors.d435i.enabled = True
     cfg.sensors.imu.mid360.enabled = False
     cfg.sensors.imu.d435i.enabled = False
     sim = G1Simulacrum(config=cfg)
@@ -27,22 +27,23 @@ def _sensorized_sim() -> G1Simulacrum:
     return sim
 
 
-def test_lidar_worker_produces_cloud() -> None:
+def test_depth_worker_produces_frame() -> None:
     sim = _sensorized_sim()
     buf = PoseSnapshotBuffer()
-    worker = LidarWorker(sim.model, sim.config.sensors.mid360, buf, rate_hz=20.0)
+    worker = DepthWorker(sim.model, sim.config.sensors.d435i, buf, rate_hz=15.0)
     worker.start()
     try:
-        deadline = time.monotonic() + 3.0
+        deadline = time.monotonic() + 5.0
         while time.monotonic() < deadline:
             buf.publish(sim.data)
-            if worker.last_scan_seq() > 0:
-                cloud = worker.get_last_cloud()
-                assert cloud is not None
-                assert cloud.num_points > 0
-                assert worker.stats().scans >= 1
+            if worker.last_frame_seq() > 0:
+                depth = worker.get_last_depth()
+                assert depth is not None
+                assert depth.depth.shape[0] > 0
+                assert depth.rgb.shape[0] > 0
+                assert worker.stats().frames >= 1
                 return
             time.sleep(0.02)
-        raise AssertionError("lidar worker did not produce a cloud within 3s")
+        raise AssertionError("depth worker did not produce a frame within 5s")
     finally:
         worker.stop()

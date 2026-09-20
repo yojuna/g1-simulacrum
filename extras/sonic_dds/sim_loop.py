@@ -40,8 +40,7 @@ from .plant_state import (
     resolve_plant_state_path,
     write_plant_state,
 )
-from .lidar_worker import LidarWorker
-from .pose_snapshot import PoseSnapshotBuffer
+from .sensor_worker_group import SensorWorkerGroup
 from .unitree_sdk2py_bridge import UnitreeSdk2Bridge
 from .wbc_config import DEFAULT_STANDING_Q, SonicDdsConfig, bridge_config_dict
 
@@ -157,7 +156,7 @@ class SonicDdsSimLoop:
                 f"sonic hands={sonic_config.hands!r} != sim robot.hands={sim_config.robot.hands!r}"
             )
 
-        if not sonic_config.loop.cameras:
+        if not sonic_config.loop.cameras or sonic_config.loop.sensor_workers:
             disable_dds_cameras(sim_config)
 
         sim_config.controller = ControllerConfig(
@@ -185,8 +184,8 @@ class SonicDdsSimLoop:
         budget = sonic_config.loop.sensor_budget
         if sonic_config.loop.cameras and sonic_config.loop.sensor_workers:
             sensors_how = (
-                f"dedicated threads (lidar @ {sim_config.sensors.mid360.rate_hz:.0f} Hz; "
-                "depth on leftover budget until PR2)"
+                f"dedicated threads (lidar @ {sim_config.sensors.mid360.rate_hz:.0f} Hz, "
+                f"depth @ {sim_config.sensors.d435i.rate_hz:.0f} Hz; not in step_physics)"
             )
         elif sonic_config.loop.cameras:
             sensors_how = (
@@ -259,40 +258,37 @@ class SonicDdsSimLoop:
         self._plant_state_warned = False
         self._plant_state_tick = 0
         self._kinematics_writer, self._kinematics_bodies = _plant_tick_writer()
-        self._pose_buffer: PoseSnapshotBuffer | None = None
-        self._lidar_worker: LidarWorker | None = None
-        self._lidar_worker_scan_seq = 0
+        self._sensor_workers: SensorWorkerGroup | None = None
         if sonic_config.loop.cameras and sonic_config.loop.sensor_workers:
-            self._pose_buffer = PoseSnapshotBuffer()
-            self._lidar_worker = LidarWorker(
+            self._sensor_workers = SensorWorkerGroup.from_configs(
                 self._sim.model,
                 sim_config.sensors.mid360,
-                self._pose_buffer,
+                sim_config.sensors.d435i,
             )
 
     def _start_sensor_workers(self) -> None:
-        if self._lidar_worker is not None:
-            self._lidar_worker.start()
+        if self._sensor_workers is not None:
+            self._sensor_workers.start()
 
     def _stop_sensor_workers(self) -> None:
-        if self._lidar_worker is not None:
-            self._lidar_worker.stop()
+        if self._sensor_workers is not None:
+            self._sensor_workers.stop()
 
     def _publish_pose_snapshot(self) -> None:
-        if self._pose_buffer is not None:
-            self._pose_buffer.publish(self._sim.data)
+        if self._sensor_workers is not None:
+            self._sensor_workers.publish(self._sim.data)
 
-    def _poll_lidar_worker(self) -> None:
-        if self._lidar_worker is None:
+    def _poll_sensor_workers(self) -> None:
+        if self._sensor_workers is None:
             return
-        seq = self._lidar_worker.last_scan_seq()
-        if seq == self._lidar_worker_scan_seq:
-            return
-        self._lidar_worker_scan_seq = seq
-        cloud = self._lidar_worker.get_last_cloud()
-        if cloud is not None:
-            self._last_cloud = cloud
-            self._lidar_ok += 1
+        poll = self._sensor_workers.poll()
+        if poll.cloud is not None:
+            self._last_cloud = poll.cloud
+            self._lidar_ok += poll.lidar_frames
+            self._overlay_refresh = True
+        if poll.depth is not None:
+            self._last_depth = poll.depth
+            self._depth_ok += poll.depth_frames
             self._overlay_refresh = True
 
     def _tick_gantry_bringup(self) -> None:
@@ -762,7 +758,7 @@ class SonicDdsSimLoop:
         future. A scan may still overrun; ``run`` then skips sleep until the
         absolute schedule catches up so RTF can return to 1.
         """
-        if not self._sonic.loop.cameras:
+        if not self._sonic.loop.cameras or self._sonic.loop.sensor_workers:
             return
         due = self._sensors_due()
         now = time.monotonic()
@@ -774,9 +770,8 @@ class SonicDdsSimLoop:
             return
         t = float(self._sim.data.time)
         mgr = self._sim.sensor_manager
-        lidar_due = mgr.lidar_due(t) and self._lidar_worker is None
         which = pick_budgeted_sensor(
-            lidar_due, mgr.depth_due(t), self._sensor_turn
+            mgr.lidar_due(t), mgr.depth_due(t), self._sensor_turn
         )
         if which == "lidar":
             cloud = mgr.step_lidar(t)
@@ -835,7 +830,7 @@ class SonicDdsSimLoop:
                     break
                 self.sim_step()
                 self._publish_pose_snapshot()
-                self._poll_lidar_worker()
+                self._poll_sensor_workers()
                 self._maybe_step_sensors(deadline)
                 if self._viewer is not None:
                     # Always sync the viewer from live MjData every control tick.
