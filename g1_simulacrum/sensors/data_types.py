@@ -50,6 +50,8 @@ class DepthFrame:
     intrinsics: CameraIntrinsics = field(default_factory=CameraIntrinsics)
     timestamp: float = 0.0
     frame_id: str = "d435i_color_optical_frame"
+    ref_proprio_seq: int = 0
+    T_world_camera: NDArray[np.float64] | None = None
 
 
 @dataclass(frozen=True, slots=True)

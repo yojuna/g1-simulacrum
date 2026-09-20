@@ -66,8 +66,8 @@ class SensorWorkerGroup:
         self.depth.stop()
         self.lidar.stop()
 
-    def publish(self, data: mujoco.MjData) -> None:
-        self.pose_buffer.publish(data)
+    def publish(self, data: mujoco.MjData, *, ref_proprio_seq: int = 0) -> None:
+        self.pose_buffer.publish(data, ref_proprio_seq=ref_proprio_seq)
 
     def worker_skips(self) -> tuple[int, int]:
         """Cumulative skip counts (lidar, depth) when a scan period was missed."""

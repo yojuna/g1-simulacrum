@@ -22,6 +22,7 @@ class PoseSnapshot:
     seq: int
     qpos: NDArray[np.float64]
     qvel: NDArray[np.float64]
+    ref_proprio_seq: int = 0
 
 
 class PoseSnapshotBuffer:
@@ -37,7 +38,12 @@ class PoseSnapshotBuffer:
         with self._lock:
             return self._seq
 
-    def publish(self, data: mujoco.MjData) -> PoseSnapshot:
+    def publish(
+        self,
+        data: mujoco.MjData,
+        *,
+        ref_proprio_seq: int = 0,
+    ) -> PoseSnapshot:
         with self._lock:
             self._seq += 1
             snap = PoseSnapshot(
@@ -45,6 +51,7 @@ class PoseSnapshotBuffer:
                 seq=self._seq,
                 qpos=np.asarray(data.qpos, dtype=np.float64).copy(),
                 qvel=np.asarray(data.qvel, dtype=np.float64).copy(),
+                ref_proprio_seq=int(ref_proprio_seq),
             )
             self._latest = snap
             return snap
@@ -59,6 +66,7 @@ class PoseSnapshotBuffer:
                 seq=snap.seq,
                 qpos=snap.qpos.copy(),
                 qvel=snap.qvel.copy(),
+                ref_proprio_seq=int(snap.ref_proprio_seq),
             )
 
 

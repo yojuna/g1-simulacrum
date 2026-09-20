@@ -12,6 +12,7 @@ from g1_simulacrum.config import D435iConfig
 from g1_simulacrum.sensors.d435i import D435iCamera
 from g1_simulacrum.sensors.data_types import DepthFrame
 
+from .platform_extero import camera_T_world_optical
 from .pose_snapshot import PoseSnapshotBuffer, apply_snapshot
 
 
@@ -97,7 +98,24 @@ class DepthWorker:
                 next_wake = now
 
             apply_snapshot(self._model, self._worker_data, snap)
-            depth = self._camera.read(snap.time)
+            raw = self._camera.read(snap.time)
+            try:
+                T_wc = camera_T_world_optical(
+                    self._model,
+                    self._worker_data,
+                    self._camera._config.rgb_camera,
+                )
+            except ValueError:
+                T_wc = None
+            depth = DepthFrame(
+                rgb=raw.rgb,
+                depth=raw.depth,
+                intrinsics=raw.intrinsics,
+                timestamp=raw.timestamp,
+                frame_id=raw.frame_id,
+                ref_proprio_seq=int(snap.ref_proprio_seq),
+                T_world_camera=T_wc,
+            )
             with self._lock:
                 self._last_depth = depth
                 self._last_frame_seq += 1

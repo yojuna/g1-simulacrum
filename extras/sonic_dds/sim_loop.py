@@ -29,6 +29,12 @@ from .lowcmd_actuation import (
     compute_hand_torques,
 )
 from .observation_adapter import prepare_obs_dict
+from .platform_extero import (
+    PlantExteroPublisher,
+    build_exteroception_dict,
+    default_bind_addr as default_extero_bind_addr,
+    extero_enabled,
+)
 from .platform_proprio import (
     PlantProprioPublisher,
     build_proprioception_dict,
@@ -247,6 +253,10 @@ class SonicDdsSimLoop:
         self._proprio_publisher: PlantProprioPublisher | None = None
         if proprio_enabled():
             self._proprio_publisher = PlantProprioPublisher(default_bind_addr())
+        self._extero_seq = 0
+        self._extero_publisher: PlantExteroPublisher | None = None
+        if extero_enabled() and sonic_config.loop.cameras:
+            self._extero_publisher = PlantExteroPublisher(default_extero_bind_addr())
         self._kinematics_writer, self._kinematics_bodies = _plant_tick_writer()
         self._sensor_workers: SensorWorkerGroup | None = None
         if sonic_config.loop.cameras:
@@ -266,7 +276,10 @@ class SonicDdsSimLoop:
 
     def _publish_pose_snapshot(self) -> None:
         if self._sensor_workers is not None:
-            self._sensor_workers.publish(self._sim.data)
+            self._sensor_workers.publish(
+                self._sim.data,
+                ref_proprio_seq=self._proprio_seq,
+            )
 
     def _poll_sensor_workers(self) -> None:
         if self._sensor_workers is None:
@@ -280,6 +293,7 @@ class SonicDdsSimLoop:
             self._last_depth = poll.depth
             self._depth_ok += poll.depth_frames
             self._overlay_refresh = True
+            self._publish_exteroception(poll.depth)
 
     def _tick_gantry_bringup(self) -> None:
         cfg = self._sonic.gantry.bringup
@@ -755,6 +769,24 @@ class SonicDdsSimLoop:
             self._proprio_publisher.close()
             self._proprio_publisher = None
 
+    def _publish_exteroception(self, frame) -> None:
+        publisher = self._extero_publisher
+        if publisher is None:
+            return
+        self._extero_seq += 1
+        ref_seq = int(frame.ref_proprio_seq or self._proprio_seq)
+        payload = build_exteroception_dict(
+            frame,
+            seq=self._extero_seq,
+            ref_proprio_seq=ref_seq,
+        )
+        publisher.publish_dict(payload)
+
+    def _close_extero_publisher(self) -> None:
+        if self._extero_publisher is not None:
+            self._extero_publisher.close()
+            self._extero_publisher = None
+
     def _paint_overlays(self) -> None:
         if self._viewer is None or not self._overlay_enabled:
             return
@@ -816,6 +848,7 @@ class SonicDdsSimLoop:
         finally:
             self._stop_sensor_workers()
             self._close_proprio_publisher()
+            self._close_extero_publisher()
             self._close_viewer()
             self._running = False
 
