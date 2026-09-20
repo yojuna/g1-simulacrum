@@ -118,7 +118,7 @@ def test_apply_gear_parity_keeps_default_timestep_and_syncs_loop_hz() -> None:
     assert sonic.loop.control_hz == 200.0
     assert sonic.gantry.mode == "gear"
     assert sonic.gantry.attach_body == "pelvis"
-    assert sonic.loop.cameras is False
+    assert sonic.loop.cameras is True
 
 
 def test_step_physics_sensors_false_does_not_call_manager(monkeypatch) -> None:
@@ -148,13 +148,14 @@ def test_sensor_manager_lidar_depth_hooks_when_disabled() -> None:
     assert mgr.step_depth(t) is None
 
 
-def test_overlay_presets_sparse_is_default() -> None:
+def test_overlay_presets_dense_is_default() -> None:
     from extras.sonic_dds.overlay import OverlayConfig, overlay_from_preset
 
-    sparse = overlay_from_preset("sparse")
+    dense = overlay_from_preset("dense")
     default = OverlayConfig()
-    assert sparse.lidar_dots == default.lidar_dots == 1800
-    assert overlay_from_preset("full").lidar_dots == 0
+    assert dense.lidar_dots == default.lidar_dots == 0
+    assert dense.depth_stride == default.depth_stride == 4
+    assert overlay_from_preset("sparse").lidar_dots == 1800
     assert overlay_from_preset("full").depth_stride == 2
 
 

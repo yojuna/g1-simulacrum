@@ -13,8 +13,8 @@ Terminal 2 (GEAR deploy, also Docker with host network)::
 
 Deploy controls: ``]`` init, ``9`` gantry, ``T`` planner, ``O`` operator.
 Viewer (this window): ``7``/``8`` hold height, ``9`` toggle crane (GEAR); numpad trolley.
-``--sensors``: dedicated-thread Mid-360/D435i + inspect overlays (not in ``step_physics``).
-``--overlay sparse|dense|full``: overlay density (default sparse). Does not change sensor rates.
+Sensors (Mid-360 + D435i worker threads) are on by default (not in ``step_physics``).
+``--no-sensors`` disables them. ``--overlay sparse|dense|full`` enables GLFW debug overlays.
 """
 
 from __future__ import annotations
@@ -73,15 +73,15 @@ def _parse_args() -> argparse.Namespace:
         "does not widen MuJoCo timestep",
     )
     p.add_argument(
-        "--sensors",
+        "--no-sensors",
         action="store_true",
-        help="Enable Mid-360 + D435i on dedicated worker threads + GLFW overlays",
+        help="Disable Mid-360 + D435i worker threads (on by default)",
     )
     p.add_argument(
         "--overlay",
         choices=("sparse", "dense", "full"),
-        default="sparse",
-        help="GLFW overlay density (default sparse: 1800 lidar boxes). Used with --sensors",
+        default=None,
+        help="Enable GLFW lidar/depth debug overlays (off by default). sparse|dense|full",
     )
     return p.parse_args()
 
@@ -122,17 +122,18 @@ def main() -> None:
         sonic_cfg.gantry.enabled = False
     if args.gear_parity:
         sonic_cfg.loop.gear_parity = True
-    if args.sensors:
-        sonic_cfg.loop.cameras = True
+    if args.no_sensors:
+        sonic_cfg.loop.cameras = False
     if args.headless:
         sonic_cfg.loop.onscreen = False
 
     print("=== g1-simulacrum SONIC DDS (sim + viewer + DDS, one process) ===", flush=True)
+    overlay = overlay_from_preset(args.overlay) if args.overlay else None
     loop = SonicDdsSimLoop(
         sim_cfg,
         sonic_cfg,
         scene_xml=args.scene,
-        overlay=overlay_from_preset(args.overlay),
+        overlay=overlay,
     )
     loop.reset()
     print(

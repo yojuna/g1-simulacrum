@@ -2,7 +2,7 @@
 
 Copied from ``examples/01_empty_arena.py`` so the DDS loop can show the same
 green Mid-360 / cyan depth / orange FOV / depth PiP without blocking LowState.
-Sparse by default: overlays are debug, not the sensor sample count.
+Dense lidar overlay by default (all returns). Box radii are viewer-only.
 """
 
 from __future__ import annotations
@@ -29,10 +29,10 @@ _PIP_FAR = 3.0
 
 @dataclass
 class OverlayConfig:
-    lidar_dots: int = 1800  # 0 = every Mid-360 return (~24k)
-    depth_stride: int = 16
-    lidar_radius: float = 0.012
-    depth_radius: float = 0.018
+    lidar_dots: int = 0  # 0 = every Mid-360 return (~24k)
+    depth_stride: int = 4
+    lidar_radius: float = 0.003
+    depth_radius: float = 0.004
 
 
 # Inspect-viewer density only. Does not change lidar/depth sample counts.
@@ -40,20 +40,20 @@ OVERLAY_PRESETS: dict[str, dict[str, float | int]] = {
     "sparse": {
         "lidar_dots": 1800,
         "depth_stride": 16,
-        "lidar_radius": 0.012,
-        "depth_radius": 0.018,
+        "lidar_radius": 0.006,
+        "depth_radius": 0.009,
     },
     "dense": {
         "lidar_dots": 0,
         "depth_stride": 4,
-        "lidar_radius": 0.006,
-        "depth_radius": 0.008,
+        "lidar_radius": 0.003,
+        "depth_radius": 0.004,
     },
     "full": {
         "lidar_dots": 0,
         "depth_stride": 2,
-        "lidar_radius": 0.004,
-        "depth_radius": 0.005,
+        "lidar_radius": 0.002,
+        "depth_radius": 0.0025,
     },
 }
 

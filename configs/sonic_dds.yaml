@@ -20,7 +20,7 @@ loop:
   gear_parity: false
   onscreen: true
   viewer_dt: 0.02
-  cameras: false  # --sensors: dedicated-thread lidar/depth + overlays; not in step_physics
+  cameras: true  # dedicated-thread lidar/depth; not in step_physics. --no-sensors to disable
 
 gantry:
   enabled: true

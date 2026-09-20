@@ -212,6 +212,7 @@ class SonicDdsSimLoop:
         self._lowstate_sim_t0 = 0.0
         self._lowstate_stats_interval_s = float(sonic_config.loop.stats_log_interval_s)
         self._recover_count = 0
+        self._overlay_enabled = overlay is not None
         self._overlay = overlay if overlay is not None else OverlayConfig()
         self._overlay_inited = [0]
         self._overlay_drawn = [0, 0]
@@ -572,7 +573,7 @@ class SonicDdsSimLoop:
         if pelvis >= 0:
             self._viewer.cam.type = mujoco.mjtCamera.mjCAMERA_TRACKING
             self._viewer.cam.trackbodyid = pelvis
-        if self._sonic.loop.cameras:
+        if self._overlay_enabled:
             configure_overlay_viewer(self._viewer)
             dots = "all" if self._overlay.lidar_dots <= 0 else str(self._overlay.lidar_dots)
             print(
@@ -725,7 +726,7 @@ class SonicDdsSimLoop:
         self._write_plant_kinematics()
 
     def _paint_overlays(self) -> None:
-        if self._viewer is None or not self._sonic.loop.cameras:
+        if self._viewer is None or not self._overlay_enabled:
             return
         paint_sensor_overlay(
             self._viewer,

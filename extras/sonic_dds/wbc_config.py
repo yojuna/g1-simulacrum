@@ -51,7 +51,7 @@ class LoopConfig(BaseModel):
     gear_parity: bool = False
     onscreen: bool = True
     viewer_dt: float = 0.02
-    cameras: bool = False
+    cameras: bool = True
     # Periodic rt/lowstate rate / sim-wall stats (seconds). 0 = off (default).
     stats_log_interval_s: float = 0.0
 
