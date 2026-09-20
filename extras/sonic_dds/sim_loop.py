@@ -6,7 +6,7 @@ and DDS PublishLowState / LowCmd actuation. There is no separate sim process.
 
 from __future__ import annotations
 
-import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -29,6 +29,12 @@ from .lowcmd_actuation import (
     compute_hand_torques,
 )
 from .observation_adapter import prepare_obs_dict
+from .platform_proprio import (
+    PlantProprioPublisher,
+    build_proprioception_dict,
+    default_bind_addr,
+    proprio_enabled,
+)
 from .overlay import (
     OverlayConfig,
     configure_overlay_viewer,
@@ -236,6 +242,11 @@ class SonicDdsSimLoop:
         self._plant_state_path = resolve_plant_state_path()
         self._plant_state_warned = False
         self._plant_state_tick = 0
+        self._proprio_seq = 0
+        self._proprio_scene_id = os.environ.get("PLANT_SCENE_ID", "")
+        self._proprio_publisher: PlantProprioPublisher | None = None
+        if proprio_enabled():
+            self._proprio_publisher = PlantProprioPublisher(default_bind_addr())
         self._kinematics_writer, self._kinematics_bodies = _plant_tick_writer()
         self._sensor_workers: SensorWorkerGroup | None = None
         if sonic_config.loop.cameras:
@@ -724,6 +735,25 @@ class SonicDdsSimLoop:
         self._recover_if_exploded("post-step")
         self._write_plant_state()
         self._write_plant_kinematics()
+        self._publish_proprioception()
+
+    def _publish_proprioception(self) -> None:
+        publisher = self._proprio_publisher
+        if publisher is None:
+            return
+        self._proprio_seq += 1
+        payload = build_proprioception_dict(
+            self._sim.compiled,
+            self._sim.data,
+            seq=self._proprio_seq,
+            scene_id=self._proprio_scene_id,
+        )
+        publisher.publish_dict(payload)
+
+    def _close_proprio_publisher(self) -> None:
+        if self._proprio_publisher is not None:
+            self._proprio_publisher.close()
+            self._proprio_publisher = None
 
     def _paint_overlays(self) -> None:
         if self._viewer is None or not self._overlay_enabled:
@@ -785,6 +815,7 @@ class SonicDdsSimLoop:
             print("SONIC DDS bridge interrupted.")
         finally:
             self._stop_sensor_workers()
+            self._close_proprio_publisher()
             self._close_viewer()
             self._running = False
 
