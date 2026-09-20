@@ -64,7 +64,7 @@ package is the MuJoCo plant. From `docker/`:
 
 ```bash
 ./run.sh sonic python examples/02_sonic_dds_bridge.py              # cameras off
-./run.sh sonic python examples/02_sonic_dds_bridge.py --sensors    # leftover-budget lidar/depth + overlays
+./run.sh sonic python examples/02_sonic_dds_bridge.py --sensors    # dedicated-thread lidar/depth + overlays
 ```
 
 How-to: [`docs/sonic_dds.md`](docs/sonic_dds.md). What broke and what the

@@ -18,8 +18,8 @@ disagree, stop and fix one of them; do not invent a third value in code.
 | [Control](g1-control.md) | `unitree_hg`, 500 Hz, joint indices, DDS topics |
 | [Hands](g1-hands.md) | Wrist flange, Dex3-1, how kits swap |
 | [Sim fidelity](sim-fidelity.md) | What MuJoCo can and cannot match |
-| [SONIC integration](sonic-integration.md) | DDS sim2sim with GEAR deploy: crane, 1 ms substeps, leftover-budget `--sensors` |
-| [Sim process model](sim-process-model.md) | MCU vs lidar vs cameras; leftover-budget stopgap vs target machines |
+| [SONIC integration](sonic-integration.md) | DDS sim2sim with GEAR deploy: crane, 1 ms substeps, dedicated-thread `--sensors` |
+| [Sim process model](sim-process-model.md) | MCU vs lidar vs cameras; Phase 2 worker threads vs optional process split |
 
 ## Rules for this wiki
 

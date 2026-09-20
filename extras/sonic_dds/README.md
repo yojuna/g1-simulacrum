@@ -17,7 +17,7 @@ Target MCU vs lidar split (still later):
 cd docker
 ./run.sh sonic up --build    # once: copy unitree_sdk2py from local GEAR tree
 ./run.sh sonic python examples/02_sonic_dds_bridge.py
-# optional: --sensors  leftover-budget Mid-360/D435i + overlays
+# optional: --sensors  dedicated-thread Mid-360/D435i + overlays
 
 # Terminal 2 — deploy (GEAR Docker, also host network)
 cd GR00T-WholeBodyControl/gear_sonic_deploy
@@ -33,14 +33,10 @@ bash deploy.sh sim
 - Gantry: `ElasticBand.gear_hold` on **pelvis** (GEAR cartesian PD).
 - `step_physics(sensors=False)` every tick. LowState does not contain
   lidar or depth.
-- `--sensors`: at most one of Mid-360 or D435i per leftover slice of the
-  5 ms slot (`loop.sensor_budget=0.65`). Skip if the **absolute** wall
-  deadline is already past. Same skip for `viewer.sync`. Overlays are
-  sparse inspect geoms (`overlay.py`), not the full cloud.
+- `--sensors`: `SensorWorkerGroup` runs Mid-360 (~10 Hz) and D435i (~30 Hz)
+  on dedicated threads with private `mjData`. Motion publishes pose
+  snapshots; overlays read the latest cloud/depth (`overlay.py`).
 - Sleep to `t0 + n × dt` so RTF can return to 1 after an overrun.
-
-This leftover path is a stopgap on the motion thread. Separate lidar /
-camera machines are the target in the process-model wiki.
 
 ## Module map
 
@@ -50,7 +46,10 @@ camera machines are the target in the process-model wiki.
 | `channel.py` | `init_channel()` for CycloneDDS (stock SDK API) |
 | `observation_adapter.py` | `MjData` → dict for `PublishLowState` |
 | `lowcmd_actuation.py` | `LowCmd` / Dex3 → named actuator torques; clip `q_des` to `jnt_range` |
-| `sim_loop.py` | `SonicDdsSimLoop` (physics + leftover sensors + viewer + DDS) |
+| `sim_loop.py` | `SonicDdsSimLoop` (physics + sensor worker group + viewer + DDS) |
+| `sensor_worker_group.py` | Lidar/depth thread orchestration + overlay poll |
+| `lidar_worker.py` / `depth_worker.py` | Dedicated scan threads |
+| `pose_snapshot.py` | Keep-last-1 qpos/qvel for workers |
 | `overlay.py` | Sparse Mid-360 / depth geoms + PiP for `launch_passive` |
 | `wbc_config.py` | YAML → GEAR-style bridge config dict |
 

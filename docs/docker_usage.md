@@ -46,7 +46,7 @@ From `docker/`:
 ```
 
 That example is sim + GLFW viewer + DDS in **one process** (GEAR `run_sim_loop.py`).
-Default cameras **off**. `--sensors` runs leftover-budget lidar/depth and
+Default cameras **off**. `--sensors` runs dedicated-thread lidar/depth and
 inspect overlays without putting them in `step_physics`. Deploy in GEAR’s
 container: `./docker/run-ros2-dev.sh` then `bash deploy.sh sim`.
 See [`sonic_dds.md`](sonic_dds.md).

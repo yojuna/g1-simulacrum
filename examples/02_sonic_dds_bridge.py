@@ -13,7 +13,7 @@ Terminal 2 (GEAR deploy, also Docker with host network)::
 
 Deploy controls: ``]`` init, ``9`` gantry, ``T`` planner, ``O`` operator.
 Viewer (this window): ``7``/``8`` hold height, ``9`` toggle crane (GEAR); numpad trolley.
-``--sensors``: leftover-budget Mid-360/D435i + inspect overlays (not in ``step_physics``).
+``--sensors``: dedicated-thread Mid-360/D435i + inspect overlays (not in ``step_physics``).
 ``--overlay sparse|dense|full``: overlay density (default sparse). Does not change sensor rates.
 """
 
@@ -75,7 +75,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument(
         "--sensors",
         action="store_true",
-        help="Enable Mid-360 + D435i on leftover control-slot budget + GLFW overlays",
+        help="Enable Mid-360 + D435i on dedicated worker threads + GLFW overlays",
     )
     p.add_argument(
         "--overlay",
@@ -124,7 +124,6 @@ def main() -> None:
         sonic_cfg.loop.gear_parity = True
     if args.sensors:
         sonic_cfg.loop.cameras = True
-        sonic_cfg.loop.sensor_workers = True
     if args.headless:
         sonic_cfg.loop.onscreen = False
 

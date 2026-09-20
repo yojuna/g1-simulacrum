@@ -134,8 +134,8 @@ does not.
 | Never set `timestep=0.005` | Keep 1 ms MJCF |
 | 200 Hz control, `physics_hz=1000` (5 substeps) | Same **wall** rate as GEAR without their coarse step |
 | `loop.control_hz` synced to controller | Wall tick = 5 ms sim |
-| Mid-360 / D435i **off** unless `--sensors` | `--sensors` is leftover-budget, not inlined in `step_physics` |
-| Absolute sleep to `t0 + n × dt`; skip sensors and `viewer.sync` when late | RTF returns to 1 after a scan that overruns the 5 ms slot |
+| Mid-360 / D435i **off** unless `--sensors` | `--sensors` uses dedicated worker threads, not inlined in `step_physics` |
+| Absolute sleep to `t0 + n × dt` | RTF returns to 1 after an overrun |
 | Inspect-style overlays on `launch_passive` | GLFW can show clouds without putting them in LowState |
 | Copy GEAR hinge dissipation at runtime | `dof_damping=0.05`, `armature=0.01`, `frictionloss=0.2` for `dof ≥ 6` |
 | Spawn 29 joints at deploy `default_angles` | Standing squat before INIT |
@@ -150,7 +150,7 @@ physics: dt=0.001  physics_hz=1000  control_hz=200  substeps=5
 ```
 
 With `--sensors` the last fields are `cameras=on` and
-`sensors=budgeted leftover (slot 0.65 … not in step_physics)`.
+`sensors=dedicated threads (lidar @ 10 Hz, depth @ 30 Hz; not in step_physics)`.
 
 Every 5 s: `~200 Hz` and **`sim/wall≈1.00`**. If `sim/wall` is ~0.5, deploy
 will again see 30–70 ms LowState age.
@@ -158,44 +158,38 @@ will again see 30–70 ms LowState age.
 `--gear-parity` now means “force 200 Hz / 5×1 ms” (already the YAML
 default). It does **not** widen MuJoCo’s timestep.
 
-## `--sensors`: leftover budget, not inlined in `step_physics`
+## `--sensors`: dedicated threads, not inlined in `step_physics`
 
-`02_sonic_dds_bridge.py` now paints inspect-style overlays on
+`02_sonic_dds_bridge.py` paints inspect-style overlays on
 `launch_passive` (`extras/sonic_dds/overlay.py`): green Mid-360, cyan
 depth, orange FOV, depth PiP. Lidar/depth are **not** inside
-`step_physics`. One product per leftover slice of the 5 ms slot; skip
-when the absolute wall deadline has already passed (same rule for
-`viewer.sync`).
+`step_physics`. `SensorWorkerGroup` runs Mid-360 (~10 Hz) and D435i
+(~30 Hz) on dedicated threads with private `mjData`; the motion thread
+publishes pose snapshots and polls the latest cloud for overlays.
 
-Before that split, `--sensors` called `SensorManager.step()` on every
-control tick and the GLFW window never drew the clouds. Measured stall
-(2026-09-07): **~110 Hz**, **`sim/wall≈0.55`**.
+Historical note: inlined `SensorManager.step()` on the motion thread
+measured **~110 Hz**, **`sim/wall≈0.55`**. The removed leftover-budget
+path kept LowState at ~200 Hz but capped clouds at ~9 Hz headless.
 
 ```text
-# headless
-cameras=on  sensors=budgeted leftover …
-~200 Hz  sim/wall=1.00  lidar=9.0 Hz depth=26–27 Hz skip=133–159
-
-# GLFW on (sync skipped when the slot is already late)
-~199–201 Hz  sim/wall=1.00  lidar≈1 Hz depth≈1 Hz skip≈950
+# headless or GLFW
+cameras=on  sensors=dedicated threads …
+~200 Hz  sim/wall=1.00  lidar≈10 Hz depth≈30 Hz lidar_skip=0 depth_skip=N
 ```
-
-GLFW `sync` of overlay geoms is expensive; if it runs while the motion
-slot is already late, LowState falls to ~6 Hz.
 
 ## How to use the sensorized suite *with* SONIC
 
 Constraint: the ONNX policy needs **fresh LowState** (~20 ms). Lidar and
 depth are slower products (10 Hz / 30 Hz) and must not steal that budget.
 
-**Stopgap on this loop:** `--sensors` does **not** call `SensorManager.step`
-inside `step_physics`. Lidar and depth run one product per leftover fraction
-of the 5 ms slot (`loop.sensor_budget`) and skip when the tick already
-overran. Overlays paint the last cloud. Target architecture (separate
-machines) is still [`sim-process-model.md`](sim-process-model.md).
+**Current loop:** `--sensors` does **not** call `SensorManager.step`
+inside `step_physics`. Lidar and depth run on dedicated worker threads
+(Phase 2 in [`sim-process-model.md`](sim-process-model.md)). Overlays
+paint the last cloud. Optional Phase 3 splits sensors into a separate
+container.
 
-Until that split exists, treat leftover-budget as debug: if `sim/wall`
-drops below ~1, turn `--sensors` off for policy work.
+If `sim/wall` drops below ~1 with `--sensors`, check worker load or turn
+sensors off for policy work.
 
 RoboCasa: `--scene` on the same **motion** loop. Gantry hold XY follows
 spawn so the spring does not pull to the world origin.
@@ -215,7 +209,6 @@ spawn so the spring does not pull to the world origin.
 - [ ] Both containers host network, domain 0, `lo`; LowState flowing.
 - [ ] Startup `dt=0.001`, `gantry=gear@pelvis`, `loop_hz=200`.
 - [ ] Without `--sensors`: `sim/wall≈1.00`, `~200 Hz`, policy `max_abs_q` modest.
-- [ ] With `--sensors`: banner `budgeted leftover`; LowState still `~200 Hz` /
-      `sim/wall≈1.00`; overlays if GLFW (clouds may be ~1 Hz). Headless lidar
-      ~9 Hz / depth ~26 Hz is the leftover ceiling on this machine.
+- [ ] With `--sensors`: banner `dedicated threads`; LowState still `~200 Hz` /
+      `sim/wall≈1.00`; overlays if GLFW; lidar ~10 Hz / depth ~30 Hz target.
 - [ ] INIT squat visible before `T` / `O`.

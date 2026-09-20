@@ -96,8 +96,8 @@ class G1Simulacrum:
     ) -> Observation:
         """Physics + optional sensors. Caller must write ``data.ctrl`` (e.g. SONIC LowCmd PD).
 
-        SONIC ``SonicDdsSimLoop`` always passes ``sensors=False`` and may scan
-        lidar/depth afterward on leftover wall time. Inspect ``step()`` still
+        SONIC ``SonicDdsSimLoop`` always passes ``sensors=False``; lidar/depth
+        run on dedicated worker threads. Inspect ``step()`` still
         uses the default ``sensors=True``.
         """
         assert self._initialized

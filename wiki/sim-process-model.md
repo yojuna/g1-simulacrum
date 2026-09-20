@@ -202,33 +202,24 @@ example still steps sensors on the main thread; that path is not SONIC.
 
 Pass: cameras-off LowState **~200 Hz**, **`sim/wall≈1.00`**.
 
-### Phase 1.5 — leftover-budget stopgap (current `--sensors`)
+### Phase 1.5 — leftover-budget stopgap (removed)
 
-Still the motion thread. After `mj_step`, at most one of lidar or depth
-if the absolute slot deadline is in the future and elapsed motion time
-is under `loop.sensor_budget` (0.65). Same skip for `viewer.sync`.
-Overlays paint the last cloud (`extras/sonic_dds/overlay.py`).
+Historical: motion thread ran at most one lidar or depth scan per 5 ms
+slot when wall time remained (`loop.sensor_budget`). Removed in PR3;
+do not resurrect on the motion thread.
 
-Pass (measured 2026-09-07): LowState **~200 Hz**, **`sim/wall≈1.00`**
-with `--sensors`. Clouds may be 9 Hz headless or ~1 Hz with GLFW.
-Forbidden: LowState ~110 Hz from inlined `SensorManager.step`, or ~6 Hz
-from `viewer.sync` while already late.
+### Phase 2 — same process, two machines (**current `--sensors`**)
 
-This is **not** a lidar machine. Do not treat leftover-budget as the
-architecture.
-
-### Phase 2 — same process, two machines
-
-- Motion thread: physics + LowState + sleep.
-- Sensor thread (or subprocess later): wait on 10 Hz / 30 Hz timers,
-  copy latest pose, `mj_copyData` or set `qpos`/`qvel` + `mj_forward`,
-  scan/render, store last cloud for overlay, optional `rt/utlidar`
-  publish.
-- Viewer: paint last overlay only. `launch_passive` still must not
-  `SensorManager.step`.
+- Motion thread: physics + LowState + pose snapshot + sleep.
+- `SensorWorkerGroup`: dedicated lidar (~10 Hz) and depth (~30 Hz)
+  threads with private `mjData`, copy latest pose, scan/render, store
+  last cloud for overlay, optional `rt/utlidar` publish.
+- Viewer: paint last overlay every tick (`extras/sonic_dds/overlay.py`).
+  `launch_passive` still must not `SensorManager.step`.
 
 Pass: cameras on, overlays visible, **`rt/lowstate` still ~200 Hz wall**,
-**`sim/wall ≈ 1.0`**. Cloud rate may be 8 Hz. Log `lidar skip=`.
+**`sim/wall ≈ 1.0`**. Log `lidar_skip=` / `depth_skip=` when a worker
+misses its period.
 
 ### Phase 3 — split processes (optional, hardware-true)
 
@@ -247,29 +238,27 @@ motion RTF is 1.
 
 ## Mapping to code (current vs target)
 
-| Current (2026-09-07 leftover-budget) | Target |
-|--------------------------------------|--------|
+| Current (Phase 2 worker threads) | Target (Phase 3 optional) |
+|----------------------------------|---------------------------|
 | `step_physics(sensors=False)` on the DDS path | Same |
-| `--sensors`: one lidar **or** depth per leftover slice; skip if past absolute deadline | Dedicated lidar/camera **machine**, private `mjData` |
-| `viewer.sync` skipped when the slot is late; last cloud overlay | Viewer paints last cloud only; never `SensorManager.step` |
-| No `rt/utlidar/*` | Phase 2+ publish, keep-last-1 |
+| `--sensors`: dedicated lidar + depth threads, private `mjData` | Split sensor container, host network |
+| Viewer paints last cloud every tick | Same |
+| No `rt/utlidar/*` (optional later) | Publish, keep-last-1 |
 | Inspect (`01_empty_arena.py`) still steps sensors on the main thread | Unchanged until inspect is ported |
-| `loop.sensor_budget` leftover raycast | Debug fallback only; not the design |
 
-`G1Simulacrum.step_physics` takes `sensors: bool`. SensorManager also
-exposes `lidar_due` / `step_lidar` / `depth_due` / `step_depth` for the
-leftover path (and later a worker).
+`G1Simulacrum.step_physics` takes `sensors: bool`. SONIC uses
+`SensorWorkerGroup` instead of `SensorManager.step` on the motion thread.
 
 ## Pass / fail (copy onto a PR)
 
 With `--gear-parity --sensors` and GEAR `deploy.sh sim` running:
 
-1. Banner: `cameras=on` and `sensors=budgeted leftover … not in step_physics`.
+1. Banner: `cameras=on` and `sensors=dedicated threads (lidar @ 10 Hz, depth @ 30 Hz; not in step_physics)`.
 2. Every 5 s: LowState **~200 Hz** wall, **`sim/wall ≈ 1.00`**
-   (same as cameras off, measured 2026-09-07).
+   (same as cameras off).
 3. Overlays: green lidar / cyan depth (GLFW). Headless needs no overlays.
-4. Allowed: `lidar 9/10 Hz skip=N` headless, or ~1 Hz with GLFW `sync`.
-   Forbidden: LowState 110 Hz or 6 Hz.
+4. Allowed: `lidar_skip` / `depth_skip` when workers miss a period.
+   Forbidden: LowState 110 Hz or inlined `SensorManager.step` on motion thread.
 
 If (2) fails, the architecture is wrong — do not tune policy gains.
 

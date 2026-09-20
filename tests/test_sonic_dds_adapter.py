@@ -119,7 +119,6 @@ def test_apply_gear_parity_keeps_default_timestep_and_syncs_loop_hz() -> None:
     assert sonic.gantry.mode == "gear"
     assert sonic.gantry.attach_body == "pelvis"
     assert sonic.loop.cameras is False
-    assert sonic.loop.sensor_budget == 0.65
 
 
 def test_step_physics_sensors_false_does_not_call_manager(monkeypatch) -> None:
@@ -147,17 +146,6 @@ def test_sensor_manager_lidar_depth_hooks_when_disabled() -> None:
     assert mgr.depth_due(t) is False
     assert mgr.step_lidar(t) is None
     assert mgr.step_depth(t) is None
-
-
-def test_pick_budgeted_sensor_alternates_when_both_due() -> None:
-    from extras.sonic_dds.sim_loop import pick_budgeted_sensor
-
-    assert pick_budgeted_sensor(False, False, "") is None
-    assert pick_budgeted_sensor(True, False, "") == "lidar"
-    assert pick_budgeted_sensor(False, True, "") == "depth"
-    assert pick_budgeted_sensor(True, True, "") == "lidar"
-    assert pick_budgeted_sensor(True, True, "lidar") == "depth"
-    assert pick_budgeted_sensor(True, True, "depth") == "lidar"
 
 
 def test_overlay_presets_sparse_is_default() -> None:

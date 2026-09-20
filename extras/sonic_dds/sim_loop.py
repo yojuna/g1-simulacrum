@@ -57,20 +57,6 @@ def _plant_tick_writer():
     return PlantTickWriter(), (PELVIS, WRIST_L, WRIST_R, body_pos_quat)
 
 
-def pick_budgeted_sensor(lidar_due: bool, depth_due: bool, last: str) -> str | None:
-    """At most one leftover-budget sensor per tick. Alternate when both are due.
-
-    Always preferring lidar starves D435i: skipped scans stay due, so every
-    leftover slot is claimed by Mid-360 and depth stays at 0 Hz.
-    """
-    if lidar_due and depth_due:
-        return "depth" if last == "lidar" else "lidar"
-    if lidar_due:
-        return "lidar"
-    if depth_due:
-        return "depth"
-    return None
-
 # GLFW keycodes — GEAR ElasticBand uses number-row 7/8/9; inspect viewer uses numpad.
 _GLFW_KEY_7 = 55
 _GLFW_KEY_8 = 56
@@ -156,8 +142,8 @@ class SonicDdsSimLoop:
                 f"sonic hands={sonic_config.hands!r} != sim robot.hands={sim_config.robot.hands!r}"
             )
 
-        if not sonic_config.loop.cameras or sonic_config.loop.sensor_workers:
-            disable_dds_cameras(sim_config)
+        # SensorManager inline stepping is never used on the DDS path; workers scan.
+        disable_dds_cameras(sim_config)
 
         sim_config.controller = ControllerConfig(
             type="passthrough",
@@ -181,16 +167,10 @@ class SonicDdsSimLoop:
         control_hz = sim_config.controller.control_hz
         substeps = max(1, int(round(physics_hz / control_hz)))
         cam = "on" if sonic_config.loop.cameras else "off"
-        budget = sonic_config.loop.sensor_budget
-        if sonic_config.loop.cameras and sonic_config.loop.sensor_workers:
+        if sonic_config.loop.cameras:
             sensors_how = (
                 f"dedicated threads (lidar @ {sim_config.sensors.mid360.rate_hz:.0f} Hz, "
                 f"depth @ {sim_config.sensors.d435i.rate_hz:.0f} Hz; not in step_physics)"
-            )
-        elif sonic_config.loop.cameras:
-            sensors_how = (
-                f"budgeted leftover (slot {budget:.2f} reserved for LowState+mj_step; "
-                "not in step_physics)"
             )
         else:
             sensors_how = "off"
@@ -240,8 +220,6 @@ class SonicDdsSimLoop:
         self._last_depth: DepthFrame | None = None
         self._lidar_ok = 0
         self._depth_ok = 0
-        self._sensor_skip = 0
-        self._sensor_turn = ""
         self._bringup_done = not (
             sonic_config.gantry.enabled and sonic_config.gantry.bringup.enabled
         )
@@ -259,7 +237,7 @@ class SonicDdsSimLoop:
         self._plant_state_tick = 0
         self._kinematics_writer, self._kinematics_bodies = _plant_tick_writer()
         self._sensor_workers: SensorWorkerGroup | None = None
-        if sonic_config.loop.cameras and sonic_config.loop.sensor_workers:
+        if sonic_config.loop.cameras:
             self._sensor_workers = SensorWorkerGroup.from_configs(
                 self._sim.model,
                 sim_config.sensors.mid360,
@@ -701,15 +679,15 @@ class SonicDdsSimLoop:
                 sim_dt = float(data.time) - self._lowstate_sim_t0
                 realtime = sim_dt / wall if wall > 0 else 0.0
                 extra = ""
-                if loop.cameras:
+                if loop.cameras and self._sensor_workers is not None:
+                    l_skip, d_skip = self._sensor_workers.worker_skips()
                     extra = (
                         f"  lidar={self._lidar_ok / wall:.1f} Hz "
                         f"depth={self._depth_ok / wall:.1f} Hz "
-                        f"skip={self._sensor_skip}"
+                        f"lidar_skip={l_skip} depth_skip={d_skip}"
                     )
                     self._lidar_ok = 0
                     self._depth_ok = 0
-                    self._sensor_skip = 0
                 print(
                     f"rt/lowstate published {self._lowstate_count} times  "
                     f"~{n / wall:.0f} Hz  sim/wall={realtime:.2f}{extra}",
@@ -745,49 +723,6 @@ class SonicDdsSimLoop:
         self._recover_if_exploded("post-step")
         self._write_plant_state()
         self._write_plant_kinematics()
-
-    def _sensors_due(self) -> bool:
-        t = float(self._sim.data.time)
-        mgr = self._sim.sensor_manager
-        return mgr.lidar_due(t) or mgr.depth_due(t)
-
-    def _maybe_step_sensors(self, deadline: float) -> None:
-        """Leftover-budget lidar/depth. Stopgap — see wiki/sim-process-model.md.
-
-        Only start a scan if this control slot's wall deadline is still in the
-        future. A scan may still overrun; ``run`` then skips sleep until the
-        absolute schedule catches up so RTF can return to 1.
-        """
-        if not self._sonic.loop.cameras or self._sonic.loop.sensor_workers:
-            return
-        due = self._sensors_due()
-        now = time.monotonic()
-        slot_start = deadline - self._control_dt
-        budget_s = self._sonic.loop.sensor_budget * self._control_dt
-        if now >= deadline or (now - slot_start) >= budget_s:
-            if due:
-                self._sensor_skip += 1
-            return
-        t = float(self._sim.data.time)
-        mgr = self._sim.sensor_manager
-        which = pick_budgeted_sensor(
-            mgr.lidar_due(t), mgr.depth_due(t), self._sensor_turn
-        )
-        if which == "lidar":
-            cloud = mgr.step_lidar(t)
-            if cloud is not None:
-                self._last_cloud = cloud
-                self._lidar_ok += 1
-                self._overlay_refresh = True
-            self._sensor_turn = "lidar"
-            return
-        if which == "depth":
-            depth = mgr.step_depth(t)
-            if depth is not None:
-                self._last_depth = depth
-                self._depth_ok += 1
-                self._overlay_refresh = True
-            self._sensor_turn = "depth"
 
     def _paint_overlays(self) -> None:
         if self._viewer is None or not self._sonic.loop.cameras:
@@ -831,7 +766,6 @@ class SonicDdsSimLoop:
                 self.sim_step()
                 self._publish_pose_snapshot()
                 self._poll_sensor_workers()
-                self._maybe_step_sensors(deadline)
                 if self._viewer is not None:
                     # Always sync the viewer from live MjData every control tick.
                     # Do not gate on the wall deadline: when RTF < 1 the old

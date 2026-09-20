@@ -20,8 +20,7 @@ loop:
   gear_parity: false
   onscreen: true
   viewer_dt: 0.02
-  cameras: false  # --sensors: leftover-budget lidar/depth + overlays; not in step_physics
-  sensor_budget: 0.65  # fraction of the 5 ms slot reserved for LowState + mj_step
+  cameras: false  # --sensors: dedicated-thread lidar/depth + overlays; not in step_physics
 
 gantry:
   enabled: true

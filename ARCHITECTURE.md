@@ -473,9 +473,9 @@ Revisit only when we open that work:
 
 - **SONIC extra** — in tree as `extras/sonic_dds/` (not a core controller).
   Plant matches GEAR deploy over `rt/lowstate` / `rt/lowcmd`. Motion calls
-  `step_physics(sensors=False)`. `--sensors` is a **leftover-budget
-  stopgap** on that same thread (absolute wall deadline, skip when late);
-  not a lidar/camera machine. Target split:
+  `step_physics(sensors=False)`. `--sensors` runs dedicated lidar/depth
+  worker threads (`SensorWorkerGroup`); scans never block the motion thread.
+  Process split (optional Phase 3):
   [`wiki/sim-process-model.md`](wiki/sim-process-model.md).
   Integration log: [`wiki/sonic-integration.md`](wiki/sonic-integration.md).
   No DDS in core.

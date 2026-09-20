@@ -71,28 +71,19 @@ Each control tick:
 1. Publish `rt/lowstate` (and optional wireless).
 2. Apply gantry wrench + LowCmd PD into `data.ctrl`.
 3. `G1Simulacrum.step_physics(sensors=False)` — physics only.
-4. If `--sensors`: at most **one** of lidar or depth, and only if the
-   tick’s **absolute wall deadline** is still in the future and motion
-   used less than `loop.sensor_budget` (0.65) of the 5 ms slot.
+4. Publish pose snapshot; poll **dedicated lidar + depth worker threads**
+   (`SensorWorkerGroup`) for overlay data. Scans never run on the motion
+   thread.
 5. Sleep until `t0 + n × 5 ms`. Missed deadlines skip sleep so RTF can
-   catch up. `viewer.sync` uses the same skip (a late sync used to drop
-   LowState to ~6 Hz).
+   catch up. `viewer.sync` runs every tick (does not block sensor workers).
 
-`--sensors` is a **stopgap on the motion thread**, not a lidar machine.
-Clouds may drop (`skip=` in the 5 s line). LowState must not.
-
-Measured 2026-09-07 (this machine, `--gear-parity --sensors`):
-
-| Mode | LowState | `sim/wall` | Lidar / depth |
-|------|----------|------------|----------------|
-| Headless | ~200 Hz | 1.00 | ~9 Hz / ~26 Hz |
-| GLFW overlays | ~199–201 Hz | 1.00 | ~1 Hz (sync eats leftover) |
-| Inlined `SensorManager.step` (old) | ~110 Hz | ~0.55 | n/a |
+Target rates: Mid-360 ~10 Hz, D435i ~30 Hz (config `rate_hz`). Worker
+`skip` counts appear when a scan period is missed.
 
 5 s log with sensors (enable `loop.stats_log_interval_s: 5` in sonic YAML):
 
 ```text
-rt/lowstate published N times  ~200 Hz  sim/wall=1.00  lidar=9.0 Hz depth=26.2 Hz skip=133
+rt/lowstate published N times  ~200 Hz  sim/wall=1.00  lidar=9.8 Hz depth=28.1 Hz lidar_skip=0 depth_skip=1
 ```
 
 By default periodic stats are **off** so bringup logs stay readable.
@@ -111,7 +102,7 @@ If `sim/wall` is not ~1, turn `--sensors` off for policy work.
 | `--headless-smoke` | 2 s physics, no DDS |
 | `--no-gantry` | Disable crane |
 | `--gear-parity` | Force 200 Hz control, 5× 1 ms `mj_step` (already the YAML default). Does **not** set `timestep=0.005`. |
-| `--sensors` | Leftover-budget Mid-360 + D435i + inspect overlays. Off by default. |
+| `--sensors` | Dedicated-thread Mid-360 + D435i + inspect overlays. Off by default. |
 | `--scene` | RoboCasa or other MJCF that already includes `g1_robot.xml` |
 | `--duration N` | Exit after N wall seconds |
 
@@ -120,9 +111,8 @@ If `sim/wall` is not ~1, turn `--sensors` off for policy work.
 | Key | Default | Meaning |
 |-----|---------|---------|
 | `loop.control_hz` | 200 | Wall LowState / LowCmd rate |
-| `loop.cameras` | false | Construct Mid-360 + D435i (`--sensors` sets true) |
-| `loop.sensor_budget` | 0.65 | Fraction of the 5 ms slot reserved for LowState + `mj_step` |
-| `loop.viewer_dt` | 0.02 | Attempt GLFW `sync` this often (skipped if the slot is late) |
+| `loop.cameras` | false | Start lidar + depth worker threads (`--sensors` sets true) |
+| `loop.viewer_dt` | 0.02 | Paint sensor overlays every N control ticks |
 | `gantry.mode` | `gear` | Pelvis cartesian PD. `cable` is inspect’s torso hook |
 | `gantry.attach_body` | `pelvis` | Force body for the gear spring |
 

@@ -69,6 +69,10 @@ class SensorWorkerGroup:
     def publish(self, data: mujoco.MjData) -> None:
         self.pose_buffer.publish(data)
 
+    def worker_skips(self) -> tuple[int, int]:
+        """Cumulative skip counts (lidar, depth) when a scan period was missed."""
+        return (self.lidar.stats().skips, self.depth.stats().skips)
+
     def poll(self) -> SensorWorkerPoll:
         cloud: PointCloud | None = None
         depth: DepthFrame | None = None
