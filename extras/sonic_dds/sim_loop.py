@@ -243,8 +243,10 @@ class SonicDdsSimLoop:
         self._bringup_lower_wait_ticks = 0
         self._bringup_settle_t0: float | None = None
         self._bringup_cmd_t0: float | None = None
+        self._bringup_stable_stand_t0: float | None = None
         self._bringup_waiting_cmd_announced = False
         self._bringup_standing_announced = False
+        self._bringup_stable_stand_announced = False
         self._plant_state_path = resolve_plant_state_path()
         self._plant_state_warned = False
         self._plant_state_tick = 0
@@ -324,7 +326,10 @@ class SonicDdsSimLoop:
 
         pelvis_z = float(self._sim.data.qpos[2])
         if cfg.release and cfg.require_standing_to_release:
-            if pelvis_z < cfg.min_pelvis_z or pelvis_z > cfg.max_pelvis_z:
+            in_band = cfg.min_pelvis_z <= pelvis_z <= cfg.max_pelvis_z
+            if not in_band:
+                self._bringup_stable_stand_t0 = None
+                self._bringup_stable_stand_announced = False
                 if not self._bringup_standing_announced:
                     print(
                         f"gantry bringup: waiting for stable stand "
@@ -334,6 +339,20 @@ class SonicDdsSimLoop:
                     self._bringup_standing_announced = True
                 return
             self._bringup_standing_announced = False
+            stable_s = float(cfg.stable_stand_s)
+            if stable_s > 0.0:
+                if self._bringup_stable_stand_t0 is None:
+                    self._bringup_stable_stand_t0 = time.monotonic()
+                    if not self._bringup_stable_stand_announced:
+                        print(
+                            f"gantry bringup: pelvis in band — holding {stable_s:.1f}s "
+                            f"before release (pelvis_z={pelvis_z:.3f})",
+                            flush=True,
+                        )
+                        self._bringup_stable_stand_announced = True
+                    return
+                if time.monotonic() - self._bringup_stable_stand_t0 < stable_s:
+                    return
 
         if cfg.release:
             if not self._bringup_released:
@@ -555,6 +574,17 @@ class SonicDdsSimLoop:
             self._viewer.close()
             self._viewer = None
 
+    def _reset_bringup_after_fall(self) -> None:
+        """Restart bringup timers/lower sequence when gantry is recreated after a fall."""
+        self._bringup_lower_ticks = 0
+        self._bringup_lower_wait_ticks = 0
+        self._bringup_settle_t0 = None
+        self._bringup_cmd_t0 = None
+        self._bringup_stable_stand_t0 = None
+        self._bringup_waiting_cmd_announced = False
+        self._bringup_standing_announced = False
+        self._bringup_stable_stand_announced = False
+
     def reset(self) -> None:
         data = self._sim.data
         data.xfrc_applied[:] = 0.0
@@ -572,6 +602,8 @@ class SonicDdsSimLoop:
                 self._gantry.enable = False
             else:
                 self._gantry = self._make_gantry()
+                if self._sonic.gantry.bringup.enabled and not self._bringup_done:
+                    self._reset_bringup_after_fall()
 
     def _apply_standing_pose(self) -> None:
         compiled = self._sim.compiled

@@ -35,8 +35,15 @@ class TestGantryBringupTiming(unittest.TestCase):
         if not path.is_file():
             self.skipTest("sonic_dds_bringup.yaml not in repo")
         cfg = SonicDdsConfig.from_yaml(path)
-        self.assertFalse(cfg.gantry.bringup.release_harness_on_lowcmd)
-        self.assertEqual(cfg.gantry.bringup.post_cmd_settle_s, 5.0)
+        bringup = cfg.gantry.bringup
+        self.assertFalse(bringup.release_harness_on_lowcmd)
+        self.assertEqual(bringup.post_cmd_settle_s, 2.0)
+        self.assertTrue(bringup.wait_for_lowcmd_to_lower)
+        self.assertEqual(bringup.stable_stand_s, 2.0)
+
+    def test_stable_stand_s_default(self):
+        cfg = GantryBringupConfig()
+        self.assertEqual(cfg.stable_stand_s, 2.0)
 
 
 if __name__ == "__main__":

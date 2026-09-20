@@ -76,6 +76,8 @@ class GantryBringupConfig(BaseModel):
     settle_s: float = 1.0
     post_cmd_settle_s: float = 5.0
     require_standing_to_release: bool = True
+    # Seconds pelvis must stay in [min_pelvis_z, max_pelvis_z] before release (0 = one frame).
+    stable_stand_s: float = 2.0
     min_pelvis_z: float = 0.55
     max_pelvis_z: float = 1.05
     release: bool = True
