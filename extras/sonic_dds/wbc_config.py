@@ -52,6 +52,8 @@ class LoopConfig(BaseModel):
     onscreen: bool = True
     viewer_dt: float = 0.02
     cameras: bool = False
+    # Phase 2: dedicated sensor threads (private mjData) instead of leftover budget.
+    sensor_workers: bool = False
     # Fraction of the control slot reserved for LowState + mj_step. Remainder
     # may run lidar/depth; if the tick is already late, those frames drop.
     sensor_budget: float = 0.65

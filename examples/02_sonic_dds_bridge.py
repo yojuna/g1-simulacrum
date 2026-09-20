@@ -124,6 +124,7 @@ def main() -> None:
         sonic_cfg.loop.gear_parity = True
     if args.sensors:
         sonic_cfg.loop.cameras = True
+        sonic_cfg.loop.sensor_workers = True
     if args.headless:
         sonic_cfg.loop.onscreen = False
 
