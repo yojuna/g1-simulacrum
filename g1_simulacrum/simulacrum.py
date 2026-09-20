@@ -14,6 +14,7 @@ from .controllers.passthrough import PassthroughController
 from .controllers.pd import PDController
 from .model.joints import NUM_BODY_JOINTS
 from .model.loader import CompiledModel, ModelLoader
+from .model.payload import AppliedPayloads, apply_payloads
 from .sensors.data_types import BaseState, JointState, Observation, SensorBundle
 from .sensors.manager import SensorManager
 
@@ -26,6 +27,7 @@ class G1Simulacrum:
         self._compiled: CompiledModel | None = None
         self._model: mujoco.MjModel | None = None
         self._data: mujoco.MjData | None = None
+        self._applied_payloads: AppliedPayloads | None = None
         self._sensor_manager: SensorManager | None = None
         self._controller: Controller | None = None
         self._previous_action: NDArray[np.float64] | None = None
@@ -44,6 +46,11 @@ class G1Simulacrum:
         self._compiled = loader.build()
         self._model = self._compiled.model
         self._data = mujoco.MjData(self._model)
+        self._applied_payloads = apply_payloads(
+            self._model,
+            self._data,
+            self._config.robot.payloads,
+        )
         self._sensor_manager = SensorManager(
             self._model, self._data, self._config.sensors
         )
@@ -178,6 +185,11 @@ class G1Simulacrum:
     def compiled(self) -> CompiledModel:
         assert self._compiled is not None
         return self._compiled
+
+    @property
+    def applied_payloads(self) -> AppliedPayloads:
+        assert self._applied_payloads is not None
+        return self._applied_payloads
 
     @property
     def sensor_manager(self) -> SensorManager:

@@ -1,6 +1,6 @@
 # MJCF pin
 
-Generated 2026-09-05 by `scripts/pin_mjcf.py` (via `docker/run.sh python scripts/pin_mjcf.py`).
+Generated 2026-09-14 by `scripts/pin_mjcf.py` (via `docker/run.sh python scripts/pin_mjcf.py`).
 Runtime does not run this script.
 
 ## Vendored Unitree sources
@@ -73,6 +73,7 @@ Runtime does not run this script.
 - Strip Unitree demo floor/skybox (`statistic` / extra `worldbody` / extra `asset`)
 - `torso_link`: include `mounts/mid360.xml`, `mounts/d435i.xml`
 - `left_wrist_yaw_link` / `right_wrist_yaw_link`: replace hand children with includes
+- Each wrist also includes one named, massless payload anchor; runtime config sets its fixed-body inertial properties before stepping
 - Dex3: copy wrist `inertial` from with-hand; extract `_hand_` bodies and palm geoms by name
 - Dex3 actuators: motors whose `joint` contains `hand` (14)
 - `sensor`: include device IMUs only (`mounts/imus.xml`)

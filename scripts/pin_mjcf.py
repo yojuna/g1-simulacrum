@@ -387,6 +387,11 @@ def compose_body(
                 f"{side} rubber hand from g1_29dof_rev_1_0",
             )
         ET.SubElement(wrist, "include", {"file": include_rel})
+        ET.SubElement(
+            wrist,
+            "include",
+            {"file": f"end_effectors/payload/{side}.xml"},
+        )
 
     if kit == "dex3":
         extract_hand_motors(hands_root, MJCF / "end_effectors" / "dex3" / "actuators.xml")
@@ -433,6 +438,8 @@ def write_pin_record(*, copies: list[tuple[str, str, str]]) -> None:
         "- Strip Unitree demo floor/skybox (`statistic` / extra `worldbody` / extra `asset`)",
         "- `torso_link`: include `mounts/mid360.xml`, `mounts/d435i.xml`",
         "- `left_wrist_yaw_link` / `right_wrist_yaw_link`: replace hand children with includes",
+        "- Each wrist also includes one named, massless payload anchor; runtime config "
+        "sets its fixed-body inertial properties before stepping",
         "- Dex3: copy wrist `inertial` from with-hand; extract `_hand_` bodies and palm geoms by name",
         "- Dex3 actuators: motors whose `joint` contains `hand` (14)",
         "- `sensor`: include device IMUs only (`mounts/imus.xml`)",

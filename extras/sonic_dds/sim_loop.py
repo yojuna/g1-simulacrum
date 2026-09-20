@@ -7,6 +7,7 @@ and DDS PublishLowState / LowCmd actuation. There is no separate sim process.
 from __future__ import annotations
 
 import json
+import sys
 import time
 from pathlib import Path
 from typing import Callable
@@ -34,8 +35,25 @@ from .overlay import (
     paint_depth_pip,
     paint_sensor_overlay,
 )
+from .plant_state import (
+    WORKSPACE_PLANT_STATE,
+    resolve_plant_state_path,
+    write_plant_state,
+)
 from .unitree_sdk2py_bridge import UnitreeSdk2Bridge
 from .wbc_config import DEFAULT_STANDING_Q, SonicDdsConfig, bridge_config_dict
+
+_WS_SIM = Path("/workspace/docker/ws_sonic_redux/sim")
+if _WS_SIM.is_dir() and str(_WS_SIM) not in sys.path:
+    sys.path.insert(0, str(_WS_SIM))
+
+
+def _plant_tick_writer():
+    try:
+        from plant_ticks import PELVIS, WRIST_L, WRIST_R, PlantTickWriter, body_pos_quat
+    except ImportError:
+        return None, None
+    return PlantTickWriter(), (PELVIS, WRIST_L, WRIST_R, body_pos_quat)
 
 
 def pick_budgeted_sensor(lidar_due: bool, depth_due: bool, last: str) -> str | None:
@@ -152,6 +170,10 @@ class SonicDdsSimLoop:
         print("Building MuJoCo model…", flush=True)
         self._sim = G1Simulacrum(config=sim_config)
         self._sim.build(scene_xml=scene_xml)
+        self._payload_manifest = {
+            "apply_verified": True,
+            **self._sim.applied_payloads.to_dict(),
+        }
         apply_gear_dof_dissipation(self._sim.model)
 
         physics_hz = sim_config.controller.physics_hz
@@ -223,10 +245,10 @@ class SonicDdsSimLoop:
         self._bringup_cmd_t0: float | None = None
         self._bringup_waiting_cmd_announced = False
         self._bringup_standing_announced = False
-        self._plant_state_path = Path(
-            "/workspace/docker/ws_sonic_redux/logs/.plant_state.json"
-        )
+        self._plant_state_path = resolve_plant_state_path()
+        self._plant_state_warned = False
         self._plant_state_tick = 0
+        self._kinematics_writer, self._kinematics_bodies = _plant_tick_writer()
 
     def _tick_gantry_bringup(self) -> None:
         cfg = self._sonic.gantry.bringup
@@ -335,7 +357,9 @@ class SonicDdsSimLoop:
         self._plant_state_tick += 1
         if self._plant_state_tick % 10 != 0:
             return
-        pelvis_z = float(self._sim.data.qpos[2])
+        data = self._sim.data
+        model = self._sim.model
+        pelvis_z = float(data.qpos[2])
         gantry_on = bool(self._gantry.enable) if self._gantry is not None else False
         fallen = pelvis_z < self._sonic.loop.fall_height
         standing = (
@@ -343,21 +367,87 @@ class SonicDdsSimLoop:
             <= pelvis_z
             <= self._sonic.gantry.bringup.max_pelvis_z
         )
+        pelvis_pos = [float(v) for v in data.qpos[:3]]
+        pelvis_quat_wxyz = [float(v) for v in data.qpos[3:7]]
+        try:
+            import mujoco
+
+            pelvis_bid = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "pelvis")
+            if pelvis_bid >= 0:
+                pelvis_pos = [float(v) for v in data.xpos[pelvis_bid]]
+                pelvis_quat_wxyz = [float(v) for v in data.xquat[pelvis_bid]]
+        except Exception:
+            pass
         payload = {
             "pelvis_z": pelvis_z,
+            "pelvis_pos": pelvis_pos,
+            "pelvis_quat_wxyz": pelvis_quat_wxyz,
+            "qpos7": [float(v) for v in data.qpos[:7]],
             "gantry_enabled": gantry_on,
             "bringup_done": self._bringup_done,
             "bringup_released": self._bringup_released,
             "lowcmd": self._bridge.cmd_received(),
-            "sim_time": float(self._sim.data.time),
+            "sim_time": float(data.time),
             "recover_count": self._recover_count,
             "standing": standing and not fallen,
             "fallen": fallen,
+            "payload": self._payload_manifest,
         }
-        tmp = self._plant_state_path.with_suffix(".tmp")
-        self._plant_state_path.parent.mkdir(parents=True, exist_ok=True)
-        tmp.write_text(json.dumps(payload))
-        tmp.replace(self._plant_state_path)
+        if write_plant_state(self._plant_state_path, payload):
+            return
+        fallback = (
+            WORKSPACE_PLANT_STATE
+            if self._plant_state_path != WORKSPACE_PLANT_STATE
+            else None
+        )
+        if fallback is not None and write_plant_state(fallback, payload):
+            if not self._plant_state_warned:
+                print(
+                    f"[sonic_dds] plant state: cannot write {self._plant_state_path}; "
+                    f"using {fallback}",
+                    flush=True,
+                )
+                self._plant_state_warned = True
+            self._plant_state_path = fallback
+            return
+        if not self._plant_state_warned:
+            print(
+                f"[sonic_dds] plant state: cannot write {self._plant_state_path} "
+                "(orchestration health checks disabled)",
+                flush=True,
+            )
+            self._plant_state_warned = True
+
+    def _write_plant_kinematics(self) -> None:
+        """Append 50 Hz body poses for session export (any experiment)."""
+        writer = self._kinematics_writer
+        bodies = self._kinematics_bodies
+        if writer is None or bodies is None:
+            return
+        pelvis, wrist_l, wrist_r, body_pos_quat = bodies
+        data = self._sim.data
+        try:
+            pelvis_pos, pelvis_quat = body_pos_quat(self._sim.model, data, pelvis)
+            left_pos, left_quat = body_pos_quat(self._sim.model, data, wrist_l)
+            right_pos, right_quat = body_pos_quat(self._sim.model, data, wrist_r)
+        except ValueError:
+            return
+        try:
+            writer.maybe_write(
+                sim_time=float(data.time),
+                qpos7=data.qpos[:7],
+                qvel6=data.qvel[:6],
+                pelvis_pos=pelvis_pos,
+                pelvis_quat_wxyz=pelvis_quat,
+                wrist_l_pos=left_pos,
+                wrist_l_quat_wxyz=left_quat,
+                wrist_r_pos=right_pos,
+                wrist_r_quat_wxyz=right_quat,
+                plant_backend="g1_simulacrum",
+                extra={"payload": self._payload_manifest},
+            )
+        except OSError:
+            return
 
     @property
     def sim(self) -> G1Simulacrum:
@@ -583,6 +673,7 @@ class SonicDdsSimLoop:
         self._sim.step_physics(sensors=False)
         self._recover_if_exploded("post-step")
         self._write_plant_state()
+        self._write_plant_kinematics()
 
     def _sensors_due(self) -> bool:
         t = float(self._sim.data.time)
@@ -667,12 +758,13 @@ class SonicDdsSimLoop:
                     break
                 self.sim_step()
                 self._maybe_step_sensors(deadline)
-                if (
-                    sim_cnt % self._sync_every == 0
-                    and self._viewer is not None
-                    and time.monotonic() < deadline
-                ):
-                    self._paint_overlays()
+                if self._viewer is not None:
+                    # Always sync the viewer from live MjData every control tick.
+                    # Do not gate on the wall deadline: when RTF < 1 the old
+                    # check skipped sync entirely, freezing the mesh/overlays
+                    # while physics and LowState kept advancing.
+                    if sim_cnt % self._sync_every == 0:
+                        self._paint_overlays()
                     self._viewer.sync()
                 sim_cnt += 1
                 if duration_s is not None and (time.monotonic() - t0) >= duration_s:

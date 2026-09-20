@@ -96,10 +96,37 @@ class ControllerConfig(BaseModel):
     kd_scale: dict[str, float] = Field(default_factory=dict)
 
 
+class HandPayloadConfig(BaseModel):
+    """One fixed, uniform cuboid expressed in its wrist-yaw-link frame."""
+
+    profile: str = "canonical_box_v1"
+    mass_kg: float = Field(default=0.0, ge=0.0, le=20.0)
+    com_pos_wrist_m: tuple[float, float, float]
+    size_m: tuple[float, float, float] = (0.12, 0.10, 0.08)
+    quat_wxyz: tuple[float, float, float, float] = (1.0, 0.0, 0.0, 0.0)
+    collision: bool = False
+
+
+class PayloadsConfig(BaseModel):
+    """Per-hand payloads; mass is interpreted independently for each hand."""
+
+    left: HandPayloadConfig = Field(
+        default_factory=lambda: HandPayloadConfig(
+            com_pos_wrist_m=(0.1015, 0.003, 0.0)
+        )
+    )
+    right: HandPayloadConfig = Field(
+        default_factory=lambda: HandPayloadConfig(
+            com_pos_wrist_m=(0.1015, -0.003, 0.0)
+        )
+    )
+
+
 class RobotConfig(BaseModel):
     hands: Literal["dex3", "none"] = "dex3"
     spawn_pos: tuple[float, float, float] = (0.0, 0.0, 0.82)
     spawn_quat: tuple[float, float, float, float] = (1.0, 0.0, 0.0, 0.0)
+    payloads: PayloadsConfig = Field(default_factory=PayloadsConfig)
 
 
 class G1SimulacrumConfig(BaseModel):

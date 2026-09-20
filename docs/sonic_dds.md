@@ -29,11 +29,15 @@ cd ws_simulacra/src/g1_simulacrum/docker
 cd GR00T-WholeBodyControl/gear_sonic_deploy
 ./docker/run-ros2-dev.sh
 # inside that container:
-bash deploy.sh sim
+bash deploy.sh sim --input-type zmq_manager --zmq-host 127.0.0.1
 ```
 
 Wait until Terminal 1 prints `Publishing rt/lowstate` before relying on deploy.
-Then press **`]`** in the deploy terminal.
+Then press **`]`** in the deploy terminal and **`9`** to lower the gantry.
+
+**Programmatic walking** (no keyboard planner keys): see
+[`docs/sonic_locomotion.md`](sonic_locomotion.md) and
+`examples/03_programmatic_walk.py`.
 
 Healthy motion-only startup:
 
@@ -131,6 +135,26 @@ machine and `uv pip install`s it into `/opt/venv` (same as GEAR’s
 `gear_sonic_deploy/docker`.
 
 `export GROOT_ROOT=...` if GR00T is not the sibling `robo_ops/GR00T-WholeBodyControl`.
+
+## ws_sonic_redux integration (optional)
+
+Orchestration (`ws_sonic_redux/scripts/sim/sim_ctl.sh`) bind-mounts the redux
+repo at `docker/ws_sonic_redux` → `/workspace/docker/ws_sonic_redux`. The sim
+loop writes health to `logs/.plant_state.json` there when `configs/sim.yaml`
+is present.
+
+**Standalone** `./run.sh sonic` (no redux mount) writes to
+`/workspace/logs/.plant_state.json` instead. If you see a permission error on
+`docker/ws_sonic_redux/logs`, remove the stale empty mountpoint and either run
+without redux or symlink the repo:
+
+```bash
+cd ws_simulacra/src/g1_simulacrum/docker
+sudo rm -rf ws_sonic_redux
+ln -s ../../../ws_sonic_redux ws_sonic_redux
+```
+
+Override: `PLANT_STATE_PATH=/path/to/.plant_state.json`.
 
 ## Troubleshooting
 

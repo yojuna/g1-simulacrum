@@ -1,0 +1,1249 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="g1_kitchen_one_wall_small_scandanavian_seed0">
+  <!-- Cached RoboCasa/RoboSuite dump. Authoring: scripts/export_robocasa_scene.py. Sits next to g1_robot.xml so compiler meshdir=assets still resolves. -->
+  <compiler angle="radian" meshdir="assets" texturedir="assets" eulerseq="xyz" inertiagrouprange="0 0" autolimits="true" />
+  <include file="g1_robot.xml" />
+  <option timestep="0.001" gravity="0 0 -9.81" impratio="20" density="1.2" viscosity="2e-05" cone="elliptic" />
+  <asset>
+    <texture type="skybox" builtin="flat" rgb1="1 1 1" rgb2="1 1 1" width="256" height="1536" />
+    <texture type="2d" name="wall_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/tiles/white_tiles.png" />
+    <texture type="2d" name="wall_backing_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/flat/light_gray.png" />
+    <texture type="2d" name="wall_left_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/tiles/white_tiles.png" />
+    <texture type="2d" name="wall_left_backing_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/flat/light_gray.png" />
+    <texture type="2d" name="wall_right_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/tiles/white_tiles.png" />
+    <texture type="2d" name="wall_right_backing_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/flat/light_gray.png" />
+    <texture type="2d" name="floor_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/wood/light_wood_planks_long.png" />
+    <texture type="2d" name="floor_backing_room_wall" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/flat/light_gray.png" />
+    <texture type="2d" name="outlet_room_tex-outlet" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/outlets/simple_white/visuals/material_0.png" />
+    <texture type="2d" name="outlet_room_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/outlets/simple_white/visuals/image0.png" />
+    <texture type="2d" name="outlet_2_room_tex-outlet" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/outlets/simple_white/visuals/material_0.png" />
+    <texture type="2d" name="outlet_2_room_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/outlets/simple_white/visuals/image0.png" />
+    <texture type="2d" name="light_switch_room_tex-light_switch" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/light_switches/white_wide_switch/visuals/material_0.png" />
+    <texture type="2d" name="light_switch_room_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/light_switches/white_wide_switch/visuals/image0.png" />
+    <texture type="2d" name="light_switch_2_room_tex-light_switch" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/light_switches/white_wide_switch/visuals/material_0.png" />
+    <texture type="2d" name="light_switch_2_room_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/light_switches/white_wide_switch/visuals/image0.png" />
+    <texture type="2d" name="sink_main_group_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/sinks/white_sink/visuals/image0.png" />
+    <texture type="2d" name="wood/light_wood_planks_2d" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/wood/light_wood_planks.png" />
+    <texture type="cube" name="flat/white" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/flat/white.png" />
+    <texture type="2d" name="stove_main_group_image7" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/image7.png" />
+    <texture type="2d" name="stove_main_group_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/image0.png" />
+    <texture type="2d" name="stove_main_group_image10" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/image10.png" />
+    <texture type="2d" name="stove_main_group_image5" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/image5.png" />
+    <texture type="2d" name="stove_main_group_image3" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/image3.png" />
+    <texture type="2d" name="fridge_main_group_tex-model" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/fridges/pack_1/visuals/material_0.png" />
+    <texture type="2d" name="fridge_main_group_image23" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/fridges/pack_1/visuals/image23.png" />
+    <texture type="2d" name="fridge_main_group_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/fridges/pack_1/visuals/image0.png" />
+    <texture type="2d" name="flat/white_2d" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/flat/white.png" />
+    <texture type="cube" name="metals/bright_metal" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/metals/bright_metal.png" />
+    <texture type="2d" name="microwave_main_group_tex-model" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/material_0.png" />
+    <texture type="2d" name="microwave_main_group_image7" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/image7.png" />
+    <texture type="2d" name="microwave_main_group_image2" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/image2.png" />
+    <texture type="2d" name="microwave_main_group_image5" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/image5.png" />
+    <texture type="cube" name="box" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/flat/white.png" />
+    <texture type="2d" name="tex_2d" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/textures/ceramic.png" />
+    <texture type="2d" name="dishwasher_main_group_tex-model" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/dishwashers/pack_1/visuals/material_0.png" />
+    <texture type="2d" name="dishwasher_main_group_image9" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/dishwashers/pack_1/visuals/image9.png" />
+    <texture type="2d" name="dishwasher_main_group_image13" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/dishwashers/pack_1/visuals/image13.png" />
+    <texture type="2d" name="coffee_machine_main_group_tex-model" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/coffee_machines/nespresso/visuals/material_0.png" />
+    <texture type="2d" name="coffee_machine_main_group_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/coffee_machines/nespresso/visuals/image0.png" />
+    <texture type="2d" name="toaster_main_group_tex-model" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/toasters/basic_popup/visuals/material_0.png" />
+    <texture type="2d" name="toaster_main_group_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/toasters/basic_popup/visuals/image0.png" />
+    <texture type="2d" name="knife_block_main_group_tex-model" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/knife_blocks/light_wood_3/visuals/material_0.png" />
+    <texture type="2d" name="knife_block_main_group_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/knife_blocks/light_wood_3/visuals/image0.png" />
+    <texture type="2d" name="paper_towel_main_group_tex-model" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/paper_towel_holders/holder_2/visuals/material_0.png" />
+    <texture type="2d" name="paper_towel_main_group_image0" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/paper_towel_holders/holder_2/visuals/image0.png" />
+    <texture type="2d" name="paper_towel_main_group_image1" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/paper_towel_holders/holder_2/visuals/image1.png" />
+    <material name="wall_room_wall_mat" texture="wall_room_wall" texuniform="true" texrepeat="2 2" shininess="0.01" reflectance="0.1" />
+    <material name="wall_backing_room_wall_mat" texture="wall_backing_room_wall" texuniform="true" texrepeat="2 2" shininess="0.01" reflectance="0.1" />
+    <material name="wall_left_room_wall_mat" texture="wall_left_room_wall" texuniform="true" texrepeat="2 2" shininess="0.01" reflectance="0.1" />
+    <material name="wall_left_backing_room_wall_mat" texture="wall_left_backing_room_wall" texuniform="true" texrepeat="2 2" shininess="0.01" reflectance="0.1" />
+    <material name="wall_right_room_wall_mat" texture="wall_right_room_wall" texuniform="true" texrepeat="2 2" shininess="0.01" reflectance="0.1" />
+    <material name="wall_right_backing_room_wall_mat" texture="wall_right_backing_room_wall" texuniform="true" texrepeat="2 2" shininess="0.01" reflectance="0.1" />
+    <material name="floor_room_wall_mat" texture="floor_room_wall" texuniform="true" texrepeat="2 2" shininess="0.1" reflectance="0.1" />
+    <material name="floor_backing_room_wall_mat" texture="floor_backing_room_wall" texuniform="true" texrepeat="2 2" shininess="0.1" reflectance="0.1" />
+    <material name="outlet_room_outlet" texture="outlet_room_tex-outlet" reflectance="0.5" />
+    <material name="outlet_2_room_outlet" texture="outlet_2_room_tex-outlet" reflectance="0.5" />
+    <material name="light_switch_room_light_switch" texture="light_switch_room_tex-light_switch" reflectance="0.5" />
+    <material name="light_switch_room_lightswitch" texture="light_switch_room_image0" shininess="0.25" />
+    <material name="light_switch_2_room_light_switch" texture="light_switch_2_room_tex-light_switch" reflectance="0.5" />
+    <material name="light_switch_2_room_lightswitch" texture="light_switch_2_room_image0" shininess="0.25" />
+    <material name="sink_main_group_kitchen_sink" texture="sink_main_group_image0" shininess="0.25" />
+    <material name="counter_main_main_group_counter_top" texture="wood/light_wood_planks_2d" texuniform="true" texrepeat="3 3" shininess="0.1" reflectance="0.1" />
+    <material name="counter_main_main_group_counter_base" texture="flat/white" shininess="0.1" reflectance="0.1" />
+    <material name="stove_main_group_Mat_Back" texture="stove_main_group_image7" shininess="0.25" />
+    <material name="stove_main_group_Mat_Decal" texture="stove_main_group_image0" shininess="0.25" />
+    <material name="stove_main_group_Mat_Doors" texture="stove_main_group_image10" shininess="0.25" />
+    <material name="stove_main_group_Mat_Interior" texture="stove_main_group_image5" shininess="0.25" />
+    <material name="stove_main_group_Mat_Main" texture="stove_main_group_image3" shininess="0.25" />
+    <material name="stove_main_group_Mat_Transparent" shininess="0.856232" rgba="0.26652 0.26652 0.26652 0.475964" />
+    <material name="counter_right_main_group_counter_top" texture="wood/light_wood_planks_2d" texuniform="true" texrepeat="3 3" shininess="0.1" reflectance="0.1" />
+    <material name="counter_right_main_group_counter_base" texture="flat/white" shininess="0.1" reflectance="0.1" />
+    <material name="fridge_main_group_model" texture="fridge_main_group_tex-model" reflectance="0.5" />
+    <material name="fridge_main_group_TX_Fridge_3_1" texture="fridge_main_group_image23" shininess="0.25" />
+    <material name="fridge_main_group_TX_Fridge_3_2" texture="fridge_main_group_image0" shininess="0.25" />
+    <material name="fridge_housing_main_group_mat" texture="flat/white" shininess="0.1" />
+    <material name="cab_1_main_group_mat" texture="flat/white" shininess="0.1" />
+    <material name="cab_1_main_group_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_1_main_group_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="cab_2_main_group_mat" texture="flat/white" shininess="0.1" />
+    <material name="cab_2_main_group_left_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_2_main_group_left_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="cab_2_main_group_right_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_2_main_group_right_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="cab_main_main_group_mat" texture="flat/white" shininess="0.1" />
+    <material name="cab_main_main_group_left_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_main_main_group_left_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="cab_main_main_group_right_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_main_main_group_right_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="microwave_main_group_model" texture="microwave_main_group_tex-model" reflectance="0.5" />
+    <material name="microwave_main_group_TX_Microwave_3_1" texture="microwave_main_group_image7" shininess="0.25" />
+    <material name="microwave_main_group_TX_Microwave_3_2" texture="microwave_main_group_image2" shininess="0.25" />
+    <material name="microwave_main_group_TX_Microwave_3_3" texture="microwave_main_group_image5" shininess="0.25" />
+    <material name="cab_micro_main_group_mat" texture="flat/white" shininess="0.1" />
+    <material name="cab_micro_main_group_left_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_micro_main_group_left_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="cab_micro_main_group_right_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_micro_main_group_right_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="cab_3_main_group_mat" texture="flat/white_2d" shininess="0.8" reflectance="0.8" />
+    <material name="cab_3_main_group_shelf_0_mat" texture="flat/white_2d" texuniform="true" texrepeat="3 3" shininess="0.1" reflectance="0.1" />
+    <material name="cab_3_main_group_shelf_1_mat" texture="flat/white_2d" texuniform="true" texrepeat="3 3" shininess="0.1" reflectance="0.1" />
+    <material name="cab_3_main_group_shelf_2_mat" texture="flat/white_2d" texuniform="true" texrepeat="3 3" shininess="0.1" reflectance="0.1" />
+    <material name="cab_4_main_group_mat" texture="flat/white" shininess="0.1" />
+    <material name="cab_4_main_group_left_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_4_main_group_left_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="cab_4_main_group_right_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="cab_4_main_group_right_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="box_mat" texture="box" shininess="0.1" />
+    <material name="stack_1_main_group_1_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_1_main_group_1_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_1_main_group_1_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_1_main_group_2_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_1_main_group_2_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_1_main_group_2_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_1_main_group_3_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_1_main_group_3_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_1_main_group_3_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_1_main_group_4_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_1_main_group_4_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_1_main_group_4_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_2_main_group_1_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_2_main_group_1_left_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_2_main_group_1_left_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_2_main_group_1_right_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_2_main_group_1_right_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_2_main_group_2_mat" texture="flat/white" shininess="0.8" reflectance="0.8" />
+    <material name="stack_2_main_group_2_mat_uniform" texture="tex_2d" texuniform="true" texrepeat="4 4" shininess="0.8" reflectance="0.8" />
+    <material name="stack_2_main_group_2_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="dishwasher_main_group_model" texture="dishwasher_main_group_tex-model" reflectance="0.5" />
+    <material name="dishwasher_main_group_TX_Dishwasher_3_1" texture="dishwasher_main_group_image9" shininess="0.25" />
+    <material name="dishwasher_main_group_TX_Dishwasher_3_2" texture="dishwasher_main_group_image13" shininess="0.25" />
+    <material name="stack_3_main_group_1_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_3_main_group_1_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_3_main_group_1_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_4_main_group_1_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_4_main_group_1_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_4_main_group_1_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="stack_4_main_group_2_mat" texture="flat/white" shininess="0.1" />
+    <material name="stack_4_main_group_2_door_mat" texture="flat/white_2d" texuniform="true" texrepeat="4 4" shininess="0.1" reflectance="0.1" />
+    <material name="stack_4_main_group_2_door_handle_mat" texture="metals/bright_metal" shininess="0.8" reflectance="0.8" />
+    <material name="coffee_machine_main_group_model" texture="coffee_machine_main_group_tex-model" reflectance="0.5" />
+    <material name="coffee_machine_main_group_Black_Plastic" texture="coffee_machine_main_group_image0" shininess="0.25" />
+    <material name="coffee_machine_main_group_Chrome" shininess="1" />
+    <material name="coffee_machine_main_group_Perspex" shininess="1" rgba="0.15482 0.15482 0.15482 1" />
+    <material name="coffee_machine_main_group_Water" shininess="1" />
+    <material name="coffee_machine_main_group_White_Plastic" shininess="0.0491555" rgba="0.8 0.686012 0.55947 1" />
+    <material name="toaster_main_group_model" texture="toaster_main_group_tex-model" reflectance="0.5" />
+    <material name="toaster_main_group_main" texture="toaster_main_group_image0" shininess="0.25" />
+    <material name="knife_block_main_group_model" texture="knife_block_main_group_tex-model" reflectance="0.5" />
+    <material name="knife_block_main_group_Knife_rack" texture="knife_block_main_group_image0" shininess="0.25" />
+    <material name="paper_towel_main_group_model" texture="paper_towel_main_group_tex-model" reflectance="0.5" />
+    <material name="paper_towel_main_group_metal" shininess="0.0553676" rgba="0.35595 0.35595 0.35595 1" />
+    <material name="paper_towel_main_group_paperSide" texture="paper_towel_main_group_image0" shininess="0" />
+    <material name="paper_towel_main_group_paperTopAndBottom" texture="paper_towel_main_group_image1" shininess="0" />
+    <material name="paper_towel_main_group_paperboard" shininess="0" rgba="0.327778 0.266356 0.198069 1" />
+    <mesh name="outlet_room_outlet_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/outlets/simple_white/visuals/outlet_0.obj" scale="0.15 0.15 0.15" inertia="shell" />
+    <mesh name="outlet_2_room_outlet_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/outlets/simple_white/visuals/outlet_0.obj" scale="0.15 0.15 0.15" inertia="shell" />
+    <mesh name="light_switch_room_light_switch_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/light_switches/white_wide_switch/visuals/light_switch_0.obj" scale="0.15 0.15 0.15" inertia="shell" />
+    <mesh name="light_switch_2_room_light_switch_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/light_switches/white_wide_switch/visuals/light_switch_0.obj" scale="0.15 0.15 0.15" inertia="shell" />
+    <mesh name="sink_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/sinks/white_sink/visuals/model_0.obj" scale="0.611111 0.611111 0.611111" inertia="shell" />
+    <mesh name="sink_main_group_model_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/sinks/white_sink/visuals/model_1.obj" scale="0.611111 0.611111 0.611111" inertia="shell" />
+    <mesh name="sink_main_group_spout_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/sinks/white_sink/visuals/spout_0.obj" scale="0.611111 0.611111 0.611111" inertia="shell" />
+    <mesh name="sink_main_group_handle_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/sinks/white_sink/visuals/handle_0.obj" scale="0.611111 0.611111 0.611111" inertia="shell" />
+    <mesh name="stove_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/model_0.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_model_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/model_1.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_model_2_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/model_2.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_model_3_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/model_3.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_model_4_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/model_4.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_model_5_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/model_5.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_rear_right_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_rear_right_0.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_rear_right_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_rear_right_1.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_front_left_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_front_left_0.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_front_left_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_front_left_1.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_front_right_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_front_right_0.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_front_right_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_front_right_1.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_rear_left_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_rear_left_0.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_rear_left_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_rear_left_1.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_center_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_center_0.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="stove_main_group_knob_center_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/stoves/frigidaire_gas/visuals/knob_center_1.obj" scale="1.16814 1.16814 1.16814" inertia="shell" />
+    <mesh name="fridge_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/fridges/pack_1/visuals/model_0.obj" scale="1.75 1.75 1.75" inertia="shell" />
+    <mesh name="fridge_main_group_model_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/fridges/pack_1/visuals/model_1.obj" scale="1.75 1.75 1.75" inertia="shell" />
+    <mesh name="microwave_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/model_0.obj" scale="0.770733 0.515464 0.770733" inertia="shell" />
+    <mesh name="microwave_main_group_model_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/model_1.obj" scale="0.770733 0.515464 0.770733" inertia="shell" />
+    <mesh name="microwave_main_group_model_2_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/model_2.obj" scale="0.770733 0.515464 0.770733" inertia="shell" />
+    <mesh name="microwave_main_group_door_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/door_0.obj" scale="0.770733 0.515464 0.770733" inertia="shell" />
+    <mesh name="microwave_main_group_door_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/door_1.obj" scale="0.770733 0.515464 0.770733" inertia="shell" />
+    <mesh name="microwave_main_group_door_2_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/microwaves/pack_1/visuals/door_2.obj" scale="0.770733 0.515464 0.770733" inertia="shell" />
+    <mesh name="dishwasher_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/dishwashers/pack_1/visuals/model_0.obj" scale="0.887868 0.828685 0.89" inertia="shell" />
+    <mesh name="dishwasher_main_group_model_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/dishwashers/pack_1/visuals/model_1.obj" scale="0.887868 0.828685 0.89" inertia="shell" />
+    <mesh name="coffee_machine_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/coffee_machines/nespresso/visuals/model_0.obj" scale="0.423992 0.423992 0.423992" inertia="shell" />
+    <mesh name="coffee_machine_main_group_model_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/coffee_machines/nespresso/visuals/model_1.obj" scale="0.423992 0.423992 0.423992" inertia="shell" />
+    <mesh name="coffee_machine_main_group_model_2_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/coffee_machines/nespresso/visuals/model_2.obj" scale="0.423992 0.423992 0.423992" inertia="shell" />
+    <mesh name="coffee_machine_main_group_model_3_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/coffee_machines/nespresso/visuals/model_3.obj" scale="0.423992 0.423992 0.423992" inertia="shell" />
+    <mesh name="coffee_machine_main_group_model_4_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/coffee_machines/nespresso/visuals/model_4.obj" scale="0.423992 0.423992 0.423992" inertia="shell" />
+    <mesh name="toaster_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/toasters/basic_popup/visuals/model_0.obj" scale="0.3 0.3 0.3" inertia="shell" />
+    <mesh name="knife_block_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/knife_blocks/light_wood_3/visuals/model_0.obj" scale="0.381892 0.381892 0.381892" inertia="shell" />
+    <mesh name="paper_towel_main_group_model_0_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/paper_towel_holders/holder_2/visuals/model_0.obj" scale="0.35 0.35 0.35" inertia="shell" />
+    <mesh name="paper_towel_main_group_model_1_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/paper_towel_holders/holder_2/visuals/model_1.obj" scale="0.35 0.35 0.35" inertia="shell" />
+    <mesh name="paper_towel_main_group_model_2_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/paper_towel_holders/holder_2/visuals/model_2.obj" scale="0.35 0.35 0.35" inertia="shell" />
+    <mesh name="paper_towel_main_group_model_3_vis" file="robocasa/kitchen_one_wall_small_scandanavian_seed0/fixtures/accessories/paper_towel_holders/holder_2/visuals/model_3.obj" scale="0.35 0.35 0.35" inertia="shell" />
+  </asset>
+  <worldbody>
+    <light pos="2 -2 2" dir="0.009999 0.009999 -0.9999" directional="true" castshadow="false" ambient="0.3 0.3 0.3" diffuse="0.3 0.3 0.3" />
+    <body name="left_eef_target" pos="0 0 -1" mocap="true">
+      <geom name="left_eef_target_box" size="0.05 0.05 0.05" type="box" contype="0" conaffinity="0" group="2" rgba="0.898 0.42 0.435 0.5" />
+      <geom name="left_eef_target_sphere" size="0.01" contype="0" conaffinity="0" group="2" rgba="0.898 0.42 0.435 0.8" />
+    </body>
+    <body name="right_eef_target" pos="0 0 -1" mocap="true">
+      <geom name="right_eef_target_box" size="0.05 0.05 0.05" type="box" contype="0" conaffinity="0" group="2" rgba="0.208 0.314 0.439 0.5" />
+      <geom name="right_eef_target_sphere" size="0.01" contype="0" conaffinity="0" group="2" rgba="0.208 0.314 0.439 0.8" />
+    </body>
+    <body name="wall_room_main" pos="2.75 0.02 1.5" quat="-0.707107 0.707107 0 0">
+      <geom name="wall_room_g0" size="2.79 1.5 0.02" type="box" rgba="0.5 0 0 1" />
+      <geom name="wall_room_g0_vis" size="2.79 1.5 0.02" type="box" contype="0" conaffinity="0" group="1" mass="0" material="wall_room_wall_mat" />
+      <site name="wall_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="wall_backing_room_main" pos="2.75 0.14 1.38" quat="-0.707107 0.707107 0 0">
+      <geom name="wall_backing_room_g0" size="2.99 1.62 0.1" type="box" rgba="0.5 0 0 1" />
+      <geom name="wall_backing_room_g0_vis" size="2.99 1.62 0.1" type="box" contype="0" conaffinity="0" group="1" mass="0" material="wall_backing_room_wall_mat" />
+      <site name="wall_backing_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="wall_left_room_main" pos="-0.02 -1.5 1.5" quat="0.5 0.5 -0.5 -0.5">
+      <geom name="wall_left_room_g0" size="1.54 1.5 0.02" type="box" rgba="0.5 0 0 1" />
+      <geom name="wall_left_room_g0_vis" size="1.54 1.5 0.02" type="box" contype="0" conaffinity="0" group="1" mass="0" material="wall_left_room_wall_mat" />
+      <site name="wall_left_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="wall_left_backing_room_main" pos="-0.14 -1.5 1.38" quat="0.5 0.5 -0.5 -0.5">
+      <geom name="wall_left_backing_room_g0" size="1.54 1.62 0.1" type="box" rgba="0.5 0 0 1" />
+      <geom name="wall_left_backing_room_g0_vis" size="1.54 1.62 0.1" type="box" contype="0" conaffinity="0" group="1" mass="0" material="wall_left_backing_room_wall_mat" />
+      <site name="wall_left_backing_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="wall_right_room_main" pos="5.52 -1.5 1.5" quat="0.5 -0.5 -0.5 0.5">
+      <geom name="wall_right_room_g0" size="1.54 1.5 0.02" type="box" rgba="0.5 0 0 1" />
+      <geom name="wall_right_room_g0_vis" size="1.54 1.5 0.02" type="box" contype="0" conaffinity="0" group="1" mass="0" material="wall_right_room_wall_mat" />
+      <site name="wall_right_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="wall_right_backing_room_main" pos="5.64 -1.5 1.38" quat="0.5 -0.5 -0.5 0.5">
+      <geom name="wall_right_backing_room_g0" size="1.54 1.62 0.1" type="box" rgba="0.5 0 0 1" />
+      <geom name="wall_right_backing_room_g0_vis" size="1.54 1.62 0.1" type="box" contype="0" conaffinity="0" group="1" mass="0" material="wall_right_backing_room_wall_mat" />
+      <site name="wall_right_backing_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="floor_room_main" pos="2.75 -1.5 -0.02" quat="0.707107 0 0 0.707107">
+      <geom name="floor_room_g0" size="1.54 2.79 0.02" type="box" rgba="0.5 0 0 1" />
+      <geom name="floor_room_g0_vis" size="1.54 2.79 0.02" type="box" contype="0" conaffinity="0" group="1" mass="0" material="floor_room_wall_mat" />
+      <site name="floor_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="floor_backing_room_main" pos="2.75 -1.5 -0.14" quat="0.707107 0 0 0.707107">
+      <geom name="floor_backing_room_g0" size="1.54 2.79 0.1" type="box" rgba="0.5 0 0 1" />
+      <geom name="floor_backing_room_g0_vis" size="1.54 2.79 0.1" type="box" contype="0" conaffinity="0" group="1" mass="0" material="floor_backing_room_wall_mat" />
+      <site name="floor_backing_room_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="outlet_room_main" pos="4.1 0 1.2">
+      <geom name="outlet_room_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="outlet_room_outlet" mesh="outlet_room_outlet_0_vis" />
+      <site name="outlet_room_default_site" pos="0 0 0" size="0.0003" rgba="1 0 0 0" />
+    </body>
+    <body name="outlet_2_room_main" pos="2 0 1.2">
+      <geom name="outlet_2_room_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="outlet_2_room_outlet" mesh="outlet_2_room_outlet_0_vis" />
+      <site name="outlet_2_room_default_site" pos="0 0 0" size="0.0003" rgba="1 0 0 0" />
+    </body>
+    <body name="light_switch_room_main" pos="2.5 0 1.2" quat="0.707388 0 0 -0.706825">
+      <geom name="light_switch_room_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="light_switch_room_lightswitch" mesh="light_switch_room_light_switch_0_vis" />
+      <site name="light_switch_room_default_site" pos="0 0 0" size="0.0003" rgba="1 0 0 0" />
+    </body>
+    <body name="light_switch_2_room_main" pos="2.61 0 1.2" quat="0.707388 0 0 -0.706825">
+      <geom name="light_switch_2_room_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="light_switch_2_room_lightswitch" mesh="light_switch_2_room_light_switch_0_vis" />
+      <site name="light_switch_2_room_default_site" pos="0 0 0" size="0.0003" rgba="1 0 0 0" />
+    </body>
+    <body name="sink_main_group_main" pos="1.25 -0.3 1.0025">
+      <geom name="sink_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="sink_main_group_kitchen_sink" mesh="sink_main_group_model_1_vis" />
+      <geom name="sink_main_group_bottom" size="0.296389 0.213889 0.00763889" pos="0 -0.0488889 -0.294861" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="sink_main_group_g2" size="0.0244444 0.262778 0.11" pos="-0.278056 0 -0.189444" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="sink_main_group_g3" size="0.0244444 0.262778 0.11" pos="0.278056 0 -0.189444" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="sink_main_group_g4" size="0.296389 0.0702778 0.11" pos="0 0.204722 -0.189444" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="sink_main_group_g5" size="0.296389 0.0232222 0.11" pos="0 -0.250556 -0.189444" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="sink_main_group_g6" size="0.0305556 0.0641667" pos="0 0.197389 -0.0158889" type="cylinder" rgba="0.5 0 0 0.5" />
+      <site name="sink_main_group_ext_p0" pos="-0.296389 -0.275 -0.300667" size="0.0122222" rgba="1 1 1 0" />
+      <site name="sink_main_group_ext_px" pos="0.296389 -0.275 -0.300667" size="0.0122222" rgba="1 0 0 0" />
+      <site name="sink_main_group_ext_py" pos="-0.296389 0.275 -0.300667" size="0.0122222" rgba="0 1 0 0" />
+      <site name="sink_main_group_ext_pz" pos="-0.296389 -0.275 -0.0825" size="0.0122222" rgba="0 0 1 0" />
+      <site name="sink_main_group_int_p0" pos="-0.253611 -0.226111 -0.287222" size="0.0122222" rgba="0.5 0.5 0.5 0" />
+      <site name="sink_main_group_int_px" pos="0.253611 -0.226111 -0.287222" size="0.0122222" rgba="1 1 0 0" />
+      <site name="sink_main_group_int_py" pos="-0.253611 0.134444 -0.287222" size="0.0122222" rgba="0 1 1 0" />
+      <site name="sink_main_group_int_pz" pos="-0.253611 -0.226111 -0.0825" size="0.0122222" rgba="1 0 1 0" />
+      <site name="sink_main_group_default_site" pos="0 0 0" size="0.00122222" rgba="1 0 0 0" />
+      <body name="sink_main_group_spout">
+        <joint name="sink_main_group_spout_joint" pos="0 0.198611 0.152778" axis="0 0 1" limited="true" range="-1.57 1.57" damping="10" />
+        <geom name="sink_main_group_g7" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="sink_main_group_kitchen_sink" mesh="sink_main_group_spout_0_vis" />
+        <geom name="sink_main_group_g8" size="0.0134444 0.11" pos="0 0.198611 0.152778" type="cylinder" rgba="0.5 0 0 0.5" />
+        <geom name="sink_main_group_g9" size="0.0152778 0.0305556" pos="0 0.171111 0.275" quat="0.923956 0.382499 0 0" type="cylinder" rgba="0.5 0 0 0.5" />
+        <geom name="sink_main_group_spout_top" size="0.0152778 0.0794444" pos="0 0.0916667 0.287222" quat="0.707105 0.707108 0 0" type="cylinder" rgba="0.5 0 0 0.5" />
+        <geom name="sink_main_group_g11" size="0.0183333 0.0611111" pos="0 -0.0122222 0.235278" quat="0.174892 0.984588 0 0" type="cylinder" rgba="0.5 0 0 0.5" />
+        <site name="sink_main_group_water" pos="0 -0.0305556 -0.0611111" size="0.00611111 0.244444" type="cylinder" rgba="0.5 0.75 1 0" />
+      </body>
+      <body name="sink_main_group_handle">
+        <joint name="sink_main_group_handle_temp_joint" pos="0.0482778 0.198611 -0.00611111" axis="1 0 0" limited="true" range="-0.785 0.785" armature="2" damping="50" />
+        <joint name="sink_main_group_handle_joint" pos="0.0482778 0.198611 0.00611111" axis="0 1 0" limited="true" range="0 0.52" armature="2" damping="10" />
+        <geom name="sink_main_group_g12" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="sink_main_group_kitchen_sink" mesh="sink_main_group_handle_0_vis" />
+        <geom name="sink_main_group_g13" size="0.0238333 0.0177222" pos="0.066 0.198611 -0.00611111" quat="0 0.707107 0 0.707107" type="cylinder" rgba="0.5 0 0 0.5" />
+        <geom name="sink_main_group_handle_main" size="0.0055 0.0427778" pos="0.0721111 0.198611 0.0556111" type="cylinder" rgba="0.5 0 0 0.5" />
+      </body>
+    </body>
+    <body name="counter_main_main_group_main" pos="1.5 -0.325 0.46">
+      <geom name="counter_main_main_group_base_right" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_base_left" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_base_back" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_base_front" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_base_right_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_base_left_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_base_back_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_base_front_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_main_main_group_top_left_visual" size="0.351806 0.325 0.015" pos="-0.898194 0 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_top" />
+      <geom name="counter_main_main_group_top_left_0" size="0.25 0.325 0.015" pos="-1 0 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_left_1" size="0.101806 0.325 0.015" pos="-0.648194 0 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_right_visual" size="0.601806 0.325 0.015" pos="0.648194 0 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_top" />
+      <geom name="counter_main_main_group_top_right_0" size="0.25 0.325 0.015" pos="0.296389 0 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_right_1" size="0.25 0.325 0.015" pos="0.796389 0 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_right_2" size="0.101806 0.325 0.015" pos="1.14819 0 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_front_visual" size="0.296389 0.0375 0.015" pos="-0.25 -0.2875 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_top" />
+      <geom name="counter_main_main_group_top_front_0" size="0.25 0.0375 0.015" pos="-0.296389 -0.2875 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_front_1" size="0.0463889 0.0375 0.015" pos="0 -0.2875 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_back_visual" size="0.296389 0.0125 0.015" pos="-0.25 0.3125 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_main_main_group_counter_top" />
+      <geom name="counter_main_main_group_top_back_0" size="0.25 0.0125 0.015" pos="-0.296389 0.3125 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_main_main_group_top_back_1" size="0.0463889 0.0125 0.015" pos="0 0.3125 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <site name="counter_main_main_group_ext_p0" pos="-1.25 -0.275 -0.46" size="0.01" rgba="0 0 0 0" />
+      <site name="counter_main_main_group_ext_px" pos="1.25 -0.275 -0.46" size="0.01" rgba="1 0 0 0" />
+      <site name="counter_main_main_group_ext_py" pos="-1.25 0.325 -0.46" size="0.01" rgba="0 1 0 0" />
+      <site name="counter_main_main_group_ext_pz" pos="-1.25 -0.275 0.46" size="0.01" rgba="0 0 1 0" />
+      <site name="counter_main_main_group_int_p0" pos="0 0 0" size="0.01" rgba="0.5 0.5 0.5 0" />
+      <site name="counter_main_main_group_int_px" pos="0 0 0" size="0.01" rgba="1 1 0 0" />
+      <site name="counter_main_main_group_int_py" pos="0 0 0" size="0.01" rgba="0 1 1 0" />
+      <site name="counter_main_main_group_int_pz" pos="0 0 0" size="0.01" rgba="1 0 1 0" />
+      <site name="counter_main_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+    </body>
+    <body name="stove_main_group_main" pos="3.12381 -0.350442 0.627965">
+      <geom name="stove_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Doors" mesh="stove_main_group_model_0_vis" />
+      <geom name="stove_main_group_g1" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Interior" mesh="stove_main_group_model_1_vis" />
+      <geom name="stove_main_group_g2" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Transparent" mesh="stove_main_group_model_2_vis" />
+      <geom name="stove_main_group_g3" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Decal" mesh="stove_main_group_model_3_vis" />
+      <geom name="stove_main_group_g4" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Main" mesh="stove_main_group_model_4_vis" />
+      <geom name="stove_main_group_g5" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Back" mesh="stove_main_group_model_5_vis" />
+      <geom name="stove_main_group_g6" size="0.373805 0.350442 0.443894" pos="0 0.040885 -0.130832" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="stove_main_group_g7" size="0.362124 0.0350442 0.0175221" pos="0 -0.338761 0.130832" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="stove_main_group_g8" size="0.373805 0.0140177 0.0350442" pos="0 -0.300212 0.21377" quat="0.999047 -0.0436361 0 0" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="stove_main_group_g9" size="0.373805 0.0584071 0.140177" pos="0 0.303717 0.449735" type="box" rgba="0.5 0 0 0.5" />
+      <site name="stove_main_group_burner_on_front_left" pos="-0.210265 -0.146018 0.274513" size="0.040885 0.00584071" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_on_front_right" pos="0.211434 -0.147186 0.274513" size="0.0584071 0.0116814" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_on_rear_left" pos="-0.212602 0.091115 0.274513" size="0.0455575 0.00584071" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_on_rear_right" pos="0.211434 0.091115 0.274513" size="0.0373805 0.00584071" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_on_center" pos="0 -0.0292035 0.274513" size="0.040885 0.00584071" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_front_left_place_site" pos="-0.210265 -0.146018 0.313062" size="0.040885 0.00116814" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_front_right_place_site" pos="0.211434 -0.147186 0.313062" size="0.0584071 0.00116814" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_rear_left_place_site" pos="-0.212602 0.091115 0.313062" size="0.0455575 0.00116814" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_rear_right_place_site" pos="0.211434 0.091115 0.313062" size="0.0373805 0.00116814" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_burner_center_place_site" pos="0 -0.0292035 0.313062" size="0.040885 0.00116814" type="cylinder" rgba="0.3 0.4 1 0" />
+      <site name="stove_main_group_ext_p0" pos="-0.373805 -0.309558 -0.572389" size="0.0116814" rgba="0 0 0 0" />
+      <site name="stove_main_group_ext_px" pos="0.373805 -0.309558 -0.572389" size="0.0116814" rgba="1 0 0 0" />
+      <site name="stove_main_group_ext_py" pos="-0.373805 0.350442 -0.572389" size="0.0116814" rgba="0 1 0 0" />
+      <site name="stove_main_group_ext_pz" pos="-0.373805 -0.309558 0.292035" size="0.0116814" rgba="0 0 1 0" />
+      <site name="stove_main_group_int_p0" pos="0 0 0" size="0.0116814" rgba="0.5 0.5 0.5 0" />
+      <site name="stove_main_group_int_px" pos="0 0 0" size="0.0116814" rgba="1 1 0 0" />
+      <site name="stove_main_group_int_py" pos="0 0 0" size="0.0116814" rgba="0 1 1 0" />
+      <site name="stove_main_group_int_pz" pos="0 0 0" size="0.0116814" rgba="1 0 1 0" />
+      <site name="stove_main_group_default_site" pos="0 0 0" size="0.00233628" rgba="1 0 0 0" />
+      <body name="stove_main_group_knob_front_right">
+        <joint name="stove_main_group_knob_front_right_joint" pos="0.23246 -0.321239 0.21377" axis="0 0.996191 -0.0871992" damping="1" />
+        <geom name="stove_main_group_g10" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Decal" mesh="stove_main_group_knob_rear_right_0_vis" />
+        <geom name="stove_main_group_g11" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Main" mesh="stove_main_group_knob_rear_right_1_vis" />
+        <geom name="stove_main_group_g12" size="0.0210265 0.00584071" pos="0.23246 -0.321239 0.21377" quat="0.737119 0.675763 0 0" type="cylinder" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+        <geom name="stove_main_group_knob_front_right_main" size="0.00759292 0.00934513 0.0186903" pos="0.23246 -0.338761 0.214938" quat="0.999047 -0.0436361 0 0" type="box" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+      </body>
+      <body name="stove_main_group_knob_front_left">
+        <joint name="stove_main_group_knob_front_left_joint" pos="-0.23246 -0.321239 0.21377" axis="0 0.996191 -0.0871992" damping="1" />
+        <geom name="stove_main_group_g14" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Decal" mesh="stove_main_group_knob_front_left_0_vis" />
+        <geom name="stove_main_group_g15" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Main" mesh="stove_main_group_knob_front_left_1_vis" />
+        <geom name="stove_main_group_g16" size="0.0210265 0.00584071" pos="-0.23246 -0.321239 0.21377" quat="0.737119 0.675763 0 0" type="cylinder" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+        <geom name="stove_main_group_knob_front_left_main" size="0.00759292 0.00934513 0.0186903" pos="-0.23246 -0.338761 0.214938" quat="0.999047 -0.0436361 0 0" type="box" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+      </body>
+      <body name="stove_main_group_knob_rear_right">
+        <joint name="stove_main_group_knob_rear_right_joint" pos="0.170549 -0.321239 0.21377" axis="0 0.996191 -0.0871992" damping="1" />
+        <geom name="stove_main_group_g18" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Decal" mesh="stove_main_group_knob_front_right_0_vis" />
+        <geom name="stove_main_group_g19" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Main" mesh="stove_main_group_knob_front_right_1_vis" />
+        <geom name="stove_main_group_g20" size="0.0210265 0.00584071" pos="0.170549 -0.321239 0.21377" quat="0.737119 0.675763 0 0" type="cylinder" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+        <geom name="stove_main_group_knob_rear_right_main" size="0.00759292 0.00934513 0.0186903" pos="0.170549 -0.338761 0.214938" quat="0.999047 -0.0436361 0 0" type="box" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+      </body>
+      <body name="stove_main_group_knob_rear_left">
+        <joint name="stove_main_group_knob_rear_left_joint" pos="-0.170549 -0.321239 0.21377" axis="0 0.996191 -0.0871992" damping="1" />
+        <geom name="stove_main_group_g22" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Decal" mesh="stove_main_group_knob_rear_left_0_vis" />
+        <geom name="stove_main_group_g23" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Main" mesh="stove_main_group_knob_rear_left_1_vis" />
+        <geom name="stove_main_group_g24" size="0.0210265 0.00584071" pos="-0.170549 -0.321239 0.21377" quat="0.737119 0.675763 0 0" type="cylinder" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+        <geom name="stove_main_group_knob_rear_left_main" size="0.00759292 0.00934513 0.0186903" pos="-0.170549 -0.338761 0.214938" quat="0.999047 -0.0436361 0 0" type="box" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+      </body>
+      <body name="stove_main_group_knob_center">
+        <joint name="stove_main_group_knob_center_joint" pos="0.0040885 -0.321239 0.21377" axis="0 0.996191 -0.0871992" damping="1" />
+        <geom name="stove_main_group_g26" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Decal" mesh="stove_main_group_knob_center_0_vis" />
+        <geom name="stove_main_group_g27" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="stove_main_group_Mat_Main" mesh="stove_main_group_knob_center_1_vis" />
+        <geom name="stove_main_group_g28" size="0.0210265 0.00584071" pos="0.0040885 -0.321239 0.21377" quat="0.737119 0.675763 0 0" type="cylinder" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+        <geom name="stove_main_group_knob_center_main" size="0.00759292 0.00934513 0.0186903" pos="0.0040885 -0.338761 0.214938" quat="0.999047 -0.0436361 0 0" type="box" friction="100 0.0001 0.1" solref="0.001 5" solimp="0.999 0.99" rgba="0.5 0 0 0.5" />
+      </body>
+    </body>
+    <body name="counter_right_main_group_main" pos="3.84761 -0.325 0.46">
+      <geom name="counter_right_main_group_base_right" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_base_left" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_base_back" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_base_front" size="0.01 0.01 0.01" pos="0 0 10" type="box" density="10" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_base_right_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_right_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_base_left_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_right_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_base_back_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_right_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_base_front_visual" size="0.01 0.01 0.01" pos="0 0 10" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_right_main_group_counter_base" rgba="0 0 0 0" />
+      <geom name="counter_right_main_group_top_visual" size="0.35 0.325 0.015" pos="0 0 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="counter_right_main_group_counter_top" />
+      <geom name="counter_right_main_group_top_0" size="0.25 0.325 0.015" pos="-0.1 0 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="counter_right_main_group_top_1" size="0.1 0.325 0.015" pos="0.25 0 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <site name="counter_right_main_group_ext_p0" pos="-0.35 -0.275 -0.46" size="0.01" rgba="0 0 0 0" />
+      <site name="counter_right_main_group_ext_px" pos="0.35 -0.275 -0.46" size="0.01" rgba="1 0 0 0" />
+      <site name="counter_right_main_group_ext_py" pos="-0.35 0.325 -0.46" size="0.01" rgba="0 1 0 0" />
+      <site name="counter_right_main_group_ext_pz" pos="-0.35 -0.275 0.46" size="0.01" rgba="0 0 1 0" />
+      <site name="counter_right_main_group_int_p0" pos="0 0 0" size="0.01" rgba="0.5 0.5 0.5 0" />
+      <site name="counter_right_main_group_int_px" pos="0 0 0" size="0.01" rgba="1 1 0 0" />
+      <site name="counter_right_main_group_int_py" pos="0 0 0" size="0.01" rgba="0 1 1 0" />
+      <site name="counter_right_main_group_int_pz" pos="0 0 0" size="0.01" rgba="1 0 1 0" />
+      <site name="counter_right_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+    </body>
+    <body name="fridge_main_group_main" pos="4.65136 -0.390974 0.875">
+      <geom name="fridge_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="fridge_main_group_TX_Fridge_3_1" mesh="fridge_main_group_model_0_vis" />
+      <geom name="fridge_main_group_g1" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="fridge_main_group_TX_Fridge_3_2" mesh="fridge_main_group_model_1_vis" />
+      <geom name="fridge_main_group_g2" size="0.433746 0.35525 0.875" pos="0 0.0175 0" type="box" rgba="0.5 0 0 0.5" />
+      <site name="fridge_main_group_default_site" pos="0 0 0" size="0.0035" rgba="1 0 0 0" />
+    </body>
+    <body name="fridge_housing_main_group_main" pos="4.65136 -0.344362 0.885">
+      <geom name="fridge_housing_main_group_top" size="0.453746 0.334362 0.01" pos="0 -0.01 0.875" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="fridge_housing_main_group_top_visual" size="0.453746 0.334362 0.01" pos="0 -0.01 0.875" type="box" contype="0" conaffinity="0" group="1" mass="0" material="fridge_housing_main_group_mat" />
+      <geom name="fridge_housing_main_group_back" size="0.453746 0.01 0.885" pos="0 0.334362 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="fridge_housing_main_group_back_visual" size="0.453746 0.01 0.885" pos="0 0.334362 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="fridge_housing_main_group_mat" />
+      <geom name="fridge_housing_main_group_left" size="0.01 0.334362 0.875" pos="-0.443746 -0.01 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="fridge_housing_main_group_left_visual" size="0.01 0.334362 0.875" pos="-0.443746 -0.01 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="fridge_housing_main_group_mat" />
+      <geom name="fridge_housing_main_group_right" size="0.01 0.334362 0.875" pos="0.443746 -0.01 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="fridge_housing_main_group_right_visual" size="0.01 0.334362 0.875" pos="0.443746 -0.01 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="fridge_housing_main_group_mat" />
+      <site name="fridge_housing_main_group_ext_p0" pos="-0.453746 -0.344362 -0.885" size="0.01" rgba="0 0 0 0" />
+      <site name="fridge_housing_main_group_ext_px" pos="0.453746 -0.344362 -0.885" size="0.01" rgba="1 0 0 0" />
+      <site name="fridge_housing_main_group_ext_py" pos="-0.453746 0.344362 -0.885" size="0.01" rgba="0 1 0 0" />
+      <site name="fridge_housing_main_group_ext_pz" pos="-0.453746 -0.344362 0.885" size="0.01" rgba="0 0 1 0" />
+      <site name="fridge_housing_main_group_int_p0" pos="-0.433746 -0.384362 -0.885" size="0.01" rgba="0.5 0.5 0.5 0" />
+      <site name="fridge_housing_main_group_int_px" pos="0.433746 -0.384362 -0.885" size="0.01" rgba="1 1 0 0" />
+      <site name="fridge_housing_main_group_int_py" pos="-0.433746 0.324362 -0.885" size="0.01" rgba="0 1 1 0" />
+      <site name="fridge_housing_main_group_int_pz" pos="-0.433746 -0.384362 0.865" size="0.01" rgba="1 0 1 0" />
+      <site name="fridge_housing_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+    </body>
+    <body name="cab_1_main_group_main" pos="0.5 -0.2 1.85">
+      <geom name="cab_1_main_group_top" size="0.25 0.185 0.015" pos="0 0.015 0.445" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="cab_1_main_group_bottom" size="0.25 0.185 0.015" pos="0 0.015 -0.445" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="cab_1_main_group_back" size="0.22 0.015 0.43" pos="0 0.185 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="cab_1_main_group_right" size="0.015 0.185 0.43" pos="0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="cab_1_main_group_left" size="0.015 0.185 0.43" pos="-0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="cab_1_main_group_shelf" size="0.22 0.15 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_1_main_group_top_visual" size="0.25 0.185 0.015" pos="0 0.015 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_mat" />
+      <geom name="cab_1_main_group_bottom_visual" size="0.25 0.185 0.015" pos="0 0.015 -0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_mat" />
+      <geom name="cab_1_main_group_back_visual" size="0.22 0.015 0.43" pos="0 0.185 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_mat" />
+      <geom name="cab_1_main_group_right_visual" size="0.015 0.185 0.43" pos="0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_mat" />
+      <geom name="cab_1_main_group_left_visual" size="0.015 0.185 0.43" pos="-0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_mat" />
+      <geom name="cab_1_main_group_shelf_visual" size="0.22 0.15 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_mat" />
+      <site name="cab_1_main_group_ext_p0" pos="-0.25 -0.2 -0.46" size="0.01" rgba="0 0 0 0" />
+      <site name="cab_1_main_group_ext_px" pos="0.25 -0.2 -0.46" size="0.01" rgba="1 0 0 0" />
+      <site name="cab_1_main_group_ext_py" pos="-0.25 0.2 -0.46" size="0.01" rgba="0 1 0 0" />
+      <site name="cab_1_main_group_ext_pz" pos="-0.25 -0.2 0.46" size="0.01" rgba="0 0 1 0" />
+      <site name="cab_1_main_group_int_p0" pos="-0.22 -0.17 -0.43" size="0.01" rgba="0.5 0.5 0.5 0" />
+      <site name="cab_1_main_group_int_px" pos="0.22 -0.17 -0.43" size="0.01" rgba="1 1 0 0" />
+      <site name="cab_1_main_group_int_py" pos="-0.22 0.17 -0.43" size="0.01" rgba="0 1 1 0" />
+      <site name="cab_1_main_group_int_pz" pos="-0.22 -0.17 0.43" size="0.01" rgba="1 0 1 0" />
+      <site name="cab_1_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="cab_1_main_group_hingedoor">
+        <joint name="cab_1_main_group_doorhinge" pos="-0.235 -0.2 0" axis="0 0 1" limited="true" range="-3 0" damping="2" />
+        <site name="cab_1_main_group_door_p1" pos="0 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_1_main_group_door_p2" pos="0.05 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_1_main_group_door_p3" pos="0 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_1_main_group_door_main" pos="0 -0.185 0">
+          <geom name="cab_1_main_group_door_door" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_1_main_group_door_door_visual" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_door_mat" />
+          <site name="cab_1_main_group_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_1_main_group_door_handle_main" pos="0.1985 0 -0.2585">
+            <geom name="cab_1_main_group_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_1_main_group_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_1_main_group_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_1_main_group_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_door_handle_mat" />
+            <geom name="cab_1_main_group_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_door_handle_mat" />
+            <geom name="cab_1_main_group_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_1_main_group_door_handle_mat" />
+            <site name="cab_1_main_group_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="cab_2_main_group_main" pos="1.25 -0.2 1.85">
+      <geom name="cab_2_main_group_top" size="0.5 0.185 0.015" pos="0 0.015 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_2_main_group_bottom" size="0.5 0.185 0.015" pos="0 0.015 -0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_2_main_group_back" size="0.47 0.015 0.43" pos="0 0.185 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_2_main_group_right" size="0.015 0.185 0.43" pos="0.485 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_2_main_group_left" size="0.015 0.185 0.43" pos="-0.485 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_2_main_group_shelf" size="0.47 0.15 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_2_main_group_top_visual" size="0.5 0.185 0.015" pos="0 0.015 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_mat" />
+      <geom name="cab_2_main_group_bottom_visual" size="0.5 0.185 0.015" pos="0 0.015 -0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_mat" />
+      <geom name="cab_2_main_group_back_visual" size="0.47 0.015 0.43" pos="0 0.185 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_mat" />
+      <geom name="cab_2_main_group_right_visual" size="0.015 0.185 0.43" pos="0.485 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_mat" />
+      <geom name="cab_2_main_group_left_visual" size="0.015 0.185 0.43" pos="-0.485 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_mat" />
+      <geom name="cab_2_main_group_shelf_visual" size="0.47 0.15 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_mat" />
+      <site name="cab_2_main_group_ext_p0" pos="-0.5 -0.2 -0.46" rgba="0 0 0 0" />
+      <site name="cab_2_main_group_ext_px" pos="0.5 -0.2 -0.46" rgba="1 0 0 0" />
+      <site name="cab_2_main_group_ext_py" pos="-0.5 0.2 -0.46" rgba="0 1 0 0" />
+      <site name="cab_2_main_group_ext_pz" pos="-0.5 -0.2 0.46" rgba="0 0 1 0" />
+      <site name="cab_2_main_group_int_p0" pos="-0.47 -0.17 -0.43" rgba="0.5 0.5 0.5 0" />
+      <site name="cab_2_main_group_int_px" pos="0.47 -0.17 -0.43" rgba="1 1 0 0" />
+      <site name="cab_2_main_group_int_py" pos="-0.47 0.17 -0.43" rgba="0 1 1 0" />
+      <site name="cab_2_main_group_int_pz" pos="-0.47 -0.17 0.43" rgba="1 0 1 0" />
+      <site name="cab_2_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="cab_2_main_group_hingeleftdoor">
+        <joint name="cab_2_main_group_leftdoorhinge" pos="-0.485 -0.2 0" axis="0 0 1" limited="true" range="-3 0" damping="2" />
+        <site name="cab_2_main_group_leftdoor_p1" pos="-0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_2_main_group_leftdoor_p2" pos="-0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_2_main_group_leftdoor_p3" pos="-0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_2_main_group_left_door_main" pos="-0.25 -0.185 0">
+          <geom name="cab_2_main_group_left_door_door" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_2_main_group_left_door_door_visual" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_left_door_mat" />
+          <site name="cab_2_main_group_left_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_2_main_group_left_door_handle_main" pos="0.1985 0 -0.2585">
+            <geom name="cab_2_main_group_left_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_2_main_group_left_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_2_main_group_left_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_2_main_group_left_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_left_door_handle_mat" />
+            <geom name="cab_2_main_group_left_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_left_door_handle_mat" />
+            <geom name="cab_2_main_group_left_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_left_door_handle_mat" />
+            <site name="cab_2_main_group_left_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+      <body name="cab_2_main_group_hingerightdoor">
+        <joint name="cab_2_main_group_rightdoorhinge" pos="0.485 -0.2 0" axis="0 0 1" limited="true" range="0 3" damping="2" />
+        <site name="cab_2_main_group_rightdoor_p1" pos="0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_2_main_group_rightdoor_p2" pos="0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_2_main_group_rightdoor_p3" pos="0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_2_main_group_right_door_main" pos="0.25 -0.185 0">
+          <geom name="cab_2_main_group_right_door_door" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_2_main_group_right_door_door_visual" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_right_door_mat" />
+          <site name="cab_2_main_group_right_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_2_main_group_right_door_handle_main" pos="-0.1985 0 -0.2585">
+            <geom name="cab_2_main_group_right_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_2_main_group_right_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_2_main_group_right_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_2_main_group_right_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_right_door_handle_mat" />
+            <geom name="cab_2_main_group_right_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_right_door_handle_mat" />
+            <geom name="cab_2_main_group_right_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_2_main_group_right_door_handle_mat" />
+            <site name="cab_2_main_group_right_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="cab_main_main_group_main" pos="2.25 -0.2 1.85">
+      <geom name="cab_main_main_group_top" size="0.5 0.185 0.015" pos="0 0.015 0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_main_main_group_bottom" size="0.5 0.185 0.015" pos="0 0.015 -0.445" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_main_main_group_back" size="0.47 0.015 0.43" pos="0 0.185 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_main_main_group_right" size="0.015 0.185 0.43" pos="0.485 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_main_main_group_left" size="0.015 0.185 0.43" pos="-0.485 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_main_main_group_shelf" size="0.47 0.15 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_main_main_group_top_visual" size="0.5 0.185 0.015" pos="0 0.015 0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_mat" />
+      <geom name="cab_main_main_group_bottom_visual" size="0.5 0.185 0.015" pos="0 0.015 -0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_mat" />
+      <geom name="cab_main_main_group_back_visual" size="0.47 0.015 0.43" pos="0 0.185 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_mat" />
+      <geom name="cab_main_main_group_right_visual" size="0.015 0.185 0.43" pos="0.485 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_mat" />
+      <geom name="cab_main_main_group_left_visual" size="0.015 0.185 0.43" pos="-0.485 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_mat" />
+      <geom name="cab_main_main_group_shelf_visual" size="0.47 0.15 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_mat" />
+      <site name="cab_main_main_group_ext_p0" pos="-0.5 -0.2 -0.46" rgba="0 0 0 0" />
+      <site name="cab_main_main_group_ext_px" pos="0.5 -0.2 -0.46" rgba="1 0 0 0" />
+      <site name="cab_main_main_group_ext_py" pos="-0.5 0.2 -0.46" rgba="0 1 0 0" />
+      <site name="cab_main_main_group_ext_pz" pos="-0.5 -0.2 0.46" rgba="0 0 1 0" />
+      <site name="cab_main_main_group_int_p0" pos="-0.47 -0.17 -0.43" rgba="0.5 0.5 0.5 0" />
+      <site name="cab_main_main_group_int_px" pos="0.47 -0.17 -0.43" rgba="1 1 0 0" />
+      <site name="cab_main_main_group_int_py" pos="-0.47 0.17 -0.43" rgba="0 1 1 0" />
+      <site name="cab_main_main_group_int_pz" pos="-0.47 -0.17 0.43" rgba="1 0 1 0" />
+      <site name="cab_main_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="cab_main_main_group_hingeleftdoor">
+        <joint name="cab_main_main_group_leftdoorhinge" pos="-0.485 -0.2 0" axis="0 0 1" limited="true" range="-3 0" damping="2" />
+        <site name="cab_main_main_group_leftdoor_p1" pos="-0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_main_main_group_leftdoor_p2" pos="-0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_main_main_group_leftdoor_p3" pos="-0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_main_main_group_left_door_main" pos="-0.25 -0.185 0">
+          <geom name="cab_main_main_group_left_door_door" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_main_main_group_left_door_door_visual" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_left_door_mat" />
+          <site name="cab_main_main_group_left_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_main_main_group_left_door_handle_main" pos="0.1985 0 -0.2585">
+            <geom name="cab_main_main_group_left_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_main_main_group_left_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_main_main_group_left_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_main_main_group_left_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_left_door_handle_mat" />
+            <geom name="cab_main_main_group_left_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_left_door_handle_mat" />
+            <geom name="cab_main_main_group_left_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_left_door_handle_mat" />
+            <site name="cab_main_main_group_left_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+      <body name="cab_main_main_group_hingerightdoor">
+        <joint name="cab_main_main_group_rightdoorhinge" pos="0.485 -0.2 0" axis="0 0 1" limited="true" range="0 3" damping="2" />
+        <site name="cab_main_main_group_rightdoor_p1" pos="0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_main_main_group_rightdoor_p2" pos="0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_main_main_group_rightdoor_p3" pos="0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_main_main_group_right_door_main" pos="0.25 -0.185 0">
+          <geom name="cab_main_main_group_right_door_door" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_main_main_group_right_door_door_visual" size="0.2485 0.4585 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_right_door_mat" />
+          <site name="cab_main_main_group_right_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_main_main_group_right_door_handle_main" pos="-0.1985 0 -0.2585">
+            <geom name="cab_main_main_group_right_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_main_main_group_right_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_main_main_group_right_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_main_main_group_right_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_right_door_handle_mat" />
+            <geom name="cab_main_main_group_right_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_right_door_handle_mat" />
+            <geom name="cab_main_main_group_right_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_main_main_group_right_door_handle_mat" />
+            <site name="cab_main_main_group_right_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="microwave_main_group_main" pos="3.12381 -0.239691 1.59039">
+      <geom name="microwave_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="microwave_main_group_TX_Microwave_3_2" mesh="microwave_main_group_model_0_vis" />
+      <geom name="microwave_main_group_g1" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="microwave_main_group_TX_Microwave_3_3" mesh="microwave_main_group_model_1_vis" />
+      <geom name="microwave_main_group_g2" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="microwave_main_group_TX_Microwave_3_1" mesh="microwave_main_group_model_2_vis" />
+      <geom name="microwave_main_group_g3" size="0.0732196 0.0170103 0.192683" pos="0.277464 -0.190206 0.0223512" type="box" contype="0" conaffinity="0" group="1" rgba="0.4 0.4 0.4 1" />
+      <geom name="microwave_main_group_g4" size="0.0732196 0.0154639 0.00847806" pos="0.277464 -0.186598 0.223512" type="box" contype="0" conaffinity="0" group="1" rgba="0.4 0.4 0.4 1" />
+      <geom name="microwave_main_group_g5" size="0.0732196 0.0154639 0.0131025" pos="0.277464 -0.187113 -0.183434" type="box" contype="0" conaffinity="0" group="1" rgba="0.4 0.4 0.4 1" />
+      <geom name="microwave_main_group_g6" size="0.373805 0.0463918 0.232761" pos="0 0.216495 0" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="microwave_main_group_g7" size="0.373805 0.172165 0.0423903" pos="0 0 -0.191142" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="microwave_main_group_g8" size="0.0192683 0.172165 0.232761" pos="-0.354537 0 0" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="microwave_main_group_g9" size="0.114068 0.172165 0.232761" pos="0.258195 0 0" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="microwave_main_group_g10" size="0.373805 0.172165 0.0223512" pos="0 0 0.21041" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="microwave_main_group_g11" size="0.0840099 0.0190722 0.215034" pos="0.288254 -0.190206 0.0177268" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="microwave_main_group_start_button" size="0.023122 0.011134 0.0192683" pos="0.327561 -0.198454 -0.100195" type="box" rgba="0 0.5 0 0.5" />
+      <geom name="microwave_main_group_stop_button" size="0.023122 0.011134 0.0192683" pos="0.23122 -0.198454 -0.100195" type="box" rgba="0 0.5 0 0.5" />
+      <geom name="microwave_main_group_tray" size="0.141482 0.00385366" pos="-0.0924879 -0.0103093 -0.150293" type="cylinder" rgba="0 1 0 0.5" />
+      <site name="microwave_main_group_ext_p0" pos="-0.373805 -0.210309 -0.20039" size="0.00685643" rgba="0 0 0 0" />
+      <site name="microwave_main_group_ext_px" pos="0.373805 -0.210309 -0.20039" size="0.00685643" rgba="1 0 0 0" />
+      <site name="microwave_main_group_ext_py" pos="-0.373805 0.239691 -0.20039" size="0.00685643" rgba="0 1 0 0" />
+      <site name="microwave_main_group_ext_pz" pos="-0.373805 -0.210309 0.235073" size="0.00685643" rgba="0 0 1 0" />
+      <site name="microwave_main_group_int_p0" pos="-0.335269 -0.172165 -0.154147" size="0.00685643" rgba="0.5 0.5 0.5 0" />
+      <site name="microwave_main_group_int_px" pos="0.144127 -0.172165 -0.154147" size="0.00685643" rgba="0 1 1 0" />
+      <site name="microwave_main_group_int_py" pos="-0.335269 0.170103 -0.154147" size="0.00685643" rgba="1 1 0 0" />
+      <site name="microwave_main_group_int_pz" pos="-0.335269 -0.172165 0.188059" size="0.00685643" rgba="1 0 1 0" />
+      <site name="microwave_main_group_default_site" pos="0 0 0" size="0.00154147" rgba="1 0 0 0" />
+      <body name="microwave_main_group_door">
+        <joint name="microwave_main_group_microjoint" pos="-0.373805 -0.172165 0" axis="0 0 1" limited="true" range="-1.57 0" armature="0.01" damping="2" frictionloss="2" />
+        <geom name="microwave_main_group_g15" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="microwave_main_group_TX_Microwave_3_2" mesh="microwave_main_group_door_0_vis" />
+        <geom name="microwave_main_group_g16" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="microwave_main_group_TX_Microwave_3_3" mesh="microwave_main_group_door_1_vis" />
+        <geom name="microwave_main_group_g17" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="microwave_main_group_TX_Microwave_3_1" mesh="microwave_main_group_door_2_vis" />
+        <geom name="microwave_main_group_g18" size="0.271221 0.0190722 0.215034" pos="-0.0693659 -0.191237 0.0177268" type="box" rgba="0.5 0 0 0.5" />
+        <geom name="microwave_main_group_g19" size="0.0208098 0.0242268 0.0161854" pos="0.157229 -0.233505 0.181893" type="box" rgba="0.5 0 0 0.5" />
+        <geom name="microwave_main_group_g20" size="0.0208098 0.0242268 0.0161854" pos="0.157229 -0.233505 -0.122546" type="box" rgba="0.5 0 0 0.5" />
+        <geom name="microwave_main_group_door_handle" size="0.0169561 0.0927835" pos="0.157229 -0.24433 0.0300586" type="cylinder" rgba="0.5 0 0 0.5" />
+        <site name="microwave_main_group_door_p1" pos="-0.0578049 -0.206186 0.00770733" size="0.00342822" rgba="1 0 0 0" />
+        <site name="microwave_main_group_door_p2" pos="-0.0192683 -0.206186 0.00770733" size="0.00342822" rgba="0 1 0 0" />
+        <site name="microwave_main_group_door_p3" pos="-0.0578049 -0.206186 0.046244" size="0.00342822" rgba="0 0 1 0" />
+      </body>
+    </body>
+    <body name="cab_micro_main_group_main" pos="3.12381 -0.2 2.06773">
+      <geom name="cab_micro_main_group_top" size="0.373805 0.185 0.015" pos="0 0.015 0.227268" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_micro_main_group_bottom" size="0.373805 0.185 0.015" pos="0 0.015 -0.227268" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_micro_main_group_back" size="0.343805 0.015 0.212268" pos="0 0.185 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_micro_main_group_right" size="0.015 0.185 0.212268" pos="0.358805 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_micro_main_group_left" size="0.015 0.185 0.212268" pos="-0.358805 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_micro_main_group_shelf" size="0.343805 0.15 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_micro_main_group_top_visual" size="0.373805 0.185 0.015" pos="0 0.015 0.227268" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_mat" />
+      <geom name="cab_micro_main_group_bottom_visual" size="0.373805 0.185 0.015" pos="0 0.015 -0.227268" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_mat" />
+      <geom name="cab_micro_main_group_back_visual" size="0.343805 0.015 0.212268" pos="0 0.185 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_mat" />
+      <geom name="cab_micro_main_group_right_visual" size="0.015 0.185 0.212268" pos="0.358805 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_mat" />
+      <geom name="cab_micro_main_group_left_visual" size="0.015 0.185 0.212268" pos="-0.358805 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_mat" />
+      <geom name="cab_micro_main_group_shelf_visual" size="0.343805 0.15 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_mat" />
+      <site name="cab_micro_main_group_ext_p0" pos="-0.373805 -0.2 -0.242268" rgba="0 0 0 0" />
+      <site name="cab_micro_main_group_ext_px" pos="0.373805 -0.2 -0.242268" rgba="1 0 0 0" />
+      <site name="cab_micro_main_group_ext_py" pos="-0.373805 0.2 -0.242268" rgba="0 1 0 0" />
+      <site name="cab_micro_main_group_ext_pz" pos="-0.373805 -0.2 0.242268" rgba="0 0 1 0" />
+      <site name="cab_micro_main_group_int_p0" pos="-0.343805 -0.17 -0.212268" rgba="0.5 0.5 0.5 0" />
+      <site name="cab_micro_main_group_int_px" pos="0.343805 -0.17 -0.212268" rgba="1 1 0 0" />
+      <site name="cab_micro_main_group_int_py" pos="-0.343805 0.17 -0.212268" rgba="0 1 1 0" />
+      <site name="cab_micro_main_group_int_pz" pos="-0.343805 -0.17 0.212268" rgba="1 0 1 0" />
+      <site name="cab_micro_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="cab_micro_main_group_hingeleftdoor">
+        <joint name="cab_micro_main_group_leftdoorhinge" pos="-0.358805 -0.2 0" axis="0 0 1" limited="true" range="-3 0" damping="2" />
+        <site name="cab_micro_main_group_leftdoor_p1" pos="-0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_micro_main_group_leftdoor_p2" pos="-0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_micro_main_group_leftdoor_p3" pos="-0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_micro_main_group_left_door_main" pos="-0.186903 -0.185 0">
+          <geom name="cab_micro_main_group_left_door_door" size="0.185403 0.240768 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_micro_main_group_left_door_door_visual" size="0.185403 0.240768 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_left_door_mat" />
+          <site name="cab_micro_main_group_left_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_micro_main_group_left_door_handle_main" pos="0.135403 0 -0.190768">
+            <geom name="cab_micro_main_group_left_door_handle_handle" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_micro_main_group_left_door_handle_handle_visual" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_left_door_handle_mat" />
+            <site name="cab_micro_main_group_left_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+      <body name="cab_micro_main_group_hingerightdoor">
+        <joint name="cab_micro_main_group_rightdoorhinge" pos="0.358805 -0.2 0" axis="0 0 1" limited="true" range="0 3" damping="2" />
+        <site name="cab_micro_main_group_rightdoor_p1" pos="0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_micro_main_group_rightdoor_p2" pos="0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_micro_main_group_rightdoor_p3" pos="0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_micro_main_group_right_door_main" pos="0.186903 -0.185 0">
+          <geom name="cab_micro_main_group_right_door_door" size="0.185403 0.240768 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_micro_main_group_right_door_door_visual" size="0.185403 0.240768 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_right_door_mat" />
+          <site name="cab_micro_main_group_right_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_micro_main_group_right_door_handle_main" pos="-0.135403 0 -0.190768">
+            <geom name="cab_micro_main_group_right_door_handle_handle" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_micro_main_group_right_door_handle_handle_visual" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_micro_main_group_right_door_handle_mat" />
+            <site name="cab_micro_main_group_right_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="cab_3_main_group_main" pos="3.84761 -0.2 1.85">
+      <site name="cab_3_main_group_ext_p0" pos="-0.7 -0.4 -0.92" size="0.01" rgba="0 0 0 0" />
+      <site name="cab_3_main_group_ext_px" pos="0.7 -0.4 -0.92" size="0.01" rgba="1 0 0 0" />
+      <site name="cab_3_main_group_ext_py" pos="-0.7 0.4 -0.92" size="0.01" rgba="0 1 0 0" />
+      <site name="cab_3_main_group_ext_pz" pos="-0.7 -0.4 0.92" size="0.01" rgba="0 0 1 0" />
+      <site name="cab_3_main_group_int_p0" pos="-0.64 -0.34 -0.86" size="0.01" rgba="0.5 0.5 0.5 0" />
+      <site name="cab_3_main_group_int_px" pos="0.64 -0.34 -0.86" size="0.01" rgba="1 1 0 0" />
+      <site name="cab_3_main_group_int_py" pos="-0.64 0.34 -0.86" size="0.01" rgba="0 1 1 0" />
+      <site name="cab_3_main_group_int_pz" pos="-0.64 -0.34 0.86" size="0.01" rgba="1 0 1 0" />
+      <site name="cab_3_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="cab_3_main_group_hingecab" />
+      <body name="cab_3_main_group_shelf_0_main">
+        <geom name="cab_3_main_group_shelf_0_shelf" size="0.35 0.2 0.015" pos="0 0 -0.445" type="box" density="10" rgba="0.5 0 0 1" />
+        <geom name="cab_3_main_group_shelf_0_shelf_visual" size="0.35 0.2 0.015" pos="0 0 -0.445" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_3_main_group_shelf_0_mat" />
+        <site name="cab_3_main_group_shelf_0_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      </body>
+      <body name="cab_3_main_group_shelf_1_main">
+        <geom name="cab_3_main_group_shelf_1_shelf" size="0.35 0.2 0.015" pos="0 0 -0.148333" type="box" density="10" rgba="0.5 0 0 1" />
+        <geom name="cab_3_main_group_shelf_1_shelf_visual" size="0.35 0.2 0.015" pos="0 0 -0.148333" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_3_main_group_shelf_1_mat" />
+        <site name="cab_3_main_group_shelf_1_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      </body>
+      <body name="cab_3_main_group_shelf_2_main">
+        <geom name="cab_3_main_group_shelf_2_shelf" size="0.35 0.2 0.015" pos="0 0 0.148333" type="box" density="10" rgba="0.5 0 0 1" />
+        <geom name="cab_3_main_group_shelf_2_shelf_visual" size="0.35 0.2 0.015" pos="0 0 0.148333" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_3_main_group_shelf_2_mat" />
+        <site name="cab_3_main_group_shelf_2_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      </body>
+    </body>
+    <body name="cab_4_main_group_main" pos="4.65136 -0.344362 2.04">
+      <geom name="cab_4_main_group_top" size="0.453746 0.329362 0.015" pos="0 0.015 0.255" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_4_main_group_bottom" size="0.453746 0.329362 0.015" pos="0 0.015 -0.255" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_4_main_group_back" size="0.423746 0.015 0.24" pos="0 0.329362 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_4_main_group_right" size="0.015 0.329362 0.24" pos="0.438746 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_4_main_group_left" size="0.015 0.329362 0.24" pos="-0.438746 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_4_main_group_shelf" size="0.423746 0.294362 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="cab_4_main_group_top_visual" size="0.453746 0.329362 0.015" pos="0 0.015 0.255" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_mat" />
+      <geom name="cab_4_main_group_bottom_visual" size="0.453746 0.329362 0.015" pos="0 0.015 -0.255" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_mat" />
+      <geom name="cab_4_main_group_back_visual" size="0.423746 0.015 0.24" pos="0 0.329362 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_mat" />
+      <geom name="cab_4_main_group_right_visual" size="0.015 0.329362 0.24" pos="0.438746 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_mat" />
+      <geom name="cab_4_main_group_left_visual" size="0.015 0.329362 0.24" pos="-0.438746 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_mat" />
+      <geom name="cab_4_main_group_shelf_visual" size="0.423746 0.294362 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_mat" />
+      <site name="cab_4_main_group_ext_p0" pos="-0.453746 -0.344362 -0.27" rgba="0 0 0 0" />
+      <site name="cab_4_main_group_ext_px" pos="0.453746 -0.344362 -0.27" rgba="1 0 0 0" />
+      <site name="cab_4_main_group_ext_py" pos="-0.453746 0.344362 -0.27" rgba="0 1 0 0" />
+      <site name="cab_4_main_group_ext_pz" pos="-0.453746 -0.344362 0.27" rgba="0 0 1 0" />
+      <site name="cab_4_main_group_int_p0" pos="-0.423746 -0.314362 -0.24" rgba="0.5 0.5 0.5 0" />
+      <site name="cab_4_main_group_int_px" pos="0.423746 -0.314362 -0.24" rgba="1 1 0 0" />
+      <site name="cab_4_main_group_int_py" pos="-0.423746 0.314362 -0.24" rgba="0 1 1 0" />
+      <site name="cab_4_main_group_int_pz" pos="-0.423746 -0.314362 0.24" rgba="1 0 1 0" />
+      <site name="cab_4_main_group_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="cab_4_main_group_hingeleftdoor">
+        <joint name="cab_4_main_group_leftdoorhinge" pos="-0.438746 -0.344362 0" axis="0 0 1" limited="true" range="-3 0" damping="2" />
+        <site name="cab_4_main_group_leftdoor_p1" pos="-0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_4_main_group_leftdoor_p2" pos="-0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_4_main_group_leftdoor_p3" pos="-0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_4_main_group_left_door_main" pos="-0.226873 -0.329362 0">
+          <geom name="cab_4_main_group_left_door_door" size="0.225373 0.2685 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_4_main_group_left_door_door_visual" size="0.225373 0.2685 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_left_door_mat" />
+          <site name="cab_4_main_group_left_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_4_main_group_left_door_handle_main" pos="0.175373 0 -0.2185">
+            <geom name="cab_4_main_group_left_door_handle_handle" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_4_main_group_left_door_handle_handle_visual" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_left_door_handle_mat" />
+            <site name="cab_4_main_group_left_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+      <body name="cab_4_main_group_hingerightdoor">
+        <joint name="cab_4_main_group_rightdoorhinge" pos="0.438746 -0.344362 0" axis="0 0 1" limited="true" range="0 3" damping="2" />
+        <site name="cab_4_main_group_rightdoor_p1" pos="0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="cab_4_main_group_rightdoor_p2" pos="0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="cab_4_main_group_rightdoor_p3" pos="0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="cab_4_main_group_right_door_main" pos="0.226873 -0.329362 0">
+          <geom name="cab_4_main_group_right_door_door" size="0.225373 0.2685 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="cab_4_main_group_right_door_door_visual" size="0.225373 0.2685 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_right_door_mat" />
+          <site name="cab_4_main_group_right_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="cab_4_main_group_right_door_handle_main" pos="-0.175373 0 -0.2185">
+            <geom name="cab_4_main_group_right_door_handle_handle" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="cab_4_main_group_right_door_handle_handle_visual" size="0.015 0.017" pos="0 -0.017 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="cab_4_main_group_right_door_handle_mat" />
+            <site name="cab_4_main_group_right_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_1_main_group_base_main" pos="0.5 -0.265 0.025">
+      <geom name="stack_1_main_group_base_g0" size="0.25 0.265 0.025" type="box" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_base_g0_vis" size="0.25 0.265 0.025" type="box" contype="0" conaffinity="0" group="1" mass="0" material="box_mat" />
+      <site name="stack_1_main_group_base_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="stack_1_main_group_1_main" pos="0.5 -0.3 0.155">
+      <geom name="stack_1_main_group_1_top" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_1_bottom" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_1_back" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_1_right" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_1_left" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_1_top_visual" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+      <geom name="stack_1_main_group_1_bottom_visual" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+      <geom name="stack_1_main_group_1_back_visual" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+      <geom name="stack_1_main_group_1_right_visual" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+      <geom name="stack_1_main_group_1_left_visual" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+      <site name="stack_1_main_group_1_ext_p0" pos="-0.25 -0.3 -0.105" rgba="0 0 0 0" />
+      <site name="stack_1_main_group_1_ext_px" pos="0.25 -0.3 -0.105" rgba="1 0 0 0" />
+      <site name="stack_1_main_group_1_ext_py" pos="-0.25 0.3 -0.105" rgba="0 1 0 0" />
+      <site name="stack_1_main_group_1_ext_pz" pos="-0.25 -0.3 0.105" rgba="0 0 1 0" />
+      <site name="stack_1_main_group_1_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_1_main_group_1_inner_box">
+        <joint name="stack_1_main_group_1_slidejoint" pos="0 -0.3 0" axis="0 1 0" type="slide" limited="true" range="-0.6 0" damping="10" />
+        <geom name="stack_1_main_group_1_inner_bottom" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_1_inner_back" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_1_inner_right" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_1_inner_left" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_1_inner_bottom_visual" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+        <geom name="stack_1_main_group_1_inner_back_visual" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+        <geom name="stack_1_main_group_1_inner_right_visual" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+        <geom name="stack_1_main_group_1_inner_left_visual" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_mat" />
+        <site name="stack_1_main_group_1_int_p0" pos="-0.189 -0.27 -0.044" rgba="0.5 0.5 0.5 0" />
+        <site name="stack_1_main_group_1_int_px" pos="0.189 -0.27 -0.044" rgba="1 1 0 0" />
+        <site name="stack_1_main_group_1_int_py" pos="-0.189 0.24 -0.044" rgba="0 1 1 0" />
+        <site name="stack_1_main_group_1_int_pz" pos="-0.189 -0.27 0.074" rgba="1 0 1 0" />
+        <body name="stack_1_main_group_1_door_main" pos="0 -0.285 0">
+          <geom name="stack_1_main_group_1_door_door" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_1_main_group_1_door_door_visual" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_door_mat" />
+          <site name="stack_1_main_group_1_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_1_main_group_1_door_handle_main">
+            <geom name="stack_1_main_group_1_door_handle_handle" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_1_door_handle_handle_connector_top" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_1_door_handle_handle_connector_bottom" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_1_door_handle_handle_visual" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_door_handle_mat" />
+            <geom name="stack_1_main_group_1_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_door_handle_mat" />
+            <geom name="stack_1_main_group_1_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_1_door_handle_mat" />
+            <site name="stack_1_main_group_1_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_1_main_group_2_main" pos="0.5 -0.3 0.365">
+      <geom name="stack_1_main_group_2_top" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_2_bottom" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_2_back" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_2_right" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_2_left" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_2_top_visual" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+      <geom name="stack_1_main_group_2_bottom_visual" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+      <geom name="stack_1_main_group_2_back_visual" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+      <geom name="stack_1_main_group_2_right_visual" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+      <geom name="stack_1_main_group_2_left_visual" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+      <site name="stack_1_main_group_2_ext_p0" pos="-0.25 -0.3 -0.105" rgba="0 0 0 0" />
+      <site name="stack_1_main_group_2_ext_px" pos="0.25 -0.3 -0.105" rgba="1 0 0 0" />
+      <site name="stack_1_main_group_2_ext_py" pos="-0.25 0.3 -0.105" rgba="0 1 0 0" />
+      <site name="stack_1_main_group_2_ext_pz" pos="-0.25 -0.3 0.105" rgba="0 0 1 0" />
+      <site name="stack_1_main_group_2_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_1_main_group_2_inner_box">
+        <joint name="stack_1_main_group_2_slidejoint" pos="0 -0.3 0" axis="0 1 0" type="slide" limited="true" range="-0.6 0" damping="10" />
+        <geom name="stack_1_main_group_2_inner_bottom" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_2_inner_back" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_2_inner_right" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_2_inner_left" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_2_inner_bottom_visual" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+        <geom name="stack_1_main_group_2_inner_back_visual" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+        <geom name="stack_1_main_group_2_inner_right_visual" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+        <geom name="stack_1_main_group_2_inner_left_visual" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_mat" />
+        <site name="stack_1_main_group_2_int_p0" pos="-0.189 -0.27 -0.044" rgba="0.5 0.5 0.5 0" />
+        <site name="stack_1_main_group_2_int_px" pos="0.189 -0.27 -0.044" rgba="1 1 0 0" />
+        <site name="stack_1_main_group_2_int_py" pos="-0.189 0.24 -0.044" rgba="0 1 1 0" />
+        <site name="stack_1_main_group_2_int_pz" pos="-0.189 -0.27 0.074" rgba="1 0 1 0" />
+        <body name="stack_1_main_group_2_door_main" pos="0 -0.285 0">
+          <geom name="stack_1_main_group_2_door_door" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_1_main_group_2_door_door_visual" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_door_mat" />
+          <site name="stack_1_main_group_2_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_1_main_group_2_door_handle_main">
+            <geom name="stack_1_main_group_2_door_handle_handle" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_2_door_handle_handle_connector_top" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_2_door_handle_handle_connector_bottom" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_2_door_handle_handle_visual" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_door_handle_mat" />
+            <geom name="stack_1_main_group_2_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_door_handle_mat" />
+            <geom name="stack_1_main_group_2_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_2_door_handle_mat" />
+            <site name="stack_1_main_group_2_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_1_main_group_3_main" pos="0.5 -0.3 0.575">
+      <geom name="stack_1_main_group_3_top" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_3_bottom" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_3_back" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_3_right" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_3_left" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_3_top_visual" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+      <geom name="stack_1_main_group_3_bottom_visual" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+      <geom name="stack_1_main_group_3_back_visual" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+      <geom name="stack_1_main_group_3_right_visual" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+      <geom name="stack_1_main_group_3_left_visual" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+      <site name="stack_1_main_group_3_ext_p0" pos="-0.25 -0.3 -0.105" rgba="0 0 0 0" />
+      <site name="stack_1_main_group_3_ext_px" pos="0.25 -0.3 -0.105" rgba="1 0 0 0" />
+      <site name="stack_1_main_group_3_ext_py" pos="-0.25 0.3 -0.105" rgba="0 1 0 0" />
+      <site name="stack_1_main_group_3_ext_pz" pos="-0.25 -0.3 0.105" rgba="0 0 1 0" />
+      <site name="stack_1_main_group_3_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_1_main_group_3_inner_box">
+        <joint name="stack_1_main_group_3_slidejoint" pos="0 -0.3 0" axis="0 1 0" type="slide" limited="true" range="-0.6 0" damping="10" />
+        <geom name="stack_1_main_group_3_inner_bottom" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_3_inner_back" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_3_inner_right" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_3_inner_left" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_3_inner_bottom_visual" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+        <geom name="stack_1_main_group_3_inner_back_visual" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+        <geom name="stack_1_main_group_3_inner_right_visual" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+        <geom name="stack_1_main_group_3_inner_left_visual" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_mat" />
+        <site name="stack_1_main_group_3_int_p0" pos="-0.189 -0.27 -0.044" rgba="0.5 0.5 0.5 0" />
+        <site name="stack_1_main_group_3_int_px" pos="0.189 -0.27 -0.044" rgba="1 1 0 0" />
+        <site name="stack_1_main_group_3_int_py" pos="-0.189 0.24 -0.044" rgba="0 1 1 0" />
+        <site name="stack_1_main_group_3_int_pz" pos="-0.189 -0.27 0.074" rgba="1 0 1 0" />
+        <body name="stack_1_main_group_3_door_main" pos="0 -0.285 0">
+          <geom name="stack_1_main_group_3_door_door" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_1_main_group_3_door_door_visual" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_door_mat" />
+          <site name="stack_1_main_group_3_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_1_main_group_3_door_handle_main">
+            <geom name="stack_1_main_group_3_door_handle_handle" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_3_door_handle_handle_connector_top" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_3_door_handle_handle_connector_bottom" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_3_door_handle_handle_visual" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_door_handle_mat" />
+            <geom name="stack_1_main_group_3_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_door_handle_mat" />
+            <geom name="stack_1_main_group_3_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_3_door_handle_mat" />
+            <site name="stack_1_main_group_3_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_1_main_group_4_main" pos="0.5 -0.3 0.785">
+      <geom name="stack_1_main_group_4_top" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_4_bottom" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_4_back" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_4_right" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_4_left" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_1_main_group_4_top_visual" size="0.25 0.285 0.015" pos="0 0.015 0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+      <geom name="stack_1_main_group_4_bottom_visual" size="0.25 0.285 0.015" pos="0 0.015 -0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+      <geom name="stack_1_main_group_4_back_visual" size="0.22 0.015 0.075" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+      <geom name="stack_1_main_group_4_right_visual" size="0.015 0.285 0.075" pos="0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+      <geom name="stack_1_main_group_4_left_visual" size="0.015 0.285 0.075" pos="-0.235 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+      <site name="stack_1_main_group_4_ext_p0" pos="-0.25 -0.3 -0.105" rgba="0 0 0 0" />
+      <site name="stack_1_main_group_4_ext_px" pos="0.25 -0.3 -0.105" rgba="1 0 0 0" />
+      <site name="stack_1_main_group_4_ext_py" pos="-0.25 0.3 -0.105" rgba="0 1 0 0" />
+      <site name="stack_1_main_group_4_ext_pz" pos="-0.25 -0.3 0.105" rgba="0 0 1 0" />
+      <site name="stack_1_main_group_4_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_1_main_group_4_inner_box">
+        <joint name="stack_1_main_group_4_slidejoint" pos="0 -0.3 0" axis="0 1 0" type="slide" limited="true" range="-0.6 0" damping="10" />
+        <geom name="stack_1_main_group_4_inner_bottom" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_4_inner_back" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_4_inner_right" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_4_inner_left" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_1_main_group_4_inner_bottom_visual" size="0.219 0.27 0.015" pos="0 0 -0.059" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+        <geom name="stack_1_main_group_4_inner_back_visual" size="0.189 0.015 0.044" pos="0 0.255 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+        <geom name="stack_1_main_group_4_inner_right_visual" size="0.015 0.27 0.044" pos="0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+        <geom name="stack_1_main_group_4_inner_left_visual" size="0.015 0.27 0.044" pos="-0.204 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_mat" />
+        <site name="stack_1_main_group_4_int_p0" pos="-0.189 -0.27 -0.044" rgba="0.5 0.5 0.5 0" />
+        <site name="stack_1_main_group_4_int_px" pos="0.189 -0.27 -0.044" rgba="1 1 0 0" />
+        <site name="stack_1_main_group_4_int_py" pos="-0.189 0.24 -0.044" rgba="0 1 1 0" />
+        <site name="stack_1_main_group_4_int_pz" pos="-0.189 -0.27 0.074" rgba="1 0 1 0" />
+        <body name="stack_1_main_group_4_door_main" pos="0 -0.285 0">
+          <geom name="stack_1_main_group_4_door_door" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_1_main_group_4_door_door_visual" size="0.2485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_door_mat" />
+          <site name="stack_1_main_group_4_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_1_main_group_4_door_handle_main">
+            <geom name="stack_1_main_group_4_door_handle_handle" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_4_door_handle_handle_connector_top" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_4_door_handle_handle_connector_bottom" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_1_main_group_4_door_handle_handle_visual" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_door_handle_mat" />
+            <geom name="stack_1_main_group_4_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_door_handle_mat" />
+            <geom name="stack_1_main_group_4_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_1_main_group_4_door_handle_mat" />
+            <site name="stack_1_main_group_4_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_2_main_group_base_main" pos="1.25 -0.265 0.025">
+      <geom name="stack_2_main_group_base_g0" size="0.5 0.265 0.025" type="box" rgba="0.5 0 0 1" />
+      <geom name="stack_2_main_group_base_g0_vis" size="0.5 0.265 0.025" type="box" contype="0" conaffinity="0" group="1" mass="0" material="box_mat" />
+      <site name="stack_2_main_group_base_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="stack_2_main_group_1_main" pos="1.25 -0.3 0.365">
+      <geom name="stack_2_main_group_1_top" size="0.5 0.285 0.015" pos="0 0.015 0.3" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_2_main_group_1_bottom" size="0.5 0.285 0.015" pos="0 0.015 -0.3" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_2_main_group_1_back" size="0.47 0.015 0.285" pos="0 0.285 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_2_main_group_1_right" size="0.015 0.285 0.285" pos="0.485 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_2_main_group_1_left" size="0.015 0.285 0.285" pos="-0.485 0.015 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_2_main_group_1_shelf" size="0.47 0.25 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_2_main_group_1_top_visual" size="0.5 0.285 0.015" pos="0 0.015 0.3" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_mat" />
+      <geom name="stack_2_main_group_1_bottom_visual" size="0.5 0.285 0.015" pos="0 0.015 -0.3" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_mat" />
+      <geom name="stack_2_main_group_1_back_visual" size="0.47 0.015 0.285" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_mat" />
+      <geom name="stack_2_main_group_1_right_visual" size="0.015 0.285 0.285" pos="0.485 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_mat" />
+      <geom name="stack_2_main_group_1_left_visual" size="0.015 0.285 0.285" pos="-0.485 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_mat" />
+      <geom name="stack_2_main_group_1_shelf_visual" size="0.47 0.25 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_mat" />
+      <site name="stack_2_main_group_1_ext_p0" pos="-0.5 -0.3 -0.315" rgba="0 0 0 0" />
+      <site name="stack_2_main_group_1_ext_px" pos="0.5 -0.3 -0.315" rgba="1 0 0 0" />
+      <site name="stack_2_main_group_1_ext_py" pos="-0.5 0.3 -0.315" rgba="0 1 0 0" />
+      <site name="stack_2_main_group_1_ext_pz" pos="-0.5 -0.3 0.315" rgba="0 0 1 0" />
+      <site name="stack_2_main_group_1_int_p0" pos="-0.47 -0.27 -0.285" rgba="0.5 0.5 0.5 0" />
+      <site name="stack_2_main_group_1_int_px" pos="0.47 -0.27 -0.285" rgba="1 1 0 0" />
+      <site name="stack_2_main_group_1_int_py" pos="-0.47 0.27 -0.285" rgba="0 1 1 0" />
+      <site name="stack_2_main_group_1_int_pz" pos="-0.47 -0.27 0.285" rgba="1 0 1 0" />
+      <site name="stack_2_main_group_1_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_2_main_group_1_hingeleftdoor">
+        <joint name="stack_2_main_group_1_leftdoorhinge" pos="-0.485 -0.3 0" axis="0 0 1" limited="true" range="-3 0" damping="2" />
+        <site name="stack_2_main_group_1_leftdoor_p1" pos="-0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="stack_2_main_group_1_leftdoor_p2" pos="-0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="stack_2_main_group_1_leftdoor_p3" pos="-0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="stack_2_main_group_1_left_door_main" pos="-0.25 -0.285 0">
+          <geom name="stack_2_main_group_1_left_door_door" size="0.2485 0.3135 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_2_main_group_1_left_door_door_visual" size="0.2485 0.3135 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_left_door_mat" />
+          <site name="stack_2_main_group_1_left_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_2_main_group_1_left_door_handle_main" pos="0.1985 0 0.1135">
+            <geom name="stack_2_main_group_1_left_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_2_main_group_1_left_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_2_main_group_1_left_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_2_main_group_1_left_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_left_door_handle_mat" />
+            <geom name="stack_2_main_group_1_left_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_left_door_handle_mat" />
+            <geom name="stack_2_main_group_1_left_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_left_door_handle_mat" />
+            <site name="stack_2_main_group_1_left_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+      <body name="stack_2_main_group_1_hingerightdoor">
+        <joint name="stack_2_main_group_1_rightdoorhinge" pos="0.485 -0.3 0" axis="0 0 1" limited="true" range="0 3" damping="2" />
+        <site name="stack_2_main_group_1_rightdoor_p1" pos="0.25 -0.2 0" rgba="1 0 0 0" />
+        <site name="stack_2_main_group_1_rightdoor_p2" pos="0.2 -0.2 0" rgba="0 1 0 0" />
+        <site name="stack_2_main_group_1_rightdoor_p3" pos="0.25 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="stack_2_main_group_1_right_door_main" pos="0.25 -0.285 0">
+          <geom name="stack_2_main_group_1_right_door_door" size="0.2485 0.3135 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_2_main_group_1_right_door_door_visual" size="0.2485 0.3135 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_right_door_mat" />
+          <site name="stack_2_main_group_1_right_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_2_main_group_1_right_door_handle_main" pos="-0.1985 0 0.1135">
+            <geom name="stack_2_main_group_1_right_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_2_main_group_1_right_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_2_main_group_1_right_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_2_main_group_1_right_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_right_door_handle_mat" />
+            <geom name="stack_2_main_group_1_right_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_right_door_handle_mat" />
+            <geom name="stack_2_main_group_1_right_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_1_right_door_handle_mat" />
+            <site name="stack_2_main_group_1_right_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_2_main_group_2_main" pos="1.25 -0.3 0.785">
+      <site name="stack_2_main_group_2_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_2_main_group_2_door_main" pos="0 -0.285 0">
+        <geom name="stack_2_main_group_2_door_door" size="0.4985 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+        <geom name="stack_2_main_group_2_door_door_visual" size="0.4985 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_2_main_group_2_door_mat" />
+        <site name="stack_2_main_group_2_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      </body>
+    </body>
+    <body name="dishwasher_main_group_main" pos="2.075 -0.317418 0.445">
+      <geom name="dishwasher_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="dishwasher_main_group_TX_Dishwasher_3_2" mesh="dishwasher_main_group_model_0_vis" />
+      <geom name="dishwasher_main_group_g1" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="dishwasher_main_group_TX_Dishwasher_3_1" mesh="dishwasher_main_group_model_1_vis" />
+      <geom name="dishwasher_main_group_g2" size="0.325 0.300813 0.445" pos="0 0.0182311 0" type="box" rgba="0.5 0 0 0.5" />
+      <site name="dishwasher_main_group_default_site" pos="0 0 0" size="0.00177574" rgba="1 0 0 0" />
+    </body>
+    <body name="stack_3_main_group_base_main" pos="2.575 -0.265 0.025">
+      <geom name="stack_3_main_group_base_g0" size="0.175 0.265 0.025" type="box" rgba="0.5 0 0 1" />
+      <geom name="stack_3_main_group_base_g0_vis" size="0.175 0.265 0.025" type="box" contype="0" conaffinity="0" group="1" mass="0" material="box_mat" />
+      <site name="stack_3_main_group_base_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="stack_3_main_group_1_main" pos="2.575 -0.3 0.47">
+      <geom name="stack_3_main_group_1_top" size="0.175 0.285 0.015" pos="0 0.015 0.405" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_3_main_group_1_bottom" size="0.175 0.285 0.015" pos="0 0.015 -0.405" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_3_main_group_1_back" size="0.145 0.015 0.39" pos="0 0.285 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_3_main_group_1_right" size="0.015 0.285 0.39" pos="0.16 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_3_main_group_1_left" size="0.015 0.285 0.39" pos="-0.16 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_3_main_group_1_shelf" size="0.145 0.25 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_3_main_group_1_top_visual" size="0.175 0.285 0.015" pos="0 0.015 0.405" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_mat" />
+      <geom name="stack_3_main_group_1_bottom_visual" size="0.175 0.285 0.015" pos="0 0.015 -0.405" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_mat" />
+      <geom name="stack_3_main_group_1_back_visual" size="0.145 0.015 0.39" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_mat" />
+      <geom name="stack_3_main_group_1_right_visual" size="0.015 0.285 0.39" pos="0.16 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_mat" />
+      <geom name="stack_3_main_group_1_left_visual" size="0.015 0.285 0.39" pos="-0.16 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_mat" />
+      <geom name="stack_3_main_group_1_shelf_visual" size="0.145 0.25 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_mat" />
+      <site name="stack_3_main_group_1_ext_p0" pos="-0.175 -0.3 -0.42" size="0.01" rgba="0 0 0 0" />
+      <site name="stack_3_main_group_1_ext_px" pos="0.175 -0.3 -0.42" size="0.01" rgba="1 0 0 0" />
+      <site name="stack_3_main_group_1_ext_py" pos="-0.175 0.3 -0.42" size="0.01" rgba="0 1 0 0" />
+      <site name="stack_3_main_group_1_ext_pz" pos="-0.175 -0.3 0.42" size="0.01" rgba="0 0 1 0" />
+      <site name="stack_3_main_group_1_int_p0" pos="-0.145 -0.27 -0.39" size="0.01" rgba="0.5 0.5 0.5 0" />
+      <site name="stack_3_main_group_1_int_px" pos="0.145 -0.27 -0.39" size="0.01" rgba="1 1 0 0" />
+      <site name="stack_3_main_group_1_int_py" pos="-0.145 0.27 -0.39" size="0.01" rgba="0 1 1 0" />
+      <site name="stack_3_main_group_1_int_pz" pos="-0.145 -0.27 0.39" size="0.01" rgba="1 0 1 0" />
+      <site name="stack_3_main_group_1_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_3_main_group_1_hingedoor">
+        <joint name="stack_3_main_group_1_doorhinge" pos="0.16 -0.3 0" axis="0 0 1" limited="true" range="0 3" damping="2" />
+        <site name="stack_3_main_group_1_door_p1" pos="0 -0.2 0" rgba="1 0 0 0" />
+        <site name="stack_3_main_group_1_door_p2" pos="0.05 -0.2 0" rgba="0 1 0 0" />
+        <site name="stack_3_main_group_1_door_p3" pos="0 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="stack_3_main_group_1_door_main" pos="0 -0.285 0">
+          <geom name="stack_3_main_group_1_door_door" size="0.1735 0.4185 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_3_main_group_1_door_door_visual" size="0.1735 0.4185 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_door_mat" />
+          <site name="stack_3_main_group_1_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_3_main_group_1_door_handle_main" pos="-0.1235 0 0.2185">
+            <geom name="stack_3_main_group_1_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_3_main_group_1_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_3_main_group_1_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_3_main_group_1_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_door_handle_mat" />
+            <geom name="stack_3_main_group_1_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_door_handle_mat" />
+            <geom name="stack_3_main_group_1_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_3_main_group_1_door_handle_mat" />
+            <site name="stack_3_main_group_1_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_4_main_group_base_main" pos="3.84761 -0.265 0.025">
+      <geom name="stack_4_main_group_base_g0" size="0.35 0.265 0.025" type="box" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_base_g0_vis" size="0.35 0.265 0.025" type="box" contype="0" conaffinity="0" group="1" mass="0" material="box_mat" />
+      <site name="stack_4_main_group_base_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 -1" />
+    </body>
+    <body name="stack_4_main_group_1_main" pos="3.84761 -0.3 0.365">
+      <geom name="stack_4_main_group_1_top" size="0.35 0.285 0.015" pos="0 0.015 0.3" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_1_bottom" size="0.35 0.285 0.015" pos="0 0.015 -0.3" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_1_back" size="0.32 0.015 0.285" pos="0 0.285 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_1_right" size="0.015 0.285 0.285" pos="0.335 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_1_left" size="0.015 0.285 0.285" pos="-0.335 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_1_shelf" size="0.32 0.25 0.015" pos="0 0.035 0" type="box" density="10" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_1_top_visual" size="0.35 0.285 0.015" pos="0 0.015 0.3" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_mat" />
+      <geom name="stack_4_main_group_1_bottom_visual" size="0.35 0.285 0.015" pos="0 0.015 -0.3" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_mat" />
+      <geom name="stack_4_main_group_1_back_visual" size="0.32 0.015 0.285" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_mat" />
+      <geom name="stack_4_main_group_1_right_visual" size="0.015 0.285 0.285" pos="0.335 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_mat" />
+      <geom name="stack_4_main_group_1_left_visual" size="0.015 0.285 0.285" pos="-0.335 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_mat" />
+      <geom name="stack_4_main_group_1_shelf_visual" size="0.32 0.25 0.015" pos="0 0.035 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_mat" />
+      <site name="stack_4_main_group_1_ext_p0" pos="-0.35 -0.3 -0.315" size="0.01" rgba="0 0 0 0" />
+      <site name="stack_4_main_group_1_ext_px" pos="0.35 -0.3 -0.315" size="0.01" rgba="1 0 0 0" />
+      <site name="stack_4_main_group_1_ext_py" pos="-0.35 0.3 -0.315" size="0.01" rgba="0 1 0 0" />
+      <site name="stack_4_main_group_1_ext_pz" pos="-0.35 -0.3 0.315" size="0.01" rgba="0 0 1 0" />
+      <site name="stack_4_main_group_1_int_p0" pos="-0.32 -0.27 -0.285" size="0.01" rgba="0.5 0.5 0.5 0" />
+      <site name="stack_4_main_group_1_int_px" pos="0.32 -0.27 -0.285" size="0.01" rgba="1 1 0 0" />
+      <site name="stack_4_main_group_1_int_py" pos="-0.32 0.27 -0.285" size="0.01" rgba="0 1 1 0" />
+      <site name="stack_4_main_group_1_int_pz" pos="-0.32 -0.27 0.285" size="0.01" rgba="1 0 1 0" />
+      <site name="stack_4_main_group_1_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_4_main_group_1_hingedoor">
+        <joint name="stack_4_main_group_1_doorhinge" pos="0.335 -0.3 0" axis="0 0 1" limited="true" range="0 3" damping="2" />
+        <site name="stack_4_main_group_1_door_p1" pos="0 -0.2 0" rgba="1 0 0 0" />
+        <site name="stack_4_main_group_1_door_p2" pos="0.05 -0.2 0" rgba="0 1 0 0" />
+        <site name="stack_4_main_group_1_door_p3" pos="0 -0.2 0.05" rgba="0 0 1 0" />
+        <body name="stack_4_main_group_1_door_main" pos="0 -0.285 0">
+          <geom name="stack_4_main_group_1_door_door" size="0.3485 0.3135 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_4_main_group_1_door_door_visual" size="0.3485 0.3135 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_door_mat" />
+          <site name="stack_4_main_group_1_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_4_main_group_1_door_handle_main" pos="-0.2985 0 0.1135">
+            <geom name="stack_4_main_group_1_door_handle_handle" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_4_main_group_1_door_handle_handle_connector_top" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_4_main_group_1_door_handle_handle_connector_bottom" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_4_main_group_1_door_handle_handle_visual" size="0.013 0.12" pos="0 -0.05 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_door_handle_mat" />
+            <geom name="stack_4_main_group_1_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0 -0.025 0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_door_handle_mat" />
+            <geom name="stack_4_main_group_1_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="0 -0.025 -0.072" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_1_door_handle_mat" />
+            <site name="stack_4_main_group_1_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="stack_4_main_group_2_main" pos="3.84761 -0.3 0.785">
+      <geom name="stack_4_main_group_2_top" size="0.35 0.285 0.015" pos="0 0.015 0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_2_bottom" size="0.35 0.285 0.015" pos="0 0.015 -0.09" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_2_back" size="0.32 0.015 0.075" pos="0 0.285 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_2_right" size="0.015 0.285 0.075" pos="0.335 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_2_left" size="0.015 0.285 0.075" pos="-0.335 0.015 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+      <geom name="stack_4_main_group_2_top_visual" size="0.35 0.285 0.015" pos="0 0.015 0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+      <geom name="stack_4_main_group_2_bottom_visual" size="0.35 0.285 0.015" pos="0 0.015 -0.09" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+      <geom name="stack_4_main_group_2_back_visual" size="0.32 0.015 0.075" pos="0 0.285 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+      <geom name="stack_4_main_group_2_right_visual" size="0.015 0.285 0.075" pos="0.335 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+      <geom name="stack_4_main_group_2_left_visual" size="0.015 0.285 0.075" pos="-0.335 0.015 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+      <site name="stack_4_main_group_2_ext_p0" pos="-0.35 -0.3 -0.105" rgba="0 0 0 0" />
+      <site name="stack_4_main_group_2_ext_px" pos="0.35 -0.3 -0.105" rgba="1 0 0 0" />
+      <site name="stack_4_main_group_2_ext_py" pos="-0.35 0.3 -0.105" rgba="0 1 0 0" />
+      <site name="stack_4_main_group_2_ext_pz" pos="-0.35 -0.3 0.105" rgba="0 0 1 0" />
+      <site name="stack_4_main_group_2_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+      <body name="stack_4_main_group_2_inner_box">
+        <joint name="stack_4_main_group_2_slidejoint" pos="0 -0.3 0" axis="0 1 0" type="slide" limited="true" range="-0.6 0" damping="10" />
+        <geom name="stack_4_main_group_2_inner_bottom" size="0.319 0.27 0.015" pos="0 0 -0.059" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_4_main_group_2_inner_back" size="0.289 0.015 0.044" pos="0 0.255 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_4_main_group_2_inner_right" size="0.015 0.27 0.044" pos="0.304 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_4_main_group_2_inner_left" size="0.015 0.27 0.044" pos="-0.304 0 0" type="box" mass="0.2" rgba="0.5 0 0 1" />
+        <geom name="stack_4_main_group_2_inner_bottom_visual" size="0.319 0.27 0.015" pos="0 0 -0.059" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+        <geom name="stack_4_main_group_2_inner_back_visual" size="0.289 0.015 0.044" pos="0 0.255 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+        <geom name="stack_4_main_group_2_inner_right_visual" size="0.015 0.27 0.044" pos="0.304 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+        <geom name="stack_4_main_group_2_inner_left_visual" size="0.015 0.27 0.044" pos="-0.304 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_mat" />
+        <site name="stack_4_main_group_2_int_p0" pos="-0.289 -0.27 -0.044" rgba="0.5 0.5 0.5 0" />
+        <site name="stack_4_main_group_2_int_px" pos="0.289 -0.27 -0.044" rgba="1 1 0 0" />
+        <site name="stack_4_main_group_2_int_py" pos="-0.289 0.24 -0.044" rgba="0 1 1 0" />
+        <site name="stack_4_main_group_2_int_pz" pos="-0.289 -0.27 0.074" rgba="1 0 1 0" />
+        <body name="stack_4_main_group_2_door_main" pos="0 -0.285 0">
+          <geom name="stack_4_main_group_2_door_door" size="0.3485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" density="10" rgba="0.5 0 0 1" />
+          <geom name="stack_4_main_group_2_door_door_visual" size="0.3485 0.1035 0.015" quat="0.707105 0.707108 0 0" type="box" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_door_mat" />
+          <site name="stack_4_main_group_2_door_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          <body name="stack_4_main_group_2_door_handle_main">
+            <geom name="stack_4_main_group_2_door_handle_handle" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_4_main_group_2_door_handle_handle_connector_top" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_4_main_group_2_door_handle_handle_connector_bottom" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" density="10" rgba="0.5 0 0 1" />
+            <geom name="stack_4_main_group_2_door_handle_handle_visual" size="0.013 0.0635" pos="0 -0.05 0" quat="0.707105 0 0.707108 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_door_handle_mat" />
+            <geom name="stack_4_main_group_2_door_handle_handle_connector_top_visual" size="0.008 0.025" pos="0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_door_handle_mat" />
+            <geom name="stack_4_main_group_2_door_handle_handle_connector_bottom_visual" size="0.008 0.025" pos="-0.0381 -0.025 0" quat="0.707107 0.707107 0 0" type="cylinder" contype="0" conaffinity="0" group="1" mass="0" material="stack_4_main_group_2_door_handle_mat" />
+            <site name="stack_4_main_group_2_door_handle_default_site" pos="0 0 0" size="0.002" rgba="1 0 0 0" />
+          </body>
+        </body>
+      </body>
+    </body>
+    <body name="coffee_machine_main_group_main" pos="0.654855 -0.228553 1.075">
+      <geom name="coffee_machine_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="coffee_machine_main_group_Water" mesh="coffee_machine_main_group_model_0_vis" />
+      <geom name="coffee_machine_main_group_g1" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="coffee_machine_main_group_Perspex" mesh="coffee_machine_main_group_model_1_vis" />
+      <geom name="coffee_machine_main_group_g2" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="coffee_machine_main_group_Chrome" mesh="coffee_machine_main_group_model_2_vis" />
+      <geom name="coffee_machine_main_group_g3" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="coffee_machine_main_group_Black_Plastic" mesh="coffee_machine_main_group_model_3_vis" />
+      <geom name="coffee_machine_main_group_g4" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="coffee_machine_main_group_White_Plastic" mesh="coffee_machine_main_group_model_4_vis" />
+      <geom name="coffee_machine_main_group_g5" size="0.0466391 0.165357 0.148397" pos="0 0.0466391 -0.0127198" type="box" rgba="0.5 0 0 0.5" />
+      <geom name="coffee_machine_main_group_g6" size="0.0695347 0.0593589" pos="0 -0.0886144 0.0932783" type="cylinder" rgba="0.5 0 0 0.5" />
+      <geom name="coffee_machine_main_group_g7" size="0.0462152 0.0135678" pos="0 -0.165781 -0.0898864" type="cylinder" rgba="0.5 0 0 0.5" />
+      <geom name="coffee_machine_main_group_start_button" size="0.0317994 0.00211996" pos="0 -0.0881904 0.157725" type="cylinder" rgba="0.5 0 0 0.5" />
+      <site name="coffee_machine_main_group_receptacle_place_site" pos="0 -0.165781 -0.0763186" size="0.00423992" rgba="0 0 0 -1" />
+      <site name="coffee_machine_main_group_coffee_liquid" pos="0 -0.148397 -0.0211996" size="0.00254395 0.0635988" type="cylinder" rgba="0.8 0.5 0.25 0" />
+      <site name="coffee_machine_main_group_default_site" pos="0 0 0" size="0.000847984" rgba="1 0 0 0" />
+    </body>
+    <body name="toaster_main_group_main" pos="4.0606 -0.253846 1.01787">
+      <geom name="toaster_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="toaster_main_group_main" mesh="toaster_main_group_model_0_vis" />
+      <geom name="toaster_main_group_g1" size="0.0780197 0.15 0.0978722" type="box" rgba="0.5 0 0 0.5" />
+      <site name="toaster_main_group_default_site" pos="0 0 0" size="0.0006" rgba="1 0 0 0" />
+    </body>
+    <body name="knife_block_main_group_main" pos="2.61605 -0.100132 1.11095">
+      <geom name="knife_block_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="knife_block_main_group_Knife_rack" mesh="knife_block_main_group_model_0_vis" />
+      <geom name="knife_block_main_group_g1" size="0.06 0.0793856 0.190946" type="box" rgba="0.5 0 0 0.5" />
+      <site name="knife_block_main_group_default_site" pos="0 0 0" size="0.000763785" rgba="1 0 0 0" />
+    </body>
+    <body name="paper_towel_main_group_main" pos="2.32458 -0.11944 1.095">
+      <geom name="paper_towel_main_group_g0" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="paper_towel_main_group_paperboard" mesh="paper_towel_main_group_model_0_vis" />
+      <geom name="paper_towel_main_group_g1" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="paper_towel_main_group_paperTopAndBottom" mesh="paper_towel_main_group_model_1_vis" />
+      <geom name="paper_towel_main_group_g2" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="paper_towel_main_group_paperSide" mesh="paper_towel_main_group_model_2_vis" />
+      <geom name="paper_towel_main_group_g3" type="mesh" contype="0" conaffinity="0" group="1" friction="0.95 0.3 0.1" solref="0.001" solimp="0.998 0.998" density="100" material="paper_towel_main_group_metal" mesh="paper_towel_main_group_model_3_vis" />
+      <geom name="paper_towel_main_group_g4" size="0.0959265 0.0959265 0.175" type="box" rgba="0.5 0 0 0.5" />
+      <site name="paper_towel_main_group_default_site" pos="0 0 0" size="0.0007" rgba="1 0 0 0" />
+    </body>
+  </worldbody>
+  <visual>
+    <map znear="0.001" />
+  </visual>
+</mujoco>

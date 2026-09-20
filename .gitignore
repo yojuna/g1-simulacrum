@@ -33,6 +33,7 @@ docker/.venv/
 docker/.cache/
 docker/sonic_py/
 docker/ws_sonic_redux/
+logs/
 
 # MuJoCo / rendering
 MUJOCO_LOG.TXT

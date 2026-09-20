@@ -43,7 +43,7 @@ must follow until we bump them on purpose. Current pin:
 
 ## This package snapshot
 
-Pinned 2026-09-05 via `docker/run.sh python scripts/pin_mjcf.py`. Pristine Unitree files are vendored under `g1_simulacrum/model/mjcf/upstream/` and `assets/`. Bump with `--fetch` (named GitHub raw files only). See `g1_simulacrum/model/mjcf/PIN.md`.
+Pinned 2026-09-14 via `docker/run.sh python scripts/pin_mjcf.py`. Pristine Unitree files are vendored under `g1_simulacrum/model/mjcf/upstream/` and `assets/`. Bump with `--fetch` (named GitHub raw files only). See `g1_simulacrum/model/mjcf/PIN.md`.
 
 | What | Pin |
 |------|-----|

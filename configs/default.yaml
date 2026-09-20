@@ -5,6 +5,22 @@ robot:
   hands: dex3                   # dex3 | none
   spawn_pos: [0.0, 0.0, 0.82]
   spawn_quat: [1.0, 0.0, 0.0, 0.0]
+  # Fixed payloads are set before the first physics step. mass_kg is per hand.
+  payloads:
+    left:
+      profile: canonical_box_v1
+      mass_kg: 0.0
+      com_pos_wrist_m: [0.1015, 0.003, 0.0]
+      size_m: [0.12, 0.10, 0.08]
+      quat_wxyz: [1.0, 0.0, 0.0, 0.0]
+      collision: false
+    right:
+      profile: canonical_box_v1
+      mass_kg: 0.0
+      com_pos_wrist_m: [0.1015, -0.003, 0.0]
+      size_m: [0.12, 0.10, 0.08]
+      quat_wxyz: [1.0, 0.0, 0.0, 0.0]
+      collision: false
 
 sensors:
   mid360:
