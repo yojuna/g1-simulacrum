@@ -35,7 +35,7 @@ warp = ["mujoco-lidar[warp]"]
 gpu-all = ["mujoco-lidar[taichi,jax,warp]"]
 
 # unitree_sdk2py is copied from local GEAR into g1-simulacrum:sonic (Dockerfile.sonic).
-sonic = ["pyzmq>=25.0"]
+sonic = ["pyzmq>=25.0", "msgpack>=1.0"]
 
 dev = [
     "pytest>=7.0",

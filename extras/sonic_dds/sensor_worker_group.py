@@ -15,6 +15,7 @@ from g1_simulacrum.sensors.data_types import DepthFrame, PointCloud
 
 from .depth_worker import DepthWorker
 from .lidar_worker import LidarWorker
+from .platform_extero import PlantExteroPublisher
 from .pose_snapshot import PoseSnapshotBuffer
 
 
@@ -42,10 +43,16 @@ class SensorWorkerGroup:
         d435i: D435iConfig,
         *,
         pose_buffer: PoseSnapshotBuffer | None = None,
+        extero_publisher: PlantExteroPublisher | None = None,
     ) -> None:
         self.pose_buffer = pose_buffer or PoseSnapshotBuffer()
         self.lidar = LidarWorker(model, mid360, self.pose_buffer)
-        self.depth = DepthWorker(model, d435i, self.pose_buffer)
+        self.depth = DepthWorker(
+            model,
+            d435i,
+            self.pose_buffer,
+            extero_publisher=extero_publisher,
+        )
         self._lidar_scan_seq = 0
         self._depth_frame_seq = 0
 
@@ -55,8 +62,10 @@ class SensorWorkerGroup:
         model: mujoco.MjModel,
         mid360: Mid360Config,
         d435i: D435iConfig,
+        *,
+        extero_publisher: PlantExteroPublisher | None = None,
     ) -> SensorWorkerGroup:
-        return cls(model, mid360, d435i)
+        return cls(model, mid360, d435i, extero_publisher=extero_publisher)
 
     def start(self) -> None:
         self.lidar.start()

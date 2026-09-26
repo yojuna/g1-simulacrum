@@ -31,7 +31,6 @@ from .lowcmd_actuation import (
 from .observation_adapter import prepare_obs_dict
 from .platform_extero import (
     PlantExteroPublisher,
-    build_exteroception_dict,
     default_bind_addr as default_extero_bind_addr,
     extero_enabled,
 )
@@ -253,7 +252,6 @@ class SonicDdsSimLoop:
         self._proprio_publisher: PlantProprioPublisher | None = None
         if proprio_enabled():
             self._proprio_publisher = PlantProprioPublisher(default_bind_addr())
-        self._extero_seq = 0
         self._extero_publisher: PlantExteroPublisher | None = None
         if extero_enabled() and sonic_config.loop.cameras:
             self._extero_publisher = PlantExteroPublisher(default_extero_bind_addr())
@@ -264,6 +262,7 @@ class SonicDdsSimLoop:
                 self._sim.model,
                 sim_config.sensors.mid360,
                 sim_config.sensors.d435i,
+                extero_publisher=self._extero_publisher,
             )
 
     def _start_sensor_workers(self) -> None:
@@ -293,7 +292,6 @@ class SonicDdsSimLoop:
             self._last_depth = poll.depth
             self._depth_ok += poll.depth_frames
             self._overlay_refresh = True
-            self._publish_exteroception(poll.depth)
 
     def _tick_gantry_bringup(self) -> None:
         cfg = self._sonic.gantry.bringup
@@ -768,19 +766,6 @@ class SonicDdsSimLoop:
         if self._proprio_publisher is not None:
             self._proprio_publisher.close()
             self._proprio_publisher = None
-
-    def _publish_exteroception(self, frame) -> None:
-        publisher = self._extero_publisher
-        if publisher is None:
-            return
-        self._extero_seq += 1
-        ref_seq = int(frame.ref_proprio_seq or self._proprio_seq)
-        payload = build_exteroception_dict(
-            frame,
-            seq=self._extero_seq,
-            ref_proprio_seq=ref_seq,
-        )
-        publisher.publish_dict(payload)
 
     def _close_extero_publisher(self) -> None:
         if self._extero_publisher is not None:

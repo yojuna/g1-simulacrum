@@ -12,7 +12,7 @@ from g1_simulacrum.config import D435iConfig
 from g1_simulacrum.sensors.d435i import D435iCamera
 from g1_simulacrum.sensors.data_types import DepthFrame
 
-from .platform_extero import camera_T_world_optical
+from .platform_extero import PlantExteroPublisher, camera_T_world_optical
 from .pose_snapshot import PoseSnapshotBuffer, apply_snapshot
 
 
@@ -33,11 +33,13 @@ class DepthWorker:
         pose_buffer: PoseSnapshotBuffer,
         *,
         rate_hz: float | None = None,
+        extero_publisher: PlantExteroPublisher | None = None,
     ) -> None:
         self._model = model
         self._worker_data = mujoco.MjData(model)
         self._camera = D435iCamera(model, self._worker_data, config)
         self._pose_buffer = pose_buffer
+        self._extero_publisher = extero_publisher
         self._period_s = 1.0 / max(float(rate_hz or config.rate_hz), 1.0)
         self._thread: threading.Thread | None = None
         self._running = False
@@ -119,9 +121,18 @@ class DepthWorker:
             with self._lock:
                 self._last_depth = depth
                 self._last_frame_seq += 1
+                frame_seq = self._last_frame_seq
                 self._stats = DepthWorkerStats(
                     frames=self._stats.frames + 1,
                     skips=self._stats.skips,
-                    last_seq=self._last_frame_seq,
+                    last_seq=frame_seq,
+                )
+            publisher = self._extero_publisher
+            if publisher is not None:
+                publisher.publish_frame(
+                    depth,
+                    seq=frame_seq,
+                    ref_proprio_seq=int(snap.ref_proprio_seq),
+                    T_world_camera=T_wc,
                 )
             next_wake += self._period_s

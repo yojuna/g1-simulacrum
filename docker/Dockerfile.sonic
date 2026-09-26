@@ -14,4 +14,4 @@ RUN uv pip install --python /opt/venv/bin/python "cyclonedds==0.10.2" \
     && chmod -R a+rX /opt/venv /opt/unitree_sdk2_python
 
 # Locomotion (extras/sonic_locomotion → SONIC zmq_manager). Separate layer: SDK layer stays cached.
-RUN uv pip install --python /opt/venv/bin/python "pyzmq>=25.0"
+RUN uv pip install --python /opt/venv/bin/python "pyzmq>=25.0" "msgpack>=1.0"

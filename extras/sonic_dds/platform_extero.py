@@ -1,12 +1,15 @@
-"""Plant exteroception wire format and ZMQ publisher (platform bus :5561)."""
+"""Plant exteroception wire format and ZMQ publisher (platform bus :5561).
+
+Wire v2 (default): msgpack + JPEG RGB + raw float32 depth — matches
+``g1_manip.comms.serialization.encode_extero_stream`` (cross-repo conformance
+tested in ws_manipulation). Legacy v1 JSON/base64 decode remains on the manip
+subscriber for one release.
+"""
 
 from __future__ import annotations
 
-import base64
-import json
 import logging
 import os
-import zlib
 from typing import Any
 
 import mujoco
@@ -16,7 +19,7 @@ from g1_simulacrum.sensors.data_types import DepthFrame
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 _TOPIC_EXTERO = b"extero"
 
 _R_OPTICAL_TO_MJ = np.array(
@@ -38,6 +41,14 @@ def extero_enabled() -> bool:
     return raw not in ("0", "false", "no", "off")
 
 
+def _jpeg_quality() -> int:
+    raw = os.environ.get("PLANT_EXTERO_JPEG_QUALITY", "85").strip()
+    try:
+        return max(1, min(100, int(raw)))
+    except ValueError:
+        return 85
+
+
 def camera_T_world_optical(
     model: mujoco.MjModel,
     data: mujoco.MjData,
@@ -56,28 +67,55 @@ def camera_T_world_optical(
     return T
 
 
-def _encode_rgb(rgb: np.ndarray) -> str:
-    return base64.b64encode(np.asarray(rgb, dtype=np.uint8).tobytes()).decode("ascii")
+def _jpeg_encode_color(color: np.ndarray, quality: int) -> tuple[bytes, str]:
+    color_arr = np.asarray(color, dtype=np.uint8)
+    try:
+        import cv2
+
+        bgr = cv2.cvtColor(color_arr, cv2.COLOR_RGB2BGR)
+        ok, buf = cv2.imencode(".jpg", bgr, [cv2.IMWRITE_JPEG_QUALITY, int(quality)])
+        if ok:
+            return buf.tobytes(), "jpeg"
+    except ImportError:
+        pass
+    return color_arr.tobytes(), "raw"
 
 
-def _encode_depth(depth: np.ndarray) -> str:
-    raw = np.asarray(depth, dtype=np.float32).tobytes()
-    return base64.b64encode(zlib.compress(raw)).decode("ascii")
-
-
-def build_exteroception_dict(
+def encode_extero_stream(
     frame: DepthFrame,
     *,
     seq: int,
     ref_proprio_seq: int,
     T_world_camera: np.ndarray | None = None,
-) -> dict[str, Any]:
+    jpeg_quality: int | None = None,
+) -> bytes:
+    """Build platform extero v2 msgpack payload (no JSON/base64)."""
+    try:
+        import msgpack
+    except ImportError as exc:
+        raise ImportError(
+            "msgpack is required for plant extero v2: pip install 'g1-simulacrum[sonic]'",
+        ) from exc
+
+    quality = _jpeg_quality() if jpeg_quality is None else int(jpeg_quality)
+    color = np.asarray(frame.rgb, dtype=np.uint8)
+    depth = np.asarray(frame.depth, dtype=np.float32)
+    color_bytes, color_fmt = _jpeg_encode_color(color, quality)
     intr = frame.intrinsics
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "seq": int(seq),
         "ref_proprio_seq": int(ref_proprio_seq),
         "stamp_motion_s": float(frame.timestamp),
+        "source": "plant_zmq",
+        "color": color_bytes,
+        "color_shape": list(color.shape),
+        "color_fmt": color_fmt,
+        "depth": depth.tobytes(),
+        "depth_shape": list(depth.shape),
+        "depth_dtype": str(depth.dtype),
+        "frame_id": int(seq),
+        "timestamp": float(frame.timestamp),
         "intrinsics": {
             "fx": float(intr.fx),
             "fy": float(intr.fy),
@@ -86,14 +124,11 @@ def build_exteroception_dict(
             "width": int(intr.width),
             "height": int(intr.height),
         },
-        "source": "plant_zmq",
-        "color_b64": _encode_rgb(frame.rgb),
-        "depth_b64": _encode_depth(frame.depth),
     }
     T = T_world_camera if T_world_camera is not None else frame.T_world_camera
     if T is not None:
         payload["T_world_camera"] = np.asarray(T, dtype=np.float64).reshape(4, 4).tolist()
-    return payload
+    return msgpack.packb(payload, use_bin_type=True)
 
 
 class PlantExteroPublisher:
@@ -113,9 +148,10 @@ class PlantExteroPublisher:
         self._socket = ctx.socket(zmq.PUB)
         self._socket.setsockopt(zmq.LINGER, 0)
         self._socket.setsockopt(zmq.CONFLATE, 1)
+        self._socket.setsockopt(zmq.SNDHWM, 1)
         self._socket.bind(self._bind_addr)
         self._bound = True
-        logger.info("PlantExteroPublisher bound %s", self._bind_addr)
+        logger.info("PlantExteroPublisher bound %s (wire v%d)", self._bind_addr, SCHEMA_VERSION)
 
     def close(self) -> None:
         if self._socket is not None:
@@ -126,15 +162,28 @@ class PlantExteroPublisher:
             self._socket = None
         self._bound = False
 
-    def publish_dict(self, payload: dict[str, Any]) -> None:
+    def publish_frame(
+        self,
+        frame: DepthFrame,
+        *,
+        seq: int,
+        ref_proprio_seq: int,
+        T_world_camera: np.ndarray | None = None,
+    ) -> None:
+        """Encode and send one RGB-D frame (call from depth worker thread only)."""
         import zmq
 
         if self._socket is None:
             self.start()
         assert self._socket is not None
-        raw = _TOPIC_EXTERO + json.dumps(payload).encode("utf-8")
+        wire = encode_extero_stream(
+            frame,
+            seq=int(seq),
+            ref_proprio_seq=int(ref_proprio_seq),
+            T_world_camera=T_world_camera,
+        )
         try:
-            self._socket.send(raw, zmq.NOBLOCK)
+            self._socket.send(_TOPIC_EXTERO + wire, zmq.NOBLOCK)
         except zmq.Again:
             logger.debug("PlantExteroPublisher: send backlog, dropping frame")
         except zmq.ZMQError as exc:
